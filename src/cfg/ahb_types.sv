@@ -80,17 +80,7 @@
     } ahb_resp_e;
 
     // ---------------------------------------------------------------------------
-    // 6. Transfer direction - HWRITE
-    //        READ  - master reads data from slave
-    //        WRITE - master writes data to slave
-    // ---------------------------------------------------------------------------
-    typedef enum bit {
-        AHB_READ  = 1'b0,
-        AHB_WRITE = 1'b1
-    } ahb_dir_e;
-
-    // ---------------------------------------------------------------------------
-    // 7. Protection control - HPROT[3:0]
+    // 6. Protection control - HPROT[3:0]
     //    Provides additional information about a bus access.
     //    Bit mapping:
     //        [0] - Data/Opcode        : 1 = data access,       0 = opcode fetch
@@ -107,7 +97,7 @@
     } ahb_prot_e;
 
     // ---------------------------------------------------------------------------
-    // 8. Event wrapper class
+    // 7. Event wrapper class
     //    Used to wrap SystemVerilog built-in event type, because event is not a
     //    class and cannot be dynamically instantiated with 'new'.
     // ---------------------------------------------------------------------------
