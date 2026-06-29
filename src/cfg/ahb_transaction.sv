@@ -20,14 +20,15 @@ class ahb_transaction extends uvm_sequence_item;
     rand bit                      lock;
     rand ahb_prot_e               prot;
     rand ahb_size_e               size;
-    rand ahb_trans_e              trans;
+    rand ahb_trans_e              trans;    // HTRANS (NONSEQ/IDLE)
     rand bit                      write;    // 0: read - 1: write
     rand bit [AHB_DATA_WIDTH-1:0] data[];   // 1 entry/beat
+    rand int unsigned             num_busy_cycles[]; // BUSY cycles to insert after each beat
 
     // Slave channel (beat-level signals)
     rand bit [AHB_DATA_WIDTH-1:0] rdata[];
     rand bit                      resp[];            // 0:OKAY - 1:ERROR
-    rand int unsigned             num_wait_states[]; // Wait states/beat (cycles HREADY=0)
+    rand int unsigned             num_wait_states[]; // cycles HREADY=0
 
     // Bus completion event - triggered by driver when final beat completes.
     // Sequences can wait on this to implement back-pressure / ordering control.
@@ -45,6 +46,7 @@ class ahb_transaction extends uvm_sequence_item;
         `uvm_field_enum(ahb_trans_e,       trans,  UVM_ALL_ON)
         `uvm_field_int(                    write,  UVM_ALL_ON)
         `uvm_field_array_int(              data,   UVM_ALL_ON)
+        `uvm_field_array_int(              num_busy_cycles, UVM_ALL_ON)
         `uvm_field_array_int(              rdata,  UVM_ALL_ON)
         `uvm_field_array_int(              resp,   UVM_ALL_ON)
         `uvm_field_array_int(              num_wait_states, UVM_ALL_ON)
@@ -71,6 +73,11 @@ class ahb_transaction extends uvm_sequence_item;
         }
     }
 
+    // Busy-cycles array size must match data array size (1 entry per beat)
+    constraint c_busy_size {
+        num_busy_cycles.size() == data.size();
+    }
+
     // Burst size must not exceed data bus width
     // 2^size <= DATA_WIDTH / 8
     constraint c_size_max {
@@ -94,10 +101,13 @@ class ahb_transaction extends uvm_sequence_item;
         foreach (resp[i]) soft resp[i] == 1'b0;
     }
 
-    // First transfer of a burst is always NONSEQ; SEQ is for subsequent beats
-    // (driver will handle HTRANS sequencing per beat, so default to NONSEQ here)
+    // Default: NONSEQ (real transfer), no BUSY insertion
     constraint c_trans_default {
         trans == AHB_TRANS_NONSEQ;
+    }
+
+    constraint c_busy_default {
+        foreach (num_busy_cycles[i]) soft num_busy_cycles[i] == 0;
     }
 
     // Default distribution: favour common burst types
@@ -137,19 +147,23 @@ class ahb_transaction extends uvm_sequence_item;
         s = {s, $sformatf("\n ADDR   = 0x%08h", addr)};
         s = {s, $sformatf("\n BURST  = %s",     burst.name())};
         s = {s, $sformatf("\n SIZE   = %s (%0d bytes/beat)", size.name(), 1 << size)};
-        s = {s, $sformatf("\n TRANS  = %s",     trans.name())};
         s = {s, $sformatf("\n LOCK   = %0b",    lock)};
         s = {s, $sformatf("\n PROT   = %s",     prot.name())};
+        s = {s, $sformatf("\n BEATS  = %0d",    data.size())};
+        s = {s, $sformatf("\n TRANS  = %s",     trans.name())};
         s = {s, $sformatf("\n DATA[%0d] = {",   data.size())};
         foreach (data[i]) begin
             if (write)
-                s = {s, $sformatf("\n   [%0d] WDATA=0x%08h", i, data[i])};
+                s = {s, $sformatf("\n   [%0d] WDATA=0x%08h  BUSY=%0d",
+                                  i, data[i],
+                                  (i < num_busy_cycles.size()) ? num_busy_cycles[i] : 0)};
             else
-                s = {s, $sformatf("\n   [%0d] RDATA=0x%08h  RESP=%s  WAITS=%0d",
+                s = {s, $sformatf("\n   [%0d] RDATA=0x%08h  RESP=%s  WAITS=%0d  BUSY=%0d",
                                   i,
                                   (i < rdata.size()) ? rdata[i] : '0,
                                   (i < resp.size())  ? (resp[i] ? "ERROR" : "OKAY") : "N/A",
-                                  (i < num_wait_states.size()) ? num_wait_states[i] : 0)};
+                                  (i < num_wait_states.size()) ? num_wait_states[i] : 0,
+                                  (i < num_busy_cycles.size()) ? num_busy_cycles[i] : 0)};
         end
         s = {s, "\n }"};
         s = {s, "\n------------------------------------------\n"};
