@@ -11,7 +11,7 @@
 `timescale 1ns/1ps
 
 `ifndef AHB_IF_INCLUDED_
-`define AHB_IF_INCLUDED_i
+`define AHB_IF_INCLUDED_
 
 interface ahb_if #(
     parameter ADDR_WIDTH = 32,
@@ -43,7 +43,7 @@ interface ahb_if #(
     //-------------------------------------------------------------------------
     // Clocking Block: Master Driver
     //  - Drives: HADDR, HBURST, HMASTLOCK, HPROT, HSIZE, HTRANS, HWDATA, HWRITE
-    //  - Samples: HRDATA, HREADY, HWRITE
+    //  - Samples: HRDATA, HREADY, HRESP
     //-------------------------------------------------------------------------
     clocking master_cb @(posedge clk);
         default input #1step output #1;
@@ -76,7 +76,7 @@ interface ahb_if #(
     //-------------------------------------------------------------------------
     // Modports
     //-------------------------------------------------------------------------
-    modport maser_mp   (clocking master_cb,  input clk, input rst_n); 
+    modport master_mp  (clocking master_cb,  input clk, input rst_n);
     modport slave_mp   (clocking slave_cb,   input clk, input rst_n);
     modport monitor_mp (clocking monitor_cb, input clk, input rst_n);
 
