@@ -15,31 +15,8 @@
     parameter AHB_DATA_WIDTH = 32;                   // Data bus width
 
     // ---------------------------------------------------------------------------
-    // 2. Transfer type - HTRANS[1:0]
-    //    Indicates the type of the current transfer.
-    //        IDLE   - no transfer required
-    //        BUSY   - insert idle cycles within a burst
-    //        NONSEQ - first transfer of a burst (or single transfer)
-    //        SEQ    - remaining transfers in a burst
-    // ---------------------------------------------------------------------------
-    typedef enum bit [1:0] {
-        AHB_TRANS_IDLE   = 2'b00,
-        AHB_TRANS_BUSY   = 2'b01,
-        AHB_TRANS_NONSEQ = 2'b10,
-        AHB_TRANS_SEQ    = 2'b11
-    } ahb_trans_e;
-
-    // ---------------------------------------------------------------------------
-    // 3. Burst type - HBURST[2:0]
+    // 2. Burst type - HBURST[2:0]
     //    Defines the burst type for the current transfer.
-    //        SINGLE - single transfer
-    //        INCR   - incrementing burst of unspecified length
-    //        WRAP4  - 4-beat wrapping burst
-    //        INCR4  - 4-beat incrementing burst
-    //        WRAP8  - 8-beat wrapping burst
-    //        INCR8  - 8-beat incrementing burst
-    //        WRAP16 - 16-beat wrapping burst
-    //        INCR16 - 16-beat incrementing burst
     // ---------------------------------------------------------------------------
     typedef enum bit [2:0] {
         AHB_BURST_SINGLE = 3'b000,
@@ -51,6 +28,23 @@
         AHB_BURST_WRAP16 = 3'b110,
         AHB_BURST_INCR16 = 3'b111
     } ahb_burst_e;
+
+    // ---------------------------------------------------------------------------
+    // 3. Protection control - HPROT[3:0]
+    //    Provides additional information about a bus access.
+    //    Bit mapping:
+    //        [0] - Data/Opcode        : 1 = data access,       0 = opcode fetch
+    //        [1] - Privileged/User    : 1 = privileged access, 0 = user access
+    //        [2] - Bufferable/Non-buf : 1 = bufferable,        0 = non-bufferable
+    //        [3] - Cacheable/Non-cach : 1 = cacheable,         0 = non-cacheable
+    // ---------------------------------------------------------------------------
+    typedef enum bit [3:0] {
+        AHB_PROT_DEFAULT        = 4'b0000,   // Opcode, user, non-bufferable, non-cacheable
+        AHB_PROT_DATA           = 4'b0001,   // Data access
+        AHB_PROT_PRIVILEGED     = 4'b0010,   // Privileged access
+        AHB_PROT_BUFFERABLE     = 4'b0100,   // Bufferable
+        AHB_PROT_CACHEABLE      = 4'b1000    // Cacheable
+    } ahb_prot_e;
 
     // ---------------------------------------------------------------------------
     // 4. Transfer size - HSIZE[2:0]
@@ -69,7 +63,32 @@
     } ahb_size_e;
 
     // ---------------------------------------------------------------------------
-    // 5. Transfer response - HRESP
+    // 5. Transfer type - HTRANS[1:0]
+    //    Indicates the type of the current transfer.
+    //        IDLE   - no transfer required
+    //        BUSY   - insert idle cycles within a burst
+    //        NONSEQ - first transfer of a burst (or single transfer)
+    //        SEQ    - remaining transfers in a burst
+    // ---------------------------------------------------------------------------
+    typedef enum bit [1:0] {
+        AHB_TRANS_IDLE   = 2'b00,
+        AHB_TRANS_BUSY   = 2'b01,
+        AHB_TRANS_NONSEQ = 2'b10,
+        AHB_TRANS_SEQ    = 2'b11
+    } ahb_trans_e;
+
+    // ---------------------------------------------------------------------------
+    // 6. Direction control - HWRITE
+    //    Indicates the transfer direction.
+    //    Must remain constant throughout a burst transfer.
+    // ---------------------------------------------------------------------------
+    typedef enum bit {
+        AHB_READ  = 1'b0,
+        AHB_WRITE = 1'b1
+    } ahb_dir_e;
+
+    // ---------------------------------------------------------------------------
+    // 7. Transfer response - HRESP
     //    AHB-Lite uses a single-bit response (simplified from full AHB).
     //        OKAY  - transfer completed successfully
     //        ERROR - transfer error
@@ -78,29 +97,3 @@
         AHB_RESP_OKAY  = 1'b0,
         AHB_RESP_ERROR = 1'b1
     } ahb_resp_e;
-
-    // ---------------------------------------------------------------------------
-    // 6. Protection control - HPROT[3:0]
-    //    Provides additional information about a bus access.
-    //    Bit mapping:
-    //        [0] - Data/Opcode        : 1 = data access,       0 = opcode fetch
-    //        [1] - Privileged/User    : 1 = privileged access, 0 = user access
-    //        [2] - Bufferable/Non-buf : 1 = bufferable,        0 = non-bufferable
-    //        [3] - Cacheable/Non-cach : 1 = cacheable,         0 = non-cacheable
-    // ---------------------------------------------------------------------------
-    typedef enum bit [3:0] {
-        AHB_PROT_DEFAULT        = 4'b0000,   // Opcode, user, non-bufferable, non-cacheable
-        AHB_PROT_DATA           = 4'b0001,   // Data access
-        AHB_PROT_PRIVILEGED     = 4'b0010,   // Privileged access
-        AHB_PROT_BUFFERABLE     = 4'b0100,   // Bufferable
-        AHB_PROT_CACHEABLE      = 4'b1000    // Cacheable
-    } ahb_prot_e;
-
-    // ---------------------------------------------------------------------------
-    // 7. Event wrapper class
-    //    Used to wrap SystemVerilog built-in event type, because event is not a
-    //    class and cannot be dynamically instantiated with 'new'.
-    // ---------------------------------------------------------------------------
-    class ahb_event_wrapper;
-        event ev;
-    endclass

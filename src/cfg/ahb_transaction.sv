@@ -17,22 +17,17 @@ class ahb_transaction extends uvm_sequence_item;
     // Master channel
     rand bit [AHB_ADDR_WIDTH-1:0] addr;
     rand ahb_burst_e              burst;
-    rand bit                      lock;
-    rand ahb_prot_e               prot;
+    rand bit                      lock;   // Always HIGH because VIP has only 1 master
+    rand ahb_prot_e               prot;   // Not supported
     rand ahb_size_e               size;
-    rand ahb_trans_e              trans;    // HTRANS (NONSEQ/IDLE)
-    rand bit                      write;    // 0: read - 1: write
-    rand bit [AHB_DATA_WIDTH-1:0] data[];   // 1 entry/beat
-    rand int unsigned             num_busy_cycles[]; // BUSY cycles to insert after each beat
+    rand ahb_trans_e              trans[];
+    rand ahb_dir_e                write;
+    rand bit [AHB_DATA_WIDTH-1:0] wdata[];
 
     // Slave channel (beat-level signals)
     rand bit [AHB_DATA_WIDTH-1:0] rdata[];
-    rand bit                      resp[];            // 0:OKAY - 1:ERROR
-    rand int unsigned             num_wait_states[]; // cycles HREADY=0
-
-    // Bus completion event - triggered by driver when final beat completes.
-    // Sequences can wait on this to implement back-pressure / ordering control.
-    ahb_event_wrapper             done_event;
+    rand bit                      ready[];
+    rand ahb_resp_e               resp[];
 
     //-------------------------------------------------------------------------
     // UVM utility macro
@@ -43,13 +38,12 @@ class ahb_transaction extends uvm_sequence_item;
         `uvm_field_int(                    lock,   UVM_ALL_ON)
         `uvm_field_enum(ahb_prot_e,        prot,   UVM_ALL_ON)
         `uvm_field_enum(ahb_size_e,        size,   UVM_ALL_ON)
-        `uvm_field_enum(ahb_trans_e,       trans,  UVM_ALL_ON)
-        `uvm_field_int(                    write,  UVM_ALL_ON)
-        `uvm_field_array_int(              data,   UVM_ALL_ON)
-        `uvm_field_array_int(              num_busy_cycles, UVM_ALL_ON)
-        `uvm_field_array_int(              rdata,  UVM_ALL_ON)
-        `uvm_field_array_int(              resp,   UVM_ALL_ON)
-        `uvm_field_array_int(              num_wait_states, UVM_ALL_ON)
+        `uvm_field_enum(ahb_dir_e,         write,  UVM_ALL_ON)
+        `uvm_field_int(                    wdata,  UVM_ALL_ON)
+        `uvm_field_int(                    rdata,  UVM_ALL_ON)
+        `uvm_field_int(                    ready,  UVM_ALL_ON)
+        // Note: trans[] & resp[] has no built-in macro for enum dynamic
+        //       arrays, so do_copy/do_compare/do_print handle it manually.
     `uvm_object_utils_end
 
     //-------------------------------------------------------------------------
@@ -136,6 +130,84 @@ class ahb_transaction extends uvm_sequence_item;
         super.new(name);
         done_event = new;
     endfunction : new
+
+    //-------------------------------------------------------------------------
+    // do_copy - deep copy including enum arrays
+    //-------------------------------------------------------------------------
+    function void do_copy(uvm_object rhs);
+        ahb_transaction rhs_t;
+        super.do_copy(rhs);     // copies all `uvm_field_*` registered fields
+        if (!$cast(rhs_t, rhs))
+            `uvm_fatal(get_type_name(), "do_copy: cast failed")
+        // Manual copy of trans[] & resp[]
+        this.trans = new[rhs_t.trans.size()];
+        this.resp  = new[rhs_t.resp.size()];
+        foreach (rhs_t.trans[i])
+            this.trans[i] = rhs_t.trans[i];
+        foreach (rhs_t.resp[i])
+            this.resp[i] = rhs_t.resp[i];
+    endfunction : do_copy
+
+    //-------------------------------------------------------------------------
+    // do_compare - compare including enum arrays
+    //-------------------------------------------------------------------------
+    function bit do_compare(uvm_object rhs, uvm_comparer comparer);
+        ahb_transaction rhs_t;
+        bit result;
+        result = super.do_compare(rhs, comparer);   // compare all registered fields
+        if (!$cast(rhs_t, rhs))
+            `uvm_fatal(get_type_name(), "do_compare: cast failed")
+        // Compare trans[] sizes & elements
+        if (this.trans.size() != rhs_t.trans.size()) begin
+            `uvm_info(get_type_name(),
+                      $sformatf("trans size mismatch: %0d vs %0d",
+                                this.trans.size(), rhs_t.trans.size()), UVM_LOW)
+            return 0;
+        end
+        foreach (this.trans[i]) begin
+            if (this.trans[i] != rhs_t.trans[i]) begin
+                `uvm_info(get_type_name(),
+                          $sformatf("trans[%0d] mismatch: %s vs %s",
+                                    i, this.trans[i].name(), rhs_t.trans[i].name()), UVM_LOW)
+                result = 0;
+            end
+        end
+        // Compare resp[] sizes & elements
+        if (this.resp.size() != rhs_t.resp.size()) begin
+            `uvm_info(get_type_name(),
+                      $sformatf("resp size mismatch: %0d vs %0d",
+                                this.resp.size(), rhs_t.resp.size()), UVM_LOW)
+            return 0;
+        end
+        foreach (this.resp[i]) begin
+            if (this.resp[i] != rhs_t.resp[i]) begin
+                `uvm_info(get_type_name(),
+                          $sformatf("resp[%0d] mismatch: %s vs %s",
+                                    i, this.resp[i].name(), rhs_t.resp[i].name()), UVM_LOW)
+                result = 0;
+            end
+        end
+        return result;
+    endfunction : do_compare
+
+    //-------------------------------------------------------------------------
+    // do_print - print UVM output
+    //-------------------------------------------------------------------------
+    function void do_print(uvm_printer printer);
+        super.do_print(printer);    // prints all registered fields
+        // Manually print trans[]
+        printer.print_generic("trans.size()", "int", $bits(trans.size()),
+                              $sformatf("%0d", trans.size()));
+        foreach (trans[i])
+            printer.print_generic($sformatf("trans[%0d]", i), "axi4_resp_e", 2,
+                                  trans[i].name());
+        // Manually print resp[]
+        printer.print_generic("resp.size()", "int", $bits(resp.size()),
+                              $sformatf("%0d", resp.size()));
+        foreach (resp[i])
+            printer.print_generic($sformatf("resp[%0d]", i), "axi4_resp_e", 2,
+                                  resp[i].name());
+    endfunction : do_print
 
     //-------------------------------------------------------------------------
     // convert2string - human-readable transaction summary for debug
