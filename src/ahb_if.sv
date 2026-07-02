@@ -62,7 +62,6 @@ interface ahb_if #(
         output HRDATA, HREADY, HRESP;
     endclocking
 
-
     //-------------------------------------------------------------------------
     // Clocking Block: Monitor
     //  - Samples all signals (passive observation only)

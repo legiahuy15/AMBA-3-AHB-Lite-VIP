@@ -17,11 +17,11 @@ class ahb_transaction extends uvm_sequence_item;
     // Master channel
     rand bit [AHB_ADDR_WIDTH-1:0] addr;
     rand ahb_burst_e              burst;
-    rand bit                      lock;   // Always HIGH because VIP has only 1 master
-    rand ahb_prot_e               prot;   // Not supported
+    rand bit                      lock;
+    rand ahb_prot_e               prot;
     rand ahb_size_e               size;
     rand ahb_trans_e              trans[];
-    rand ahb_dir_e                write;
+    rand ahb_dir_e                write;     // 0: Read, 1: Write
     rand bit [AHB_DATA_WIDTH-1:0] wdata[];
 
     // Slave channel (beat-level signals)
@@ -50,26 +50,26 @@ class ahb_transaction extends uvm_sequence_item;
     // Constraints
     //-------------------------------------------------------------------------
 
-    // Data array size must match burst length
+    // Wdata array size must match burst length
     //   SINGLE = 1, INCRx/WRAPx = 4/8/16, INCR = [1:256]
-    constraint c_data_size {
+    constraint c_wdata_size {
         if (burst == AHB_BURST_SINGLE) {
-            data.size() == 1;
+            wdata.size() == 1;
         } else if (burst == AHB_BURST_WRAP4 || burst == AHB_BURST_INCR4) {
-            data.size() == 4;
+            wdata.size() == 4;
         } else if (burst == AHB_BURST_WRAP8 || burst == AHB_BURST_INCR8) {
-            data.size() == 8;
+            wdata.size() == 8;
         } else if (burst == AHB_BURST_WRAP16 || burst == AHB_BURST_INCR16) {
-            data.size() == 16;
+            wdata.size() == 16;
         } else {
             // AHB_BURST_INCR: unspecified length
-            data.size() inside {[1:256]};
+            wdata.size() inside {[1:256]};
         }
     }
 
-    // Busy-cycles array size must match data array size (1 entry per beat)
-    constraint c_busy_size {
-        num_busy_cycles.size() == data.size();
+    // Trans array size must match wdata array size (1 entry per beat)
+    constraint c_trans_size {
+        trans.size() == wdata.size();
     }
 
     // Burst size must not exceed data bus width
@@ -91,17 +91,30 @@ class ahb_transaction extends uvm_sequence_item;
         (burst == AHB_BURST_WRAP16) -> (addr % (16 * (1 << size))) == 0;
     }
 
+    // Single master — HMASTLOCK not needed (no arbitration)
+    constraint c_lock_fixed {
+        lock == 1'b0;
+    }
+
+    // HPROT not supported — fixed to default
+    constraint c_prot_fixed {
+        prot == AHB_PROT_DEFAULT;
+    }
+
+    // Default slave responses
     constraint c_resp_default {
-        foreach (resp[i]) soft resp[i] == 1'b0;
+        foreach (resp[i]) soft resp[i] == AHB_RESP_OKAY;
     }
 
-    // Default: NONSEQ (real transfer), no BUSY insertion
+    // Default: first beat NONSEQ, subsequent beats SEQ
     constraint c_trans_default {
-        trans == AHB_TRANS_NONSEQ;
-    }
-
-    constraint c_busy_default {
-        foreach (num_busy_cycles[i]) soft num_busy_cycles[i] == 0;
+        foreach (trans[i]) {
+            if (i == 0) {
+                soft trans[i] == AHB_TRANS_NONSEQ;
+            } else {
+                soft trans[i] == AHB_TRANS_SEQ;
+            }
+        }
     }
 
     // Default distribution: favour common burst types
@@ -128,8 +141,21 @@ class ahb_transaction extends uvm_sequence_item;
     //-------------------------------------------------------------------------
     function new(string name = "ahb_transaction");
         super.new(name);
-        done_event = new;
     endfunction : new
+
+    //-------------------------------------------------------------------------
+    // Helper: get number of beats for the current burst type
+    //-------------------------------------------------------------------------
+    function int get_num_beats();
+        case (burst)
+            AHB_BURST_SINGLE:                   return 1;
+            AHB_BURST_WRAP4,  AHB_BURST_INCR4:  return 4;
+            AHB_BURST_WRAP8,  AHB_BURST_INCR8:  return 8;
+            AHB_BURST_WRAP16, AHB_BURST_INCR16: return 16;
+            AHB_BURST_INCR:                     return wdata.size();
+            default:                            return 1;
+        endcase
+    endfunction : get_num_beats
 
     //-------------------------------------------------------------------------
     // do_copy - deep copy including enum arrays
@@ -199,13 +225,13 @@ class ahb_transaction extends uvm_sequence_item;
         printer.print_generic("trans.size()", "int", $bits(trans.size()),
                               $sformatf("%0d", trans.size()));
         foreach (trans[i])
-            printer.print_generic($sformatf("trans[%0d]", i), "axi4_resp_e", 2,
+            printer.print_generic($sformatf("trans[%0d]", i), "ahb_trans_e", 2,
                                   trans[i].name());
         // Manually print resp[]
         printer.print_generic("resp.size()", "int", $bits(resp.size()),
                               $sformatf("%0d", resp.size()));
         foreach (resp[i])
-            printer.print_generic($sformatf("resp[%0d]", i), "axi4_resp_e", 2,
+            printer.print_generic($sformatf("resp[%0d]", i), "ahb_resp_e", 1,
                                   resp[i].name());
     endfunction : do_print
 
@@ -214,30 +240,27 @@ class ahb_transaction extends uvm_sequence_item;
     //-------------------------------------------------------------------------
     function string convert2string();
         string s;
+        int num_beats;
+        num_beats = get_num_beats();
         s = $sformatf("\n---------- AHB-Lite Transaction ----------");
-        s = {s, $sformatf("\n DIR    = %s",     write ? "WRITE" : "READ")};
+        s = {s, $sformatf("\n DIR    = %s",     write.name())};
         s = {s, $sformatf("\n ADDR   = 0x%08h", addr)};
         s = {s, $sformatf("\n BURST  = %s",     burst.name())};
         s = {s, $sformatf("\n SIZE   = %s (%0d bytes/beat)", size.name(), 1 << size)};
         s = {s, $sformatf("\n LOCK   = %0b",    lock)};
         s = {s, $sformatf("\n PROT   = %s",     prot.name())};
-        s = {s, $sformatf("\n BEATS  = %0d",    data.size())};
-        s = {s, $sformatf("\n TRANS  = %s",     trans.name())};
-        s = {s, $sformatf("\n DATA[%0d] = {",   data.size())};
-        foreach (data[i]) begin
-            if (write)
-                s = {s, $sformatf("\n   [%0d] WDATA=0x%08h  BUSY=%0d",
-                                  i, data[i],
-                                  (i < num_busy_cycles.size()) ? num_busy_cycles[i] : 0)};
+        s = {s, $sformatf("\n BEATS  = %0d",    num_beats)};
+        for (int i = 0; i < num_beats; i++) begin
+            s = {s, $sformatf("\n   [%0d] TRANS=%s", i,
+                              (i < trans.size()) ? trans[i].name() : "N/A")};
+            if (write == AHB_WRITE)
+                s = {s, $sformatf("  WDATA=0x%08h",
+                                  (i < wdata.size()) ? wdata[i] : '0)};
             else
-                s = {s, $sformatf("\n   [%0d] RDATA=0x%08h  RESP=%s  WAITS=%0d  BUSY=%0d",
-                                  i,
+                s = {s, $sformatf("  RDATA=0x%08h  RESP=%s",
                                   (i < rdata.size()) ? rdata[i] : '0,
-                                  (i < resp.size())  ? (resp[i] ? "ERROR" : "OKAY") : "N/A",
-                                  (i < num_wait_states.size()) ? num_wait_states[i] : 0,
-                                  (i < num_busy_cycles.size()) ? num_busy_cycles[i] : 0)};
+                                  (i < resp.size())  ? resp[i].name() : "N/A")};
         end
-        s = {s, "\n }"};
         s = {s, "\n------------------------------------------\n"};
         return s;
     endfunction : convert2string
