@@ -47,7 +47,7 @@ class ahb_transaction extends uvm_sequence_item;
     `uvm_object_utils_end
 
     //-------------------------------------------------------------------------
-    // Constraints
+    // Constraints (IHI0033A compliant)
     //-------------------------------------------------------------------------
 
     // Wdata array size must match burst length
@@ -72,23 +72,46 @@ class ahb_transaction extends uvm_sequence_item;
         trans.size() == wdata.size();
     }
 
+    // Slave response arrays must match beat count
+    constraint c_rdata_size {
+        rdata.size() == wdata.size();
+    }
+
+    constraint c_ready_size {
+        ready.size() == wdata.size();
+    }
+
+    constraint c_resp_size {
+        resp.size() == wdata.size();
+    }
+
     // Burst size must not exceed data bus width
-    // 2^size <= DATA_WIDTH / 8
+    // 2^size <= DATA_WIDTH / 8  (Ch.3)
     constraint c_size_max {
         (1 << size) <= (AHB_DATA_WIDTH / 8);
     }
 
-    // Start address must be aligned to transfer size (2^HSIZE bytes)
+    // Start address must be aligned to transfer size (Ch.3)
+    //   HADDR must be aligned to 2^HSIZE bytes
     constraint c_addr_align {
         (addr % (1 << size)) == 0;
     }
 
-    // WRAP burst: start address must be aligned to wrap boundary
-    //   boundary = num_beats * 2^HSIZE
-    constraint c_wrap_align {
-        (burst == AHB_BURST_WRAP4)  -> (addr % (4  * (1 << size))) == 0;
-        (burst == AHB_BURST_WRAP8)  -> (addr % (8  * (1 << size))) == 0;
-        (burst == AHB_BURST_WRAP16) -> (addr % (16 * (1 << size))) == 0;
+    // Incrementing burst must not cross 1KB boundary (Ch.3)
+    //   end_addr = addr + (num_beats - 1) * 2^HSIZE
+    //   addr[31:10] must equal end_addr[31:10]
+    constraint c_1kb_boundary {
+        (burst == AHB_BURST_INCR4) ->
+            (addr[AHB_ADDR_WIDTH-1:10] ==
+             ((addr + (4  - 1) * (1 << size))[AHB_ADDR_WIDTH-1:10]));
+        (burst == AHB_BURST_INCR8) ->
+            (addr[AHB_ADDR_WIDTH-1:10] ==
+             ((addr + (8  - 1) * (1 << size))[AHB_ADDR_WIDTH-1:10]));
+        (burst == AHB_BURST_INCR16) ->
+            (addr[AHB_ADDR_WIDTH-1:10] ==
+             ((addr + (16 - 1) * (1 << size))[AHB_ADDR_WIDTH-1:10]));
+        // INCR (undefined length): cannot constrain at randomization,
+        // checked at runtime by SVA
     }
 
     // Single master — HMASTLOCK not needed (no arbitration)
@@ -106,7 +129,12 @@ class ahb_transaction extends uvm_sequence_item;
         foreach (resp[i]) soft resp[i] == AHB_RESP_OKAY;
     }
 
-    // Default: first beat NONSEQ, subsequent beats SEQ
+    // Default ready: no wait states
+    constraint c_ready_default {
+        foreach (ready[i]) soft ready[i] == 1'b1;
+    }
+
+    // Default: first beat NONSEQ, subsequent beats SEQ (Ch.3)
     constraint c_trans_default {
         foreach (trans[i]) {
             if (i == 0) {
