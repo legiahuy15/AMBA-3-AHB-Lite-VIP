@@ -24,6 +24,11 @@ class ahb_agent_config extends uvm_object;
     // =========================================================================
     bit has_coverage = 1;       // Enable functional coverage collection
 
+    // Master driver back-to-back: overlap next transaction's beat-0 address
+    // phase into the last data phase (no IDLE bubble). item_done() runs one
+    // cycle early - last beat's rdata/resp not yet valid at finish_item()
+    bit en_back_to_back = 1;
+
     // =========================================================================
     // Slave driver timing — back-pressure delays
     //   Only used by slave agent. Ignored by master agent.

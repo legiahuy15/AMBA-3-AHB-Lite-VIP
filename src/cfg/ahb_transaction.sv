@@ -29,6 +29,20 @@ class ahb_transaction extends uvm_sequence_item;
     rand bit                      ready[];
     rand ahb_resp_e               resp[];
 
+    // Canonical burst length (number of beats), derived from burst type
+    rand int unsigned             num_beats;
+
+    // BUSY cycles driven before beat i. busy_cycles[0] == 0, so BUSY only
+    // appears between beats and a fixed-length burst always ends with SEQ
+    rand int unsigned             busy_cycles[];
+
+    // INCR only: BUSY cycles after the last beat, then IDLE/NONSEQ
+    // (termination out of BUSY). 0 for SINGLE and fixed-length bursts
+    rand int unsigned             trailing_busy_cycles;
+
+    // ERROR policy: 1 = cancel remaining beats, 0 = continue (both spec-legal)
+    rand bit                      abort_on_error;
+
     //-------------------------------------------------------------------------
     // UVM utility macro
     //-------------------------------------------------------------------------
@@ -42,84 +56,61 @@ class ahb_transaction extends uvm_sequence_item;
         `uvm_field_int(                    wdata,  UVM_ALL_ON)
         `uvm_field_int(                    rdata,  UVM_ALL_ON)
         `uvm_field_int(                    ready,  UVM_ALL_ON)
+        `uvm_field_int(                    num_beats, UVM_ALL_ON)
+        `uvm_field_array_int(              busy_cycles, UVM_ALL_ON)
+        `uvm_field_int(                    trailing_busy_cycles, UVM_ALL_ON)
+        `uvm_field_int(                    abort_on_error, UVM_ALL_ON)
         // Note: trans[] & resp[] has no built-in macro for enum dynamic
-        //       arrays, so do_copy/do_compare/do_print handle it manually.
+        //       arrays, so do_copy/do_compare/do_print handle it manually
     `uvm_object_utils_end
 
     //-------------------------------------------------------------------------
-    // Constraints (IHI0033A compliant)
+    // Constraints
     //-------------------------------------------------------------------------
 
-    // Wdata array size must match burst length
-    //   SINGLE = 1, INCRx/WRAPx = 4/8/16, INCR = [1:256]
-    constraint c_wdata_size {
-        if (burst == AHB_BURST_SINGLE) {
-            wdata.size() == 1;
-        } else if (burst == AHB_BURST_WRAP4 || burst == AHB_BURST_INCR4) {
-            wdata.size() == 4;
-        } else if (burst == AHB_BURST_WRAP8 || burst == AHB_BURST_INCR8) {
-            wdata.size() == 8;
-        } else if (burst == AHB_BURST_WRAP16 || burst == AHB_BURST_INCR16) {
-            wdata.size() == 16;
-        } else {
-            // AHB_BURST_INCR: unspecified length
-            wdata.size() inside {[1:256]};
-        }
+    // Canonical beat count, derived from burst type
+    constraint c_num_beats {
+        if (burst == AHB_BURST_SINGLE)                              num_beats == 1;
+        else if (burst inside {AHB_BURST_WRAP4,  AHB_BURST_INCR4})  num_beats == 4;
+        else if (burst inside {AHB_BURST_WRAP8,  AHB_BURST_INCR8})  num_beats == 8;
+        else if (burst inside {AHB_BURST_WRAP16, AHB_BURST_INCR16}) num_beats == 16;
+        else                                                        num_beats inside {[1:256]}; // INCR
     }
 
-    // Trans array size must match wdata array size (1 entry per beat)
-    constraint c_trans_size {
-        trans.size() == wdata.size();
-    }
-
-    // Slave response arrays must match beat count
-    constraint c_rdata_size {
-        rdata.size() == wdata.size();
-    }
-
-    constraint c_ready_size {
-        ready.size() == wdata.size();
-    }
-
-    constraint c_resp_size {
-        resp.size() == wdata.size();
+    // Every beat-level array is sized to the canonical beat count
+    constraint c_array_sizes {
+        wdata.size() == num_beats;
+        rdata.size() == num_beats;
+        trans.size() == num_beats;
+        ready.size() == num_beats;
+        resp.size()  == num_beats;
+        busy_cycles.size() == num_beats;
     }
 
     // Burst size must not exceed data bus width
-    // 2^size <= DATA_WIDTH / 8  (Ch.3)
+    // 2^size <= DATA_WIDTH / 8
     constraint c_size_max {
         (1 << size) <= (AHB_DATA_WIDTH / 8);
     }
 
-    // Start address must be aligned to transfer size (Ch.3)
-    //   HADDR must be aligned to 2^HSIZE bytes
+    // HADDR aligned to 2^HSIZE bytes
     constraint c_addr_align {
         (addr % (1 << size)) == 0;
     }
 
-    // Incrementing burst must not cross 1KB boundary (Ch.3)
-    //   end_addr = addr + (num_beats - 1) * 2^HSIZE
-    //   addr[31:10] must equal end_addr[31:10]
+    // INCR burst must not cross a 1KB boundary
     constraint c_1kb_boundary {
-        (burst == AHB_BURST_INCR4) ->
-            (addr[AHB_ADDR_WIDTH-1:10] ==
-             ((addr + (4  - 1) * (1 << size))[AHB_ADDR_WIDTH-1:10]));
-        (burst == AHB_BURST_INCR8) ->
-            (addr[AHB_ADDR_WIDTH-1:10] ==
-             ((addr + (8  - 1) * (1 << size))[AHB_ADDR_WIDTH-1:10]));
-        (burst == AHB_BURST_INCR16) ->
-            (addr[AHB_ADDR_WIDTH-1:10] ==
-             ((addr + (16 - 1) * (1 << size))[AHB_ADDR_WIDTH-1:10]));
-        // INCR (undefined length): cannot constrain at randomization,
-        // checked at runtime by SVA
+        (burst inside {AHB_BURST_INCR,  AHB_BURST_INCR4,
+                       AHB_BURST_INCR8, AHB_BURST_INCR16}) ->
+            ((addr >> 10) == ((addr + (num_beats - 1) * (1 << size)) >> 10));
     }
 
-    // Single master — HMASTLOCK not needed (no arbitration)
+    // Single master - HMASTLOCK not needed (no arbitration)
     constraint c_lock_fixed {
         lock == 1'b0;
     }
 
-    // HPROT not supported — fixed to default
+    // HPROT not supported - fixed to default
     constraint c_prot_fixed {
         prot == AHB_PROT_DEFAULT;
     }
@@ -134,7 +125,7 @@ class ahb_transaction extends uvm_sequence_item;
         foreach (ready[i]) soft ready[i] == 1'b1;
     }
 
-    // Default: first beat NONSEQ, subsequent beats SEQ (Ch.3)
+    // Default: first beat NONSEQ, subsequent beats SEQ
     constraint c_trans_default {
         foreach (trans[i]) {
             if (i == 0) {
@@ -143,6 +134,37 @@ class ahb_transaction extends uvm_sequence_item;
                 soft trans[i] == AHB_TRANS_SEQ;
             }
         }
+    }
+
+    // Beats are active transfers only (BUSY modeled via busy_cycles[]);
+    // beat 0 is NONSEQ
+    constraint c_trans_active {
+        foreach (trans[i])
+            trans[i] inside {AHB_TRANS_NONSEQ, AHB_TRANS_SEQ};
+        if (num_beats > 0)
+            trans[0] == AHB_TRANS_NONSEQ;
+    }
+
+    // No BUSY before beat 0 (burst starts NONSEQ; also excludes SINGLE).
+    // BUSY runs capped at 3 cycles; default none
+    constraint c_busy_cycles {
+        if (num_beats > 0) busy_cycles[0] == 0;
+        foreach (busy_cycles[i]) {
+            busy_cycles[i] <= 3;
+            soft busy_cycles[i] == 0;
+        }
+    }
+
+    // Only INCR may end the burst out of BUSY; default none
+    constraint c_trailing_busy {
+        trailing_busy_cycles <= 3;
+        soft trailing_busy_cycles == 0;
+        (burst != AHB_BURST_INCR) -> (trailing_busy_cycles == 0);
+    }
+
+    // Cancel-on-ERROR is optional per spec; default cancel
+    constraint c_abort_on_error {
+        soft abort_on_error == 1'b1;
     }
 
     // Default distribution: favour common burst types
@@ -169,6 +191,8 @@ class ahb_transaction extends uvm_sequence_item;
     //-------------------------------------------------------------------------
     function new(string name = "ahb_transaction");
         super.new(name);
+        // Default for non-randomized transactions: cancel on ERROR
+        abort_on_error = 1'b1;
     endfunction : new
 
     //-------------------------------------------------------------------------
@@ -278,9 +302,14 @@ class ahb_transaction extends uvm_sequence_item;
         s = {s, $sformatf("\n LOCK   = %0b",    lock)};
         s = {s, $sformatf("\n PROT   = %s",     prot.name())};
         s = {s, $sformatf("\n BEATS  = %0d",    num_beats)};
+        s = {s, $sformatf("\n ABORT_ON_ERROR = %0b", abort_on_error)};
+        if (trailing_busy_cycles > 0)
+            s = {s, $sformatf("\n TRAILING_BUSY  = %0d", trailing_busy_cycles)};
         for (int i = 0; i < num_beats; i++) begin
             s = {s, $sformatf("\n   [%0d] TRANS=%s", i,
                               (i < trans.size()) ? trans[i].name() : "N/A")};
+            if (i < busy_cycles.size() && busy_cycles[i] > 0)
+                s = {s, $sformatf("  (+%0d BUSY before)", busy_cycles[i])};
             if (write == AHB_WRITE)
                 s = {s, $sformatf("  WDATA=0x%08h",
                                   (i < wdata.size()) ? wdata[i] : '0)};

@@ -2,12 +2,8 @@
 // File        : ahb_master_driver.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : AHB-Lite master driver.
-//               Receives transactions from the sequencer and drives them
-//               onto the AHB-Lite bus via the master clocking block.
-//               Implements pipelined address/data phases per IHI0033A:
-//                 Address phase of beat N+1 overlaps data phase of beat N.
-//                 HREADY=1 completes both phases simultaneously.
+// Description : AHB-Lite master driver. Pulls sequence items and drives them
+//               onto the bus via the master clocking block.
 //               This file is `included inside ahb_pkg.sv.
 //=============================================================================
 
@@ -17,6 +13,11 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
 
     // Virtual interface handle
     virtual ahb_if vif;
+
+    // Back-to-back pipelining state
+    bit             en_back_to_back = 1;  // overlap next txn's addr phase into last data phase
+    ahb_transaction next_tr;              // prefetched item, beat-0 addr phase in flight
+    bit             early_done;           // item_done() already called for current item
 
     //-------------------------------------------------------------------------
     // Constructor
@@ -29,9 +30,13 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
     // Build phase - get virtual interface from config_db
     //-------------------------------------------------------------------------
     function void build_phase(uvm_phase phase);
+        ahb_agent_config cfg;
         super.build_phase(phase);
         if(!uvm_config_db#(virtual ahb_if)::get(this, "", "vif", vif))
             `uvm_fatal(get_type_name(), "Virtual interface not found in config_db")
+        // Agent config is optional - keep the default when absent
+        if (uvm_config_db#(ahb_agent_config)::get(this, "", "cfg", cfg))
+            en_back_to_back = cfg.en_back_to_back;
     endfunction: build_phase
 
     //-------------------------------------------------------------------------
@@ -40,99 +45,137 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
     virtual task run_phase(uvm_phase phase);
         forever begin
             reset_signals();
-            @(posedge vif.rst_n);
+            // Wait until reset is de-asserted
+            if (!vif.rst_n) @(posedge vif.rst_n);
             `uvm_info(get_type_name(), "Reset deasserted - master driver active", UVM_MEDIUM)
 
-            fork
-                begin : drive_loop
-                    forever begin
-                        ahb_transaction tr;
-                        seq_item_port.get_next_item(tr);
-                        `uvm_info(get_type_name(),
-                                  $sformatf("Driving [%s]: HADDR=0x%08h, HBURST=%s, HSIZE=%s, %0d beats",
-                                             tr.write.name(), tr.addr, tr.burst.name(),
-                                             tr.size.name(), tr.get_num_beats()), UVM_MEDIUM)
-                        drive_transaction(tr);
-                        seq_item_port.item_done();
+            forever begin
+                ahb_transaction tr;
+                bit addr_in_flight;
+
+                // Prefetched item: beat-0 addr phase already driven & accepted
+                if (next_tr != null) begin
+                    tr = next_tr;
+                    next_tr = null;
+                    addr_in_flight = 1;
+                end else begin
+                    seq_item_port.get_next_item(tr);
+                    addr_in_flight = 0;
+                end
+                early_done = 0;
+
+                `uvm_info(get_type_name(),
+                          $sformatf("Driving [%s]: HADDR=0x%08h, HBURST=%s, HSIZE=%s, %0d beats%s",
+                                     tr.write.name(), tr.addr, tr.burst.name(),
+                                     tr.size.name(), tr.get_num_beats(),
+                                     addr_in_flight ? " (back-to-back)" : ""), UVM_MEDIUM)
+                fork
+                    begin : drive_item
+                        drive_transaction(tr, addr_in_flight);
                     end
-                end
-                begin : rst_watch
-                    @(negedge vif.rst_n);
-                    `uvm_info(get_type_name(), "Reset asserted - aborting", UVM_MEDIUM)
-                end
-            join_any
-            disable fork;
+                    begin : rst_watch
+                        // Fire now if reset already low, else on its falling edge
+                        if (vif.rst_n) @(negedge vif.rst_n);
+                        `uvm_info(get_type_name(),
+                                  "Reset asserted - aborting transaction", UVM_MEDIUM)
+                    end
+                join_any
+                disable fork;
+                if (!early_done)
+                    seq_item_port.item_done();
+
+                if (!vif.rst_n) break;   // fall out to re-run reset_signals()
+            end
+
+            // Discard prefetched item aborted by reset (close its open handshake)
+            if (next_tr != null) begin
+                seq_item_port.item_done();
+                next_tr = null;
+            end
         end
     endtask : run_phase
 
     //-------------------------------------------------------------------------
-    // Drive transaction — pipelined address/data phases per IHI0033A
-    //
-    //   The address phase of beat N+1 overlaps the data phase of beat N.
-    //   When HREADY=1 at a clock edge:
-    //     - Data phase of the current beat completes
-    //     - Address phase of the current beat is accepted
-    //
-    //   Timing for 4-beat WRITE (no wait states):
-    //     T1: Drive A0, NONSEQ
-    //     T2: HREADY=1 → A0 accepted. Drive A1, SEQ, D0
-    //     T3: HREADY=1 → D0 done, A1 accepted. Drive A2, SEQ, D1
-    //     T4: HREADY=1 → D1 done, A2 accepted. Drive A3, SEQ, D2
-    //     T5: HREADY=1 → D2 done, A3 accepted. Drive IDLE, D3
-    //     T6: HREADY=1 → D3 done. Complete.
+    // Drive one transaction - pipelined: addr[i+1] overlaps data[i].
+    // Handles BUSY insertion, INCR termination out of BUSY, ERROR policy
+    // (abort/continue), and back-to-back overlap of the next transaction.
+    // addr_in_flight=1: beat 0 already driven & accepted by previous overlap
     //-------------------------------------------------------------------------
-    task drive_transaction(ahb_transaction tr);
+    task drive_transaction(ahb_transaction tr, bit addr_in_flight = 0);
         int num_beats;
+        int n_busy;
+        bit pipelined_own;   // pipelined slot belongs to this burst (cancellable on ERROR)
         bit [AHB_ADDR_WIDTH-1:0] beat_addr[];
 
         num_beats = tr.get_num_beats();
 
-        // Pre-calculate all beat addresses
+        // Pre-compute beat addresses
         beat_addr = new[num_beats];
         beat_addr[0] = tr.addr;
         for (int i = 1; i < num_beats; i++)
             beat_addr[i] = calc_next_addr(tr, beat_addr[i-1]);
 
-        //-----------------------------------------------------------------
-        // Initial address phase (beat 0) — no data yet
-        //-----------------------------------------------------------------
-        @(vif.master_cb);
-        vif.master_cb.HADDR     <= beat_addr[0];
-        vif.master_cb.HBURST    <= tr.burst;
-        vif.master_cb.HMASTLOCK <= tr.lock;
-        vif.master_cb.HPROT     <= tr.prot;
-        vif.master_cb.HSIZE     <= tr.size;
-        vif.master_cb.HTRANS    <= tr.trans[0];
-        vif.master_cb.HWRITE    <= tr.write;
-
-        // Wait for address phase to be accepted
-        do begin
+        if (!addr_in_flight) begin
+            // Beat 0 address phase (burst starts with NONSEQ)
             @(vif.master_cb);
-        end while (vif.master_cb.HREADY !== 1'b1);
+            drive_addr_phase0(tr);
 
-        //-----------------------------------------------------------------
-        // Pipelined data[i] + address[i+1] phases
-        //-----------------------------------------------------------------
-        for (int i = 0; i < num_beats; i++) begin
-
-            // Drive write data for beat i
-            if (tr.write == AHB_WRITE)
-                vif.master_cb.HWDATA <= tr.wdata[i];
-
-            // Drive address for next beat, or IDLE after last beat
-            if (i < num_beats - 1) begin
-                vif.master_cb.HADDR  <= beat_addr[i+1];
-                vif.master_cb.HTRANS <= tr.trans[i+1];
-            end else begin
-                vif.master_cb.HTRANS <= AHB_TRANS_IDLE;
-            end
-
-            // Wait for data phase to complete (HREADY=1)
+            // Wait until the address phase is accepted
             do begin
                 @(vif.master_cb);
             end while (vif.master_cb.HREADY !== 1'b1);
+        end
+        // else: beat 0 accepted at the previous txn's last data-phase edge
 
-            // Sample slave response
+        // Per beat: drive data[i] + pipelined address phase
+        // (BUSY run and/or address[i+1]; IDLE after the last beat)
+        for (int i = 0; i < num_beats; i++) begin
+
+            // Write data for beat i
+            if (tr.write == AHB_WRITE)
+                vif.master_cb.HWDATA <= tr.wdata[i];
+
+            // BUSY count: before beat i+1, or trailing (INCR) after the last beat
+            if (i < num_beats - 1)
+                n_busy = (i+1 < tr.busy_cycles.size()) ? tr.busy_cycles[i+1] : 0;
+            else
+                n_busy = tr.trailing_busy_cycles;
+
+            // Pipelined address phase; during BUSY addr/control show the
+            // next transfer in the burst
+            pipelined_own = 1'b1;
+            if (n_busy > 0) begin
+                vif.master_cb.HTRANS <= AHB_TRANS_BUSY;
+                vif.master_cb.HADDR  <= (i < num_beats - 1)
+                                        ? beat_addr[i+1]
+                                        : calc_next_addr(tr, beat_addr[i]);
+            end else if (i < num_beats - 1) begin
+                vif.master_cb.HADDR  <= beat_addr[i+1];
+                vif.master_cb.HTRANS <= tr.trans[i+1];
+            end else begin
+                // Last beat: overlap next txn's beat-0 addr phase, else IDLE.
+                // A prefetched NONSEQ is a new burst - never cancelled here
+                if (en_back_to_back)
+                    prefetch_next();
+                if (next_tr != null) begin
+                    drive_addr_phase0(next_tr);
+                    pipelined_own = 1'b0;
+                end else begin
+                    vif.master_cb.HTRANS <= AHB_TRANS_IDLE;
+                end
+            end
+
+            // Wait HREADY; on ERROR cycle 1 cancel the pipelined transfer to
+            // IDLE (only own slot, only when aborting)
+            forever begin
+                @(vif.master_cb);
+                if (vif.master_cb.HREADY === 1'b1) break;
+                if (vif.master_cb.HRESP === AHB_RESP_ERROR &&
+                    tr.abort_on_error && pipelined_own)
+                    vif.master_cb.HTRANS <= AHB_TRANS_IDLE;
+            end
+
+            // Sample response (valid on the HREADY=1 cycle)
             if (tr.write == AHB_READ)
                 tr.rdata[i] = vif.master_cb.HRDATA;
             tr.resp[i] = ahb_resp_e'(vif.master_cb.HRESP);
@@ -145,6 +188,39 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
                                 (tr.write == AHB_WRITE) ? "wdata" : "rdata",
                                 (tr.write == AHB_WRITE) ? tr.wdata[i] : tr.rdata[i]),
                       UVM_HIGH)
+
+            // ERROR: abort=1 -> abandon burst (safety-net IDLE re-drive,
+            // own slot only); abort=0 -> continue, both spec-legal
+            if (tr.resp[i] == AHB_RESP_ERROR) begin
+                if (tr.abort_on_error) begin
+                    `uvm_warning(get_type_name(),
+                                 $sformatf("ERROR response on beat %0d/%0d%s",
+                                           i, num_beats,
+                                           (i < num_beats - 1) ? " - cancelling remaining burst" : ""))
+                    if (pipelined_own)
+                        vif.master_cb.HTRANS <= AHB_TRANS_IDLE;
+                    break;
+                end
+                `uvm_info(get_type_name(),
+                          $sformatf("ERROR response on beat %0d/%0d - continuing burst (abort_on_error=0)",
+                                    i, num_beats), UVM_MEDIUM)
+            end
+
+            // Remaining BUSY cycles (first one accepted with beat i's
+            // completion; BUSY gets zero-wait OKAY), then the ending transfer
+            if (n_busy > 0) begin
+                repeat (n_busy - 1) begin
+                    do @(vif.master_cb); while (vif.master_cb.HREADY !== 1'b1);
+                end
+                if (i < num_beats - 1) begin
+                    vif.master_cb.HADDR  <= beat_addr[i+1];
+                    vif.master_cb.HTRANS <= tr.trans[i+1];
+                end else begin
+                    // INCR terminated out of BUSY -> IDLE (no overlap on this path)
+                    vif.master_cb.HTRANS <= AHB_TRANS_IDLE;
+                end
+                do @(vif.master_cb); while (vif.master_cb.HREADY !== 1'b1);
+            end
         end
 
         `uvm_info(get_type_name(),
@@ -154,10 +230,34 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
     endtask : drive_transaction
 
     //-------------------------------------------------------------------------
-    // Calculate next beat address per IHI0033A
-    //   INCR:   addr += 2^HSIZE
-    //   WRAP:   addr wraps at boundary = num_beats * 2^HSIZE
-    //   SINGLE: no increment
+    // Beat-0 address phase: all address & control signals.
+    // Used at transaction start and for the back-to-back overlap slot
+    //-------------------------------------------------------------------------
+    task drive_addr_phase0(ahb_transaction tr);
+        vif.master_cb.HADDR     <= tr.addr;
+        vif.master_cb.HBURST    <= tr.burst;
+        vif.master_cb.HMASTLOCK <= tr.lock;
+        vif.master_cb.HPROT     <= tr.prot;
+        vif.master_cb.HSIZE     <= tr.size;
+        vif.master_cb.HTRANS    <= tr.trans[0];
+        vif.master_cb.HWRITE    <= tr.write;
+    endtask : drive_addr_phase0
+
+    //-------------------------------------------------------------------------
+    // Prefetch the next item for back-to-back overlap. item_done() runs one
+    // data phase early (sequencer handshake requires it before try_next_item),
+    // so the last beat's rdata/resp are not yet valid at finish_item() return.
+    // try_next_item() null -> caller drives IDLE
+    //-------------------------------------------------------------------------
+    task prefetch_next();
+        early_done = 1;
+        seq_item_port.item_done();
+        seq_item_port.try_next_item(next_tr);
+    endtask : prefetch_next
+
+    //-------------------------------------------------------------------------
+    // Next beat address (beats 1..N-1 only; SINGLE never reaches here)
+    //   INCR: addr + 2^HSIZE    WRAP: wraps at num_beats * 2^HSIZE
     //-------------------------------------------------------------------------
     function bit [AHB_ADDR_WIDTH-1:0] calc_next_addr(
         ahb_transaction tr,
@@ -172,10 +272,6 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
         next_addr = current_addr + bytes_per_beat;
 
         case (tr.burst)
-            AHB_BURST_SINGLE: begin
-                return current_addr;
-            end
-
             AHB_BURST_INCR,
             AHB_BURST_INCR4,
             AHB_BURST_INCR8,
@@ -197,7 +293,7 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
     endfunction : calc_next_addr
 
     //-------------------------------------------------------------------------
-    // Reset — deassert all master-driven signals
+    // Reset - deassert all master-driven signals
     //-------------------------------------------------------------------------
     task reset_signals();
         @(vif.master_cb);

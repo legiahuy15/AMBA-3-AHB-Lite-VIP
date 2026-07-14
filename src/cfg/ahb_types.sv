@@ -9,13 +9,13 @@
 //==============================================================================
 
     // ---------------------------------------------------------------------------
-    // 1. Bus-width parameters
+    // Bus-width parameters
     // ---------------------------------------------------------------------------
     parameter AHB_ADDR_WIDTH = 32;                   // Address bus width
     parameter AHB_DATA_WIDTH = 32;                   // Data bus width
 
     // ---------------------------------------------------------------------------
-    // 2. Burst type - HBURST[2:0]
+    // Burst type - HBURST[2:0]
     //    Defines the burst type for the current transfer.
     // ---------------------------------------------------------------------------
     typedef enum bit [2:0] {
@@ -30,7 +30,7 @@
     } ahb_burst_e;
 
     // ---------------------------------------------------------------------------
-    // 3. Protection control - HPROT[3:0]
+    // Protection control - HPROT[3:0]
     //    Provides additional information about a bus access.
     //    Bit mapping:
     //        [0] - Data/Opcode        : 1 = data access,       0 = opcode fetch
@@ -47,7 +47,7 @@
     } ahb_prot_e;
 
     // ---------------------------------------------------------------------------
-    // 4. Transfer size - HSIZE[2:0]
+    // Transfer size - HSIZE[2:0]
     //    Number of bytes per transfer = 2^HSIZE.
     //    Must not exceed the data bus width (DATA_WIDTH / 8 bytes).
     // ---------------------------------------------------------------------------
@@ -63,7 +63,7 @@
     } ahb_size_e;
 
     // ---------------------------------------------------------------------------
-    // 5. Transfer type - HTRANS[1:0]
+    // Transfer type - HTRANS[1:0]
     //    Indicates the type of the current transfer.
     //        IDLE   - no transfer required
     //        BUSY   - insert idle cycles within a burst
@@ -78,7 +78,7 @@
     } ahb_trans_e;
 
     // ---------------------------------------------------------------------------
-    // 6. Direction control - HWRITE
+    // Direction control - HWRITE
     //    Indicates the transfer direction.
     //    Must remain constant throughout a burst transfer.
     // ---------------------------------------------------------------------------
@@ -88,7 +88,7 @@
     } ahb_dir_e;
 
     // ---------------------------------------------------------------------------
-    // 7. Transfer response - HRESP
+    // Transfer response - HRESP
     //    AHB-Lite uses a single-bit response (simplified from full AHB).
     //        OKAY  - transfer completed successfully
     //        ERROR - transfer error
