@@ -55,7 +55,6 @@ class ahb_master_monitor extends uvm_monitor;
     //-------------------------------------------------------------------------
     function new(string name, uvm_component parent);
         super.new(name, parent);
-        ap = new("ap", this);
     endfunction : new
 
     //-------------------------------------------------------------------------
@@ -63,6 +62,7 @@ class ahb_master_monitor extends uvm_monitor;
     //-------------------------------------------------------------------------
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
+        ap = new("ap", this);
         if (!uvm_config_db#(virtual ahb_if)::get(this, "", "vif", vif))
             `uvm_fatal(get_type_name(), "Virtual interface not found in config_db")
     endfunction : build_phase
@@ -90,8 +90,8 @@ class ahb_master_monitor extends uvm_monitor;
 
     //-------------------------------------------------------------------------
     // Collect loop - one evaluation per HREADY=1 edge:
-    //   1) the in-flight data phase completes (sample HWDATA/HRDATA + HRESP)
-    //   2) the address phase presented this cycle is accepted
+    //   1) The in-flight data phase completes (sample HWDATA/HRDATA + HRESP)
+    //   2) The address phase presented this cycle is accepted
     // NONSEQ/IDLE accept closes the previous burst (its last data completed
     // in step 1 on the same edge - covers back-to-back)
     //-------------------------------------------------------------------------
@@ -103,7 +103,7 @@ class ahb_master_monitor extends uvm_monitor;
                 continue;
             end
 
-            // 1) Complete the pending beat's data phase
+            // Complete the pending beat's data phase
             if (pending_valid) begin
                 data_q.push_back((cur_write == AHB_WRITE) ? vif.monitor_cb.HWDATA
                                                           : vif.monitor_cb.HRDATA);
@@ -122,7 +122,7 @@ class ahb_master_monitor extends uvm_monitor;
                 // cancelled to IDLE) - closing happens below via IDLE/NONSEQ
             end
 
-            // 2) Decode the accepted address phase
+            // Decode the accepted address phase
             case (ahb_trans_e'(vif.monitor_cb.HTRANS))
 
                 AHB_TRANS_NONSEQ: begin
