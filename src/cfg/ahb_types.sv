@@ -16,7 +16,6 @@
 
     // ---------------------------------------------------------------------------
     // Burst type - HBURST[2:0]
-    //    Defines the burst type for the current transfer.
     // ---------------------------------------------------------------------------
     typedef enum bit [2:0] {
         AHB_BURST_SINGLE = 3'b000,
@@ -31,12 +30,7 @@
 
     // ---------------------------------------------------------------------------
     // Protection control - HPROT[3:0]
-    //    Provides additional information about a bus access.
-    //    Bit mapping:
-    //        [0] - Data/Opcode        : 1 = data access,       0 = opcode fetch
-    //        [1] - Privileged/User    : 1 = privileged access, 0 = user access
-    //        [2] - Bufferable/Non-buf : 1 = bufferable,        0 = non-bufferable
-    //        [3] - Cacheable/Non-cach : 1 = cacheable,         0 = non-cacheable
+    //    [0] data/opcode  [1] privileged/user  [2] bufferable  [3] cacheable
     // ---------------------------------------------------------------------------
     typedef enum bit [3:0] {
         AHB_PROT_DEFAULT        = 4'b0000,   // Opcode, user, non-bufferable, non-cacheable
@@ -48,8 +42,7 @@
 
     // ---------------------------------------------------------------------------
     // Transfer size - HSIZE[2:0]
-    //    Number of bytes per transfer = 2^HSIZE.
-    //    Must not exceed the data bus width (DATA_WIDTH / 8 bytes).
+    //    Bytes per transfer = 2^HSIZE; must not exceed DATA_WIDTH/8
     // ---------------------------------------------------------------------------
     typedef enum bit [2:0] {
         AHB_SIZE_8B    = 3'b000,   //   1 byte   (8 bits)
@@ -64,11 +57,10 @@
 
     // ---------------------------------------------------------------------------
     // Transfer type - HTRANS[1:0]
-    //    Indicates the type of the current transfer.
-    //        IDLE   - no transfer required
-    //        BUSY   - insert idle cycles within a burst
-    //        NONSEQ - first transfer of a burst (or single transfer)
-    //        SEQ    - remaining transfers in a burst
+    //    IDLE   - no transfer
+    //    BUSY   - idle cycle within a burst
+    //    NONSEQ - first beat of a burst (or single)
+    //    SEQ    - subsequent beats
     // ---------------------------------------------------------------------------
     typedef enum bit [1:0] {
         AHB_TRANS_IDLE   = 2'b00,
@@ -79,8 +71,7 @@
 
     // ---------------------------------------------------------------------------
     // Direction control - HWRITE
-    //    Indicates the transfer direction.
-    //    Must remain constant throughout a burst transfer.
+    //    Constant throughout a burst
     // ---------------------------------------------------------------------------
     typedef enum bit {
         AHB_READ  = 1'b0,
@@ -88,12 +79,19 @@
     } ahb_dir_e;
 
     // ---------------------------------------------------------------------------
-    // Transfer response - HRESP
-    //    AHB-Lite uses a single-bit response (simplified from full AHB).
-    //        OKAY  - transfer completed successfully
-    //        ERROR - transfer error
+    // Transfer response - HRESP (single-bit in AHB-Lite)
+    //    OKAY  - success
+    //    ERROR - transfer error
     // ---------------------------------------------------------------------------
     typedef enum bit {
         AHB_RESP_OKAY  = 1'b0,
         AHB_RESP_ERROR = 1'b1
     } ahb_resp_e;
+
+    //------------------------------------------------------------------------------
+    // Completion-event wrapper: held by handle so driver and sequence share one
+    // event object even if the transaction is copied
+    //------------------------------------------------------------------------------
+    class ahb_done_event;
+        event ev;
+    endclass : ahb_done_event

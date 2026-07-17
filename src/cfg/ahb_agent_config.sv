@@ -15,8 +15,8 @@ class ahb_agent_config extends uvm_object;
     // =========================================================================
     // Agent mode
     // =========================================================================
-    //   UVM_ACTIVE  — agent has driver + sequencer + monitor (drives traffic)
-    //   UVM_PASSIVE — agent has monitor only (passive observation)
+    //   UVM_ACTIVE  — driver + sequencer + monitor (drives traffic)
+    //   UVM_PASSIVE — monitor only (passive observation)
     uvm_active_passive_enum is_active = UVM_ACTIVE;
 
     // =========================================================================
@@ -24,15 +24,18 @@ class ahb_agent_config extends uvm_object;
     // =========================================================================
     bit has_coverage = 1;       // Enable functional coverage collection
 
-    // Master driver back-to-back: overlap next transaction's beat-0 address
-    // phase into the last data phase (no IDLE bubble). item_done() runs one
-    // cycle early - last beat's rdata/resp not yet valid at finish_item()
+    // Master back-to-back: overlap next queued txn's beat-0 address phase
+    // into the last data phase (no IDLE bubble). Driver always calls
+    // item_done() when queued (pipelined) - wait on tr.done_event.ev
     bit en_back_to_back = 1;
 
+    // Master backpressure: max accepted-but-not-completed txns. Accept loop
+    // stalls at this depth. 0 = unlimited
+    int unsigned max_outstanding = 0;
+
     // =========================================================================
-    // Slave driver timing — back-pressure delays
-    //   Only used by slave agent. Ignored by master agent.
-    //   When max = 0, no delay is inserted (fastest response).
+    // Slave driver timing — back-pressure delays (slave agent only).
+    //   max = 0 -> no delay (fastest response)
     // =========================================================================
     int unsigned ready_delay_min = 0;   // Min cycles before HREADY
     int unsigned ready_delay_max = 0;   // Max cycles before HREADY

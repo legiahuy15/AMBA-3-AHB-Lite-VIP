@@ -43,6 +43,15 @@ class ahb_transaction extends uvm_sequence_item;
     // ERROR policy: 1 = cancel remaining beats, 0 = continue (both spec-legal)
     rand bit                      abort_on_error;
 
+    // Completion event. Driver calls item_done() when the item is queued
+    // (pipelined), so finish_item() returns before the transfer completes -
+    // wait on done_event.ev; rdata[]/resp[] valid only after it fires
+    ahb_done_event                done_event;
+
+    // Set by the driver when a reset flushes the txn before it finished.
+    // done_event.ev still fires (no hang), but rdata[]/resp[] are invalid
+    bit                           aborted;
+
     //-------------------------------------------------------------------------
     // UVM utility macro
     //-------------------------------------------------------------------------
@@ -193,6 +202,8 @@ class ahb_transaction extends uvm_sequence_item;
         super.new(name);
         // Default for non-randomized transactions: cancel on ERROR
         abort_on_error = 1'b1;
+        aborted        = 1'b0;
+        done_event = new();
     endfunction : new
 
     //-------------------------------------------------------------------------
@@ -204,7 +215,9 @@ class ahb_transaction extends uvm_sequence_item;
             AHB_BURST_WRAP4,  AHB_BURST_INCR4:  return 4;
             AHB_BURST_WRAP8,  AHB_BURST_INCR8:  return 8;
             AHB_BURST_WRAP16, AHB_BURST_INCR16: return 16;
-            AHB_BURST_INCR:                     return wdata.size();
+            // INCR length is the canonical num_beats; fall back to the
+            // beat-array size for directed items that skip num_beats
+            AHB_BURST_INCR:                     return (num_beats != 0) ? num_beats : wdata.size();
             default:                            return 1;
         endcase
     endfunction : get_num_beats
