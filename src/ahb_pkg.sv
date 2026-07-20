@@ -40,6 +40,7 @@ package ahb_pkg;
    //-------------------------------------------------------------------------
     // Slave-side Components  (src/slv/)
    //-------------------------------------------------------------------------
+    `include "slv/ahb_slave_response.sv"
     `include "slv/ahb_slave_sequencer.sv"
     `include "slv/ahb_slave_driver.sv"
     `include "slv/ahb_slave_monitor.sv"

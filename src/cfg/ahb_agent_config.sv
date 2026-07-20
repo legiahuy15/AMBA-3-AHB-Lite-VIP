@@ -34,7 +34,19 @@ class ahb_agent_config extends uvm_object;
     int unsigned max_outstanding = 0;
 
     // =========================================================================
+    // Slave response mode (slave agent only)
+    // =========================================================================
+    //   1 — slave driver auto-generates responses per the AHB-Lite spec
+    //       (internal memory model, OKAY responses, ready_delay_min/max wait
+    //       states). No sequencer traffic required.
+    //   0 — slave driver pulls ahb_slave_response items from its sequencer;
+    //       the sequence controls ready delay, HRESP, and HRDATA per beat.
+    bit auto_gen_resp = 1;
+
+    // =========================================================================
     // Slave driver timing — back-pressure delays (slave agent only).
+    // Applied only in auto-generate mode (auto_gen_resp = 1); ignored when
+    // responses come from a sequence.
     //   max = 0 -> no delay (fastest response)
     // =========================================================================
     int unsigned ready_delay_min = 0;   // Min cycles before HREADY
