@@ -36,7 +36,7 @@ class ahb_coverage extends uvm_subscriber #(ahb_transaction);
             bins write = {AHB_WRITE};
         }
 
-        // Burst type - HBURST (all eight encodings)
+        // Burst type - HBURST
         cp_burst : coverpoint tr.burst {
             bins single = {AHB_BURST_SINGLE};
             bins incr   = {AHB_BURST_INCR};
@@ -68,7 +68,7 @@ class ahb_coverage extends uvm_subscriber #(ahb_transaction);
             bins incr_other  = {[2:3], [5:7], [9:15], [17:256]};
         }
 
-        // Slave response - did the burst see an ERROR?
+        // Slave response
         cp_resp : coverpoint has_error {
             bins okay  = {0};
             bins error = {1};
