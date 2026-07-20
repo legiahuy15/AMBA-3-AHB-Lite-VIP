@@ -2,10 +2,8 @@
 // File        : ahb_if.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : AHB-Lite interface with address & data chanel.
-//               Includes clocking blocks for master driver, slave driver,
-//               and monitor to avoid race conditions.
-//               Signal widths use parameters from ahb_types.sv.
+// Description : AHB-Lite bus interface. Provides master-driver, slave-driver,
+//               and monitor clocking blocks with matching modports.
 //==============================================================================
 
 `timescale 1ns/1ps
@@ -41,9 +39,7 @@ interface ahb_if #(
     logic                  HRESP;
 
     //-------------------------------------------------------------------------
-    // Clocking Block: Master Driver
-    //  - Drives: HADDR, HBURST, HMASTLOCK, HPROT, HSIZE, HTRANS, HWDATA, HWRITE
-    //  - Samples: HRDATA, HREADY, HRESP
+    // Master driver clocking block: drives address/control/HWDATA, samples response
     //-------------------------------------------------------------------------
     clocking master_cb @(posedge clk);
         default input #1step output #1;
@@ -52,9 +48,7 @@ interface ahb_if #(
     endclocking
 
     //-------------------------------------------------------------------------
-    // Clocking Block: Slave Driver
-    //  - Drives: HRDATA, HREADY, HWRITE
-    //  - Samples: HADDR, HBURST, HMASTLOCK, HPROT, HSIZE, HTRANS, HWDATA, HWRITE
+    // Slave driver clocking block: drives HRDATA/HREADY/HRESP, samples address/control
     //-------------------------------------------------------------------------
     clocking slave_cb @(posedge clk);
         default input #1step output #1;
@@ -63,8 +57,7 @@ interface ahb_if #(
     endclocking
 
     //-------------------------------------------------------------------------
-    // Clocking Block: Monitor
-    //  - Samples all signals (passive observation only)
+    // Monitor clocking block: samples all signals (passive)
     //-------------------------------------------------------------------------
     clocking monitor_cb @(posedge clk);
         default input #1step;

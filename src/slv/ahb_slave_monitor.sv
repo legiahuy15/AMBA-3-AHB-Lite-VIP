@@ -2,13 +2,9 @@
 // File        : ahb_slave_monitor.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : AHB-Lite slave monitor.
-//               Reconstructs burst transactions from the pipelined bus as seen
-//               at the slave (address phase + one-cycle-later data phase incl.
-//               HREADY wait states and HRESP) and broadcasts completed
-//               transactions on an analysis port for the scoreboard.
-//               Passive: samples only via monitor_cb.
-//               This file is `included inside ahb_pkg.sv.
+// Description : AHB-Lite slave monitor. Reconstructs burst transactions from the
+//               pipelined bus (including HREADY wait states and HRESP) and
+//               broadcasts them on an analysis port. Passive: samples only.
 //=============================================================================
 
 class ahb_slave_monitor extends uvm_monitor;

@@ -2,8 +2,7 @@
 // File        : ahb_sva.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : SystemVerilog Assertions for AHB-Lite protocol compliance
-//               (ARM IHI0033A). Bind to an ahb_if instance.
+// Description : AHB-Lite protocol assertions (IHI0033A). Bind to an ahb_if.
 //=============================================================================
 
 `timescale 1ns/1ps

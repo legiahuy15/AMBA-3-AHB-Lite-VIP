@@ -2,15 +2,13 @@
 // File        : ahb_slave_driver.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : AHB-Lite slave driver.
-//               Answers bus transfers on the slave clocking block. Two modes,
-//               selected by ahb_agent_config.auto_gen_resp:
-//                 1 (auto)     - self-generates spec responses from an internal
-//                                memory model (OKAY, ready_delay_min/max waits).
-//                 0 (sequence) - pulls ahb_slave_response items and drives the
-//                                ready delay / HRESP / HRDATA they specify.
+// Description : AHB-Lite slave driver. Answers bus transfers in two modes
+//               (ahb_agent_config.auto_gen_resp):
+//                 1 (auto)     - OKAY from an internal memory model, random
+//                                ready_delay_min/max wait states.
+//                 0 (sequence) - drives ready delay / HRESP / HRDATA from
+//                                ahb_slave_response items.
 //               Reactive component: raises no run-phase objection.
-//               This file is `included inside ahb_pkg.sv.
 //=============================================================================
 
 class ahb_slave_driver extends uvm_driver #(ahb_slave_response);

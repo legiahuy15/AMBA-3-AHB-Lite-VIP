@@ -2,10 +2,8 @@
 // File        : ahb_master_sequencer.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : AHB-Lite master sequencer.
-//               Sequences generate transactions that are passed
-//               to the master driver for driving onto the bus.
-//               This file is `included inside ahb_pkg.sv.
+// Description : AHB-Lite master sequencer. Feeds ahb_transaction items to the
+//               master driver.
 //=============================================================================
 
 class ahb_master_sequencer extends uvm_sequencer #(ahb_transaction);

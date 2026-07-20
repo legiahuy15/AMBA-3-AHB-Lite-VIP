@@ -2,13 +2,9 @@
 // File        : ahb_pkg.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Top-level SystemVerilog package for AHB-Lite VIP.
-//               Imports UVM library and includes all core components:
-//               transactions, sequencers, drivers, monitors, agents,
-//               configs, coverage, scoreboard, and environment.
-//
-//               Note: ahb_if.sv (SystemVerilog interface) is NOT included
-//               here - it must be compiled separately before this package.
+// Description : Top-level package for the AHB-Lite VIP. Imports UVM and
+//               includes all VIP components.
+//               Note: ahb_if.sv is an interface - compile it before this package.
 //=============================================================================
 
 `ifndef AHB_PKG_INCLUDED_

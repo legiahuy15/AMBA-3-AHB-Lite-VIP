@@ -2,10 +2,9 @@
 // File        : ahb_agent_config.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Configuration object for AHB-Lite agents.
-//               Controls active/passive mode, coverage enable, and slave
-//               driver timing delays. Shared by both master and slave agents.
-//               This file is `included inside ahb_pkg.sv.
+// Description : Configuration object shared by the AHB-Lite master and slave
+//               agents. Controls active/passive mode, coverage, master
+//               back-to-back/backpressure, and slave response mode/timing.
 //==============================================================================
 
 class ahb_agent_config extends uvm_object;

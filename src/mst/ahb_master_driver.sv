@@ -2,10 +2,8 @@
 // File        : ahb_master_driver.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : AHB-Lite master driver.
-//               Receives transactions from the sequencer and drives them
-//               onto the bus via the master clocking block.
-//               This file is `included inside ahb_pkg.sv.
+// Description : AHB-Lite master driver. Drives sequencer transactions onto the
+//               bus (pipelined address/data, back-to-back, reset recovery).
 //=============================================================================
 
 class ahb_master_driver extends uvm_driver #(ahb_transaction);

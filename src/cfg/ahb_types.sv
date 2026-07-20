@@ -2,10 +2,8 @@
 // File        : ahb_types.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : AHB-Lite protocol parameters, enums, and typedefs.
-//               All values follow ARM AMBA 3 AHB-Lite specification (IHI0033A).
-//               This file is `included inside ahb_pkg.sv - do NOT add
-//               package/endpackage here.
+// Description : AHB-Lite protocol parameters, enums, and typedefs (IHI0033A).
+//               Included inside ahb_pkg.sv - do NOT add package/endpackage here.
 //==============================================================================
 
     // ---------------------------------------------------------------------------

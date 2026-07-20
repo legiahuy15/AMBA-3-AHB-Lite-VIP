@@ -2,10 +2,8 @@
 // File        : ahb_transaction.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : AHB-Lite sequence item (transaction object).
-//               Contains all fields for a single AHB-Lite read/write transaction,
-//               constraints per IHI0033A spec, and utility methods for debug.
-//               This file is `included inside ahb_pkg.sv.
+// Description : AHB-Lite sequence item. Holds all fields for one read/write
+//               transaction, protocol constraints (IHI0033A), and debug helpers.
 //==============================================================================
 
 class ahb_transaction extends uvm_sequence_item;

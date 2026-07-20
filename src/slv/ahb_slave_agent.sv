@@ -3,12 +3,9 @@
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
 // Description : AHB-Lite slave agent.
-//               UVM_ACTIVE:  driver + sequencer + monitor (answers the bus)
-//               UVM_PASSIVE: monitor only (passive observation)
-//               In ACTIVE mode the driver still runs whether responses are
-//               auto-generated or sequence-driven (ahb_agent_config.auto_gen_resp);
-//               the sequencer is simply idle in auto mode.
-//               This file is `included inside ahb_pkg.sv.
+//               UVM_ACTIVE  - driver + sequencer + monitor
+//               UVM_PASSIVE - monitor only
+//               The sequencer is idle when the driver runs in auto mode.
 //=============================================================================
 
 class ahb_slave_agent extends uvm_agent;

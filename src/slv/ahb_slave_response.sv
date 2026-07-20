@@ -2,15 +2,9 @@
 // File        : ahb_slave_response.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : AHB-Lite slave response item (sequence item).
-//               One item describes how the slave driver answers a SINGLE
-//               data phase (beat): how many wait states to insert, the
-//               transfer response, and the read data to return.
-//               Used only when the slave agent runs in sequence mode
-//               (ahb_agent_config.auto_gen_resp = 0). In auto-generate mode
-//               the slave driver builds responses itself and never pulls
-//               these items.
-//               This file is `included inside ahb_pkg.sv.
+// Description : AHB-Lite slave response item. Describes how the slave driver
+//               answers one data phase: wait states, HRESP, and read data.
+//               Used only in sequence mode (ahb_agent_config.auto_gen_resp = 0).
 //==============================================================================
 
 class ahb_slave_response extends uvm_sequence_item;

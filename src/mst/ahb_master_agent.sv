@@ -3,9 +3,8 @@
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
 // Description : AHB-Lite master agent.
-//               UVM_ACTIVE:  driver + sequencer + monitor (drives traffic)
-//               UVM_PASSIVE: monitor only (passive observation)
-//               This file is `included inside ahb_pkg.sv.
+//               UVM_ACTIVE  - driver + sequencer + monitor
+//               UVM_PASSIVE - monitor only
 //=============================================================================
 
 class ahb_master_agent extends uvm_agent;

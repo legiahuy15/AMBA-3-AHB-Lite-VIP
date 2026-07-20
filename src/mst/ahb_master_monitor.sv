@@ -2,10 +2,8 @@
 // File        : ahb_master_monitor.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : AHB-Lite master monitor.
-//               Reconstructs burst transactions from the pipelined bus and
-//               broadcasts completed transactions on an analysis port.
-//               This file is `included inside ahb_pkg.sv.
+// Description : AHB-Lite master monitor. Reconstructs burst transactions from
+//               the pipelined bus and broadcasts them on an analysis port.
 //=============================================================================
 
 class ahb_master_monitor extends uvm_monitor;
