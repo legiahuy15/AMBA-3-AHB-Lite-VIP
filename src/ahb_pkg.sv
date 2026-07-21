@@ -5,6 +5,7 @@
 // Description : Top-level package for the AHB-Lite VIP. Imports UVM and
 //               includes all VIP components.
 //               Note: ahb_if.sv is an interface - compile it before this package.
+//               The sequence library lives in ahb_seq_pkg.sv (compiled after).
 //=============================================================================
 
 `ifndef AHB_PKG_INCLUDED_
@@ -24,7 +25,7 @@ package ahb_pkg;
     `include "cfg/ahb_types.sv"
     `include "cfg/ahb_transaction.sv"
     `include "cfg/ahb_agent_config.sv"
-    `include "env/ahb_vip_env_config.sv"
+    `include "cfg/ahb_vip_env_config.sv"
 
     //-------------------------------------------------------------------------
     // Master-side Components  (src/mst/)
@@ -42,16 +43,6 @@ package ahb_pkg;
     `include "slv/ahb_slave_driver.sv"
     `include "slv/ahb_slave_monitor.sv"
     `include "slv/ahb_slave_agent.sv"
-
-    //-------------------------------------------------------------------------
-    // Master-sequence Library  (src/mst_seq/)
-    //-------------------------------------------------------------------------
-    `include "mst_seq/..."
-
-    //-------------------------------------------------------------------------
-    // Slave-sequence Library  (src/slv_seq/)
-    //-------------------------------------------------------------------------
-    `include "slv_seq/..."
 
     //-------------------------------------------------------------------------
     // Environment-level Components  (src/env/)
