@@ -14,6 +14,9 @@ class ahb_master_agent extends uvm_agent;
     // Agent configuration (from config_db; default object when absent)
     ahb_agent_config     cfg;
 
+    // Virtual interface (from config_db)
+    virtual ahb_if       vif;
+
     // Sub-components
     ahb_master_driver    drv;
     ahb_master_sequencer sqr;
@@ -48,7 +51,7 @@ class ahb_master_agent extends uvm_agent;
             `uvm_fatal(get_type_name(), "Virtual interface not found in config_db")
 
         // Propagate vif to children via config_db
-        uvm_config_db#(virtual ahb_if)::set(this, "mon", "vif", vif);
+        uvm_config_db#(virtual ahb_if)::set(this, "*", "vif", vif);
 
         // Monitor (always created)
         mon = ahb_master_monitor::type_id::create("mon", this);
