@@ -28,6 +28,12 @@ module ahb_sva #(
     input logic                  HRESP
 );
 
+    //-------------------------------------------------------------------------
+    // Imports & Macros (assertion failures are reported through UVM)
+    //-------------------------------------------------------------------------
+    import uvm_pkg::*;
+    `include "uvm_macros.svh"
+
     // HTRANS encoding
     localparam [1:0] IDLE   = 2'b00;
     localparam [1:0] BUSY   = 2'b01;
