@@ -85,14 +85,16 @@ module tb_top;
     //   at the first sampling edge and IDLE_DURING_RESET / *_KNOWN assertions
     //   would fire spuriously. Driven once at time 0 only - the master and
     //   slave drivers own these signals from then on.
+    //   Values match the drivers' reset_signals() exactly, so the bus shows no
+    //   spurious transition when they take over on the first clocking edge.
     //-------------------------------------------------------------------------
     initial begin
         intf.HADDR     = '0;
-        intf.HBURST    = 3'b000;   // SINGLE
+        intf.HBURST    = '0;       // SINGLE
         intf.HMASTLOCK = 1'b0;
-        intf.HPROT     = 4'b0011;  // non-cacheable, non-bufferable, privileged, data
-        intf.HSIZE     = 3'b010;   // 32-bit
-        intf.HTRANS    = 2'b00;    // IDLE
+        intf.HPROT     = '0;       // AHB_PROT_DEFAULT
+        intf.HSIZE     = '0;
+        intf.HTRANS    = '0;       // IDLE
         intf.HWDATA    = '0;
         intf.HWRITE    = 1'b0;
         intf.HRDATA    = '0;
