@@ -333,7 +333,7 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
     endtask : drive_transaction
 
     //-------------------------------------------------------------------------
-    // Beat-0 address phase: all address & control signals.
+    // Beat-0 address phase: all address & control signals
     // Used at transaction start and for the back-to-back overlap slot
     //-------------------------------------------------------------------------
     task drive_addr_phase0(ahb_transaction tr);
@@ -347,8 +347,9 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
     endtask : drive_addr_phase0
 
     //-------------------------------------------------------------------------
-    // Next beat address (beats 1..N-1 only; SINGLE never reaches here)
-    //   INCR: addr + 2^HSIZE    WRAP: wraps at num_beats * 2^HSIZE
+    // Next beat address (beats 1...N-1 only; SINGLE never reaches here)
+    //   INCR: addr + 2^HSIZE
+    //   WRAP: wraps at num_beats * 2^HSIZE
     //-------------------------------------------------------------------------
     function bit [AHB_ADDR_WIDTH-1:0] calc_next_addr(
         ahb_transaction tr,
