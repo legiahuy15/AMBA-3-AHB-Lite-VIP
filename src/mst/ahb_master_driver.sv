@@ -101,7 +101,7 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
     //-------------------------------------------------------------------------
     // Bus drive loop - drive queued txns FIFO. A txn from the overlap slot
     // (next_tr) already has beat-0 addr phase accepted. On completion drop
-    // the objection and fire done_event.ev (rdata/resp valid only here)
+    // the objection and complete the txn (rdata/resp valid only here)
     //-------------------------------------------------------------------------
     task bus_drive_loop();
         forever begin
@@ -129,9 +129,19 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
             active_tr = null;
 
             drop_driver_objection("AHB transaction completed");
-            ->tr.done_event.ev;
+            complete_txn(tr, 1'b0);
         end
     endtask : bus_drive_loop
+
+    //-------------------------------------------------------------------------
+    // Release a waiting sequence. Must stay a function (zero-time) so aborted
+    // and done land in the same time step - a waiter can never see done=1 with
+    // a stale aborted
+    //-------------------------------------------------------------------------
+    function void complete_txn(ahb_transaction tr, bit is_aborted);
+        tr.aborted = is_aborted;
+        tr.done    = 1'b1;
+    endfunction : complete_txn
 
     //-------------------------------------------------------------------------
     // Objection helpers
@@ -152,26 +162,23 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
 
     //-------------------------------------------------------------------------
     // Flush on reset. item_done() fires when queued, so accepted txns already
-    // returned from finish_item(). Fire done_event.ev (marked aborted) for the
-    // in-flight txn, overlap slot, and queued txns so waiters don't hang.
-    // Objections are released by clear_objections()
+    // returned from finish_item(). Complete the in-flight txn, overlap slot,
+    // and queued txns (marked aborted) so waiters don't hang. Objections are
+    // released by clear_objections()
     //-------------------------------------------------------------------------
     function void flush_pending(string reason = "");
         ahb_transaction tr;
         if (active_tr != null) begin
-            active_tr.aborted = 1'b1;
-            ->active_tr.done_event.ev;
+            complete_txn(active_tr, 1'b1);
             active_tr = null;
         end
         if (next_tr != null) begin
-            next_tr.aborted = 1'b1;
-            ->next_tr.done_event.ev;
+            complete_txn(next_tr, 1'b1);
             next_tr = null;
         end
         while (drive_queue.size() > 0) begin
             tr = drive_queue.pop_front();
-            tr.aborted = 1'b1;
-            ->tr.done_event.ev;
+            complete_txn(tr, 1'b1);
         end
         if (reason != "")
             `uvm_info(get_type_name(),

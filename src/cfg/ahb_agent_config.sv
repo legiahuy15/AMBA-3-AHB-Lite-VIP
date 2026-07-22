@@ -25,7 +25,7 @@ class ahb_agent_config extends uvm_object;
 
     // Master back-to-back: overlap next queued txn's beat-0 address phase
     // into the last data phase (no IDLE bubble). Driver always calls
-    // item_done() when queued (pipelined) - wait on tr.done_event.ev
+    // item_done() when queued (pipelined) - wait on tr.done
     bit en_back_to_back = 1;
 
     // Master backpressure: max accepted-but-not-completed txns. Accept loop

@@ -41,13 +41,15 @@ class ahb_transaction extends uvm_sequence_item;
     // ERROR policy: 1 = cancel remaining beats, 0 = continue (both spec-legal)
     rand bit                      abort_on_error;
 
-    // Completion event. Driver calls item_done() when the item is queued
-    // (pipelined), so finish_item() returns before the transfer completes -
-    // wait on done_event.ev; rdata[]/resp[] valid only after it fires
-    ahb_done_event                done_event;
+    // Completion flag. item_done() fires when the item is queued (pipelined),
+    // so finish_item() returns before the transfer completes - wait on done;
+    // rdata[]/resp[] are valid only once it is set. Level flag (not an event)
+    // so a completion before the waiter arms cannot be missed. Cleared by the
+    // sequence between start_item() and finish_item()
+    bit                           done;
 
-    // Set by the driver when a reset flushes the txn before it finished.
-    // done_event.ev still fires (no hang), but rdata[]/resp[] are invalid
+    // Set by the driver when a reset flushes the txn before it finished;
+    // rdata[]/resp[] are invalid. Written with done in complete_txn()
     bit                           aborted;
 
     //-------------------------------------------------------------------------
@@ -201,7 +203,7 @@ class ahb_transaction extends uvm_sequence_item;
         // Default for non-randomized transactions: cancel on ERROR
         abort_on_error = 1'b1;
         aborted        = 1'b0;
-        done_event = new();
+        done           = 1'b0;
     endfunction : new
 
     //-------------------------------------------------------------------------

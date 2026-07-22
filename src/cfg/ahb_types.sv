@@ -85,11 +85,3 @@
         AHB_RESP_OKAY  = 1'b0,
         AHB_RESP_ERROR = 1'b1
     } ahb_resp_e;
-
-    //------------------------------------------------------------------------------
-    // Completion-event wrapper: held by handle so driver and sequence share one
-    // event object even if the transaction is copied
-    //------------------------------------------------------------------------------
-    class ahb_done_event;
-        event ev;
-    endclass : ahb_done_event

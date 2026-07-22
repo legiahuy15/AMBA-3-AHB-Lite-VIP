@@ -144,9 +144,8 @@ class ahb_scoreboard extends uvm_scoreboard;
         int unsigned lane;
         bit [7:0] exp_b, got_b;
 
-        // A reset-flushed transaction carries invalid data - skip it
-        if (t.aborted) return;
-
+        // No reset filter needed: the monitor drops bursts truncated by reset
+        // (see publish_if_complete / rst_watch), and aborted is driver-only
         bytes = 1 << t.size;
 
         foreach (t.trans[i]) begin
