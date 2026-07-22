@@ -29,7 +29,7 @@ module ahb_sva #(
 );
 
     //-------------------------------------------------------------------------
-    // Imports & Macros (assertion failures are reported through UVM)
+    // Imports & Macros
     //-------------------------------------------------------------------------
     import uvm_pkg::*;
     `include "uvm_macros.svh"

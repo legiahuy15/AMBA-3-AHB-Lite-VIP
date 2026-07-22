@@ -4,8 +4,6 @@
 // Author      : Huy Le
 // Description : Top-level package for the AHB-Lite VIP. Imports UVM and
 //               includes all VIP components.
-//               Note: ahb_if.sv is an interface - compile it before this package.
-//               The sequence library lives in ahb_seq_pkg.sv (compiled after).
 //=============================================================================
 
 `ifndef AHB_PKG_INCLUDED_

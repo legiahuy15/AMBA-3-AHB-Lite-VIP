@@ -2,8 +2,8 @@
 // File        : ahb_master_driver.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : AHB-Lite master driver. Drives sequencer transactions onto the
-//               bus (pipelined address/data, back-to-back, reset recovery).
+// Description : AHB-Lite master driver.
+//               Drives sequencer transactions onto the bus.
 //=============================================================================
 
 class ahb_master_driver extends uvm_driver #(ahb_transaction);
