@@ -21,8 +21,8 @@ class ahb_incr_burst_seq extends ahb_base_seq;
     //-------------------------------------------------------------------------
     int unsigned num_iter = 16;
 
-    // 1KB aligned: with a 64-byte slot the 16th iteration of every page ends
-    // flush against the 1KB boundary, which is where INCR_1KB_BOUNDARY bites
+    // 1KB aligned, so a 64-byte slot boundary is also a 1KB page boundary
+    // every 16 slots
     bit [AHB_ADDR_WIDTH-1:0] base_addr = 32'h0000_3000;
 
     // Slot holds the largest burst this sequence issues (16 beats x 4 bytes).
@@ -44,6 +44,7 @@ class ahb_incr_burst_seq extends ahb_base_seq;
     virtual task body();
         ahb_transaction          wr;
         bit [AHB_ADDR_WIDTH-1:0] slot;
+        bit                      pin_top;
 
         `uvm_info(get_type_name(),
                   $sformatf("Starting INCR bursts: %0d iterations from 0x%08h",
@@ -52,6 +53,12 @@ class ahb_incr_burst_seq extends ahb_base_seq;
         for (int unsigned i = 0; i < num_iter; i++) begin
             slot = base_addr + i * SLOT_SIZE;
 
+            // Pin every fourth burst against the top of its slot. Every slot
+            // that closes a 1KB page has (i % 4 == 3), so each page ends with
+            // a burst finishing on the last byte before the boundary - the
+            // worst case INCR_1KB_BOUNDARY has to accept
+            pin_top = ((i % 4) == 3);
+
             wr = ahb_transaction::type_id::create("wr");
             if (!wr.randomize() with {
                     write == AHB_WRITE;
@@ -59,6 +66,7 @@ class ahb_incr_burst_seq extends ahb_base_seq;
                     size inside {AHB_SIZE_8B, AHB_SIZE_16B, AHB_SIZE_32B};
                     addr >= slot;
                     addr + num_beats * (1 << size) <= slot + SLOT_SIZE;
+                    pin_top -> (addr + num_beats * (1 << size) == slot + SLOT_SIZE);
                 })
                 `uvm_fatal(get_type_name(),
                            $sformatf("Write randomization failed @slot 0x%08h", slot))
