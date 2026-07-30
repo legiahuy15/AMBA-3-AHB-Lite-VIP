@@ -21,6 +21,7 @@ package ahb_test_pkg;
     // Tests  (src/test/)
     //-------------------------------------------------------------------------
     `include "test/ahb_base_test.sv"
+    `include "test/ahb_sanity_test.sv"
     `include "test/ahb_read_after_write_test.sv"
 
 endpackage : ahb_test_pkg

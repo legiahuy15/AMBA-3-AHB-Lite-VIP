@@ -196,6 +196,30 @@ module ahb_sva #(
     CTRL_STABLE_IN_BURST: assert property (p_ctrl_stable_in_burst)
         else `uvm_error("AHB_SVA", "HBURST, HSIZE, or HWRITE changed mid-burst")
 
+    // HPROT constant throughout a burst (address-phase timing, same as HSIZE)
+    property p_hprot_stable_in_burst;
+        @(posedge clk) disable iff (!rst_n)
+        (HREADY && (HTRANS == SEQ || HTRANS == BUSY)) |-> ($stable(HPROT));
+    endproperty
+    HPROT_STABLE_IN_BURST: assert property (p_hprot_stable_in_burst)
+        else `uvm_error("AHB_SVA", "HPROT changed mid-burst")
+
+    // HMASTLOCK has address-phase timing and is held for the whole locked
+    // sequence: stable on every beat of a burst, and held across wait states.
+    // Same exception as ADDR_CTRL_STABLE_DURING_WAIT: an INCR burst ended out
+    // of BUSY starts a new (possibly unlocked) sequence
+    property p_mastlock_addr_timing;
+        @(posedge clk) disable iff (!rst_n)
+        ((HREADY && (HTRANS == SEQ || HTRANS == BUSY)) ||
+         (!$past(HREADY) && $past(HTRANS) != IDLE &&
+          !($past(HTRANS) == BUSY && $past(HBURST) == INCR &&
+            (HTRANS == IDLE || HTRANS == NONSEQ))))
+        |-> ($stable(HMASTLOCK));
+    endproperty
+    MASTLOCK_ADDR_TIMING: assert property (p_mastlock_addr_timing)
+        else `uvm_error("AHB_SVA",
+            "HMASTLOCK changed mid-burst or during a wait state (must follow address-phase timing)")
+
     // BUSY is not allowed with a SINGLE burst
     property p_no_busy_for_single;
         @(posedge clk) disable iff (!rst_n)
@@ -252,6 +276,15 @@ module ahb_sva #(
     endproperty
     IDLE_DURING_RESET: assert property (p_idle_during_reset)
         else `uvm_error("AHB_SVA", "HTRANS is not IDLE during reset")
+
+    // Slave drives HREADYOUT HIGH for the whole reset period.
+    // Single-slave passthrough topology, so HREADY is the slave's HREADYOUT
+    property p_readyout_high_in_reset;
+        @(posedge clk)
+        (!rst_n) |-> (HREADY == 1'b1);
+    endproperty
+    READYOUT_HIGH_IN_RESET: assert property (p_readyout_high_in_reset)
+        else `uvm_error("AHB_SVA", "HREADY (HREADYOUT) is not HIGH during reset")
 
     // INCR address increments by 2^HSIZE between sequential beats
     // (skip when the previous beat was BUSY: address held)
@@ -332,6 +365,19 @@ module ahb_sva #(
     endproperty
     ERROR_FIRST_CYCLE_READY_LOW: assert property (p_error_first_cycle_ready_low)
         else `uvm_error("AHB_SVA", "ERROR response first cycle must have HREADY=LOW")
+
+    // Any wait states inserted before the ERROR response must carry HRESP=OKAY
+    // (transfer pending). With a 1-bit HRESP this is checked from the completion
+    // side: the cycle that ends an ERROR (HRESP=ERROR, HREADY=1) must be
+    // preceded by the ERROR/HREADY=0 cycle, so no earlier wait cycle drove
+    // ERROR and the ERROR response is never a single cycle
+    property p_okay_before_error;
+        @(posedge clk) disable iff (!rst_n)
+        (HRESP == 1'b1 && HREADY) |-> ($past(HRESP) == 1'b1 && !$past(HREADY));
+    endproperty
+    OKAY_BEFORE_ERROR: assert property (p_okay_before_error)
+        else `uvm_error("AHB_SVA",
+            "ERROR completed without a preceding ERROR/HREADY=0 cycle (wait states before ERROR must drive HRESP=OKAY)")
 
     // Slave must respond OKAY (zero-wait) to IDLE transfers
     property p_idle_okay_resp;

@@ -23,6 +23,7 @@ package ahb_seq_pkg;
     // Master-sequence Library  (src/mst_seq/)
     //-------------------------------------------------------------------------
     `include "mst_seq/ahb_base_seq.sv"
+    `include "mst_seq/ahb_sanity_seq.sv"
     `include "mst_seq/ahb_read_after_write_seq.sv"
 
     //-------------------------------------------------------------------------
