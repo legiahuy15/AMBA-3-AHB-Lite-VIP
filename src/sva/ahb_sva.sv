@@ -88,9 +88,8 @@ module ahb_sva #(
     // WAIT STATES (HREADY=0)
     //-------------------------------------------------------------------------
 
-    // Address/control stable during wait, for any non-IDLE transfer
-    // Exception: an INCR burst may be ended out of BUSY (-> NONSEQ/IDLE),
-    // which lets address/control change
+    // Address/control stable during wait, for any non-IDLE transfer.
+    // Exception: an INCR burst ended out of BUSY (-> NONSEQ/IDLE)
     property p_addr_ctrl_stable_during_wait;
         @(posedge clk) disable iff (!rst_n)
         (!HREADY && HTRANS != IDLE) |=>
@@ -125,8 +124,7 @@ module ahb_sva #(
     BUSY_WAIT_TRANSITION: assert property (p_busy_wait_transition)
         else `uvm_error("AHB_SVA", "BUSY changed to illegal type during wait")
 
-    // HWDATA stable during wait in a write data phase
-    // in_write_data_phase = last accepted transfer was an active write
+    // Set when the last accepted transfer was an active write
     logic in_write_data_phase;
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n)
@@ -204,10 +202,9 @@ module ahb_sva #(
     HPROT_STABLE_IN_BURST: assert property (p_hprot_stable_in_burst)
         else `uvm_error("AHB_SVA", "HPROT changed mid-burst")
 
-    // HMASTLOCK has address-phase timing and is held for the whole locked
-    // sequence: stable on every beat of a burst, and held across wait states.
-    // Same exception as ADDR_CTRL_STABLE_DURING_WAIT: an INCR burst ended out
-    // of BUSY starts a new (possibly unlocked) sequence
+    // HMASTLOCK has address-phase timing: stable on every beat of a burst and
+    // across wait states. Same INCR-ended-out-of-BUSY exception as
+    // ADDR_CTRL_STABLE_DURING_WAIT
     property p_mastlock_addr_timing;
         @(posedge clk) disable iff (!rst_n)
         ((HREADY && (HTRANS == SEQ || HTRANS == BUSY)) ||
@@ -229,8 +226,8 @@ module ahb_sva #(
         else `uvm_error("AHB_SVA", "BUSY transfer used with SINGLE burst (not allowed)")
 
     // Fixed-length burst: accepted BUSY -> BUSY/SEQ only (must end with SEQ).
-    // INCR may end out of BUSY; !HREADY covered by BUSY_WAIT_TRANSITION;
-    // HRESP==OKAY excludes the ERROR-cancel case
+    // Waited BUSY is covered by BUSY_WAIT_TRANSITION; HRESP==OKAY excludes
+    // the ERROR-cancel case
     property p_busy_fixed_len_no_terminate;
         @(posedge clk) disable iff (!rst_n)
         (HREADY && HTRANS == BUSY && HRESP == 1'b0 &&
@@ -242,7 +239,6 @@ module ahb_sva #(
             "Fixed-length burst terminated out of BUSY (must end with SEQ)")
 
     // A SINGLE burst must be followed by IDLE or NONSEQ
-    // (SEQ/BUSY after a SINGLE's NONSEQ beat is illegal)
     property p_single_followed_by_idle_nonseq;
         @(posedge clk) disable iff (!rst_n)
         (HREADY && HTRANS == NONSEQ && HBURST == SINGLE) |=>
@@ -253,7 +249,6 @@ module ahb_sva #(
             "SINGLE burst must be followed by IDLE or NONSEQ transfer")
 
     // After an accepted IDLE, next transfer must be IDLE or NONSEQ
-    // (SEQ/BUSY are only valid inside a burst)
     property p_no_seq_busy_after_idle;
         @(posedge clk) disable iff (!rst_n)
         (HTRANS == IDLE && HREADY) |=> (HTRANS == IDLE || HTRANS == NONSEQ);
@@ -277,8 +272,8 @@ module ahb_sva #(
     IDLE_DURING_RESET: assert property (p_idle_during_reset)
         else `uvm_error("AHB_SVA", "HTRANS is not IDLE during reset")
 
-    // Slave drives HREADYOUT HIGH for the whole reset period.
-    // Single-slave passthrough topology, so HREADY is the slave's HREADYOUT
+    // Slave drives HREADYOUT HIGH for the whole reset period
+    // (single-slave passthrough topology, so HREADY is the slave's HREADYOUT)
     property p_readyout_high_in_reset;
         @(posedge clk)
         (!rst_n) |-> (HREADY == 1'b1);
@@ -308,8 +303,8 @@ module ahb_sva #(
     ADDR_STABLE_AFTER_BUSY: assert property (p_addr_stable_after_busy)
         else `uvm_error("AHB_SVA", "HADDR changed after BUSY (must hold next-beat address)")
 
-    // WRAP address: bits above the wrap boundary (num_beats*2^HSIZE) stay constant
-    // Checked per WRAP type for tool compatibility
+    // WRAP address: bits above the wrap boundary (num_beats * 2^HSIZE) stay
+    // constant. Checked per WRAP type
 
     // WRAP4: boundary = 4 * 2^HSIZE
     property p_wrap4_upper_stable;
@@ -366,11 +361,8 @@ module ahb_sva #(
     ERROR_FIRST_CYCLE_READY_LOW: assert property (p_error_first_cycle_ready_low)
         else `uvm_error("AHB_SVA", "ERROR response first cycle must have HREADY=LOW")
 
-    // Any wait states inserted before the ERROR response must carry HRESP=OKAY
-    // (transfer pending). With a 1-bit HRESP this is checked from the completion
-    // side: the cycle that ends an ERROR (HRESP=ERROR, HREADY=1) must be
-    // preceded by the ERROR/HREADY=0 cycle, so no earlier wait cycle drove
-    // ERROR and the ERROR response is never a single cycle
+    // Wait states before an ERROR carry HRESP=OKAY: the cycle ending an ERROR
+    // must be preceded by the ERROR/HREADY=0 cycle, so ERROR is never one cycle
     property p_okay_before_error;
         @(posedge clk) disable iff (!rst_n)
         (HRESP == 1'b1 && HREADY) |-> ($past(HRESP) == 1'b1 && !$past(HREADY));

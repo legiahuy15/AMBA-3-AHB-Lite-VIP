@@ -2,11 +2,10 @@
 // File        : ahb_read_after_write_test.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Data-integrity test. Runs ahb_read_after_write_seq: each
-//               iteration writes a random word then reads back the SAME
-//               address and compares. The slave agent answers from its
-//               internal memory model (auto_gen_resp), so the read must
-//               return the value just written.
+// Description : Data-integrity test. Runs ahb_read_after_write_seq, which
+//               writes a random word and reads back the same address. The
+//               slave answers from its memory model (auto_gen_resp), so the
+//               read must return the value just written.
 //               This file is `included inside ahb_test_pkg.sv.
 //=============================================================================
 
@@ -28,8 +27,8 @@ class ahb_read_after_write_test extends ahb_base_test;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Build phase - base test builds env_cfg; tighten slave timing here.
-    // A few wait states exercise the pipelined driver without changing data.
+    // Build phase - base test builds env_cfg; a few slave wait states exercise
+    // the pipelined driver
     //-------------------------------------------------------------------------
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);

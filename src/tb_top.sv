@@ -49,11 +49,8 @@ module tb_top;
     end
 
     //-------------------------------------------------------------------------
-    // Mid-simulation reset support
-    //   A test can request an EXTRA reset pulse (to verify reset-recovery of the
-    //   drivers and monitors) by triggering the global UVM event
-    //   "ahb_reset_req". rst_n is driven low for a few cycles, then released.
-    //   This is independent of the power-on reset above.
+    // Mid-simulation reset - an extra pulse requested by a test through the
+    // global UVM event "ahb_reset_req", independent of the power-on reset
     //-------------------------------------------------------------------------
     initial begin
         automatic uvm_event reset_ev = uvm_event_pool::get_global("ahb_reset_req");
@@ -79,14 +76,9 @@ module tb_top;
     );
 
     //-------------------------------------------------------------------------
-    // Time-0 signal initialisation
-    //   The drivers only take control of the bus after their first clocking
-    //   block drive (posedge + output skew), so without this the signals are X
-    //   at the first sampling edge and IDLE_DURING_RESET / *_KNOWN assertions
-    //   would fire spuriously. Driven once at time 0 only - the master and
-    //   slave drivers own these signals from then on.
-    //   Values match the drivers' reset_signals() exactly, so the bus shows no
-    //   spurious transition when they take over on the first clocking edge.
+    // Time-0 signal initialisation - the drivers only take the bus on their
+    // first clocking edge, so without this the signals are X at the first
+    // sampling edge. Values match the drivers' reset_signals()
     //-------------------------------------------------------------------------
     initial begin
         intf.HADDR     = '0;
@@ -104,9 +96,6 @@ module tb_top;
 
     //-------------------------------------------------------------------------
     // SVA - AHB-Lite protocol assertion checker
-    //   Direct instantiation (old versions of QuestaSim do not support
-    //   bind-to-interface). All signals are connected via the interface
-    //   instance `intf`.
     //-------------------------------------------------------------------------
     ahb_sva #(
         .ADDR_WIDTH (ADDR_WIDTH),
@@ -134,14 +123,9 @@ module tb_top;
     //-------------------------------------------------------------------------
     initial begin
         uvm_config_db#(virtual ahb_if)::set(null, "*", "vif", intf);
-
-        // Explicit per-side handles, for tests that prefer named lookups.
-        //uvm_config_db#(virtual ahb_if)::set(null, "*", "master_vif", intf);
-        //uvm_config_db#(virtual ahb_if)::set(null, "*", "slave_vif",  intf);
-
         `uvm_info("TB_TOP", "Virtual interface set in config_db", UVM_LOW)
 
-        // Kick off UVM phases. The active test is specified via +UVM_TESTNAME plusarg.
+        // Test selected with +UVM_TESTNAME
         run_test();
     end
 
@@ -158,10 +142,7 @@ module tb_top;
     end
 
     //-------------------------------------------------------------------------
-    // Safety simulation watchdog
-    //   The timeout (in ns) is overridable from the command line:
-    //       make run PLUSARGS=+TIMEOUT_NS=2000000
-    //   With the 1ns timescale, the default 10_000_000 ns = 10 ms of sim time.
+    // Safety simulation watchdog - timeout in ns, overridable with +TIMEOUT_NS
     //-------------------------------------------------------------------------
     initial begin
         automatic longint unsigned timeout_ns = 10_000_000;  // 10 ms default backup

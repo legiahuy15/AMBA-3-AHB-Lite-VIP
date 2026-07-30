@@ -38,9 +38,8 @@ class ahb_read_after_write_seq extends ahb_base_seq;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Body - num_iter x (write @A, read @A, compare)
-    //   Word-sized SINGLE transfers only: one beat, no byte-lane masking, so
-    //   HRDATA can be compared directly against HWDATA.
+    // Body - num_iter x (write @A, read @A, compare). Word-sized SINGLE
+    // transfers only, so HRDATA compares directly against HWDATA
     //-------------------------------------------------------------------------
     virtual task body();
         ahb_transaction wr_tr;

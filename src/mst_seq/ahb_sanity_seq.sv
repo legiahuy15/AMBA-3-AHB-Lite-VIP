@@ -2,11 +2,8 @@
 // File        : ahb_sanity_seq.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Smoke sequence. Walks the two most basic AHB-Lite paths with
-//               fully directed stimulus - a SINGLE word pair and an INCR4 word
-//               burst pair - writing a known pattern and reading it straight
-//               back. Everything is deterministic, so a failure points at the
-//               VIP or the protocol checker, never at the randomizer.
+// Description : Smoke sequence. Directed SINGLE word pair and INCR4 word burst
+//               pair, writing a known pattern and reading it straight back.
 //               Requires the slave agent in auto-response mode (memory model).
 //               This file is `included inside ahb_seq_pkg.sv.
 //=============================================================================
@@ -25,10 +22,8 @@ class ahb_sanity_seq extends ahb_base_seq;
 
     bit [AHB_ADDR_WIDTH-1:0] base_addr = 32'h0000_1000;   // 1KB-aligned
 
-    // Address slot per iteration. 64 bytes holds the SINGLE word at slot+0 and
-    // the INCR4 word burst at slot+32 without overlap, so a later iteration can
-    // never mask an earlier miscompare. Slot alignment also keeps every burst
-    // clear of a 1KB boundary
+    // Address slot per iteration: SINGLE word at slot+0, INCR4 burst at
+    // slot+32. Slots never overlap and every burst stays clear of a 1KB boundary
     localparam int unsigned SLOT_SIZE  = 64;
     localparam int unsigned BURST_OFFS = 32;
 
@@ -59,10 +54,10 @@ class ahb_sanity_seq extends ahb_base_seq;
         for (int unsigned i = 0; i < num_iter; i++) begin
             slot = base_addr + i * SLOT_SIZE;
 
-            // SINGLE word: one address cycle, one data cycle (NONSEQ only)
+            // SINGLE word: one address cycle, one data cycle
             write_read_check(AHB_BURST_SINGLE, slot, 32'hA5A5_0000 + i);
 
-            // INCR4 word burst: NONSEQ beat followed by three SEQ beats
+            // INCR4 word burst: NONSEQ beat then three SEQ beats
             write_read_check(AHB_BURST_INCR4, slot + BURST_OFFS,
                              32'h5A5A_0000 + (i << 8));
         end
@@ -75,10 +70,9 @@ class ahb_sanity_seq extends ahb_base_seq;
 
     //-------------------------------------------------------------------------
     // One write/read pair at the same address with the same burst type.
-    // Word-sized beats only: one full-width beat per address, so HRDATA can be
-    // compared straight against HWDATA with no byte-lane masking.
-    // Beat k carries tgt_data + k, which makes a beat-ordering bug visible as a
-    // shifted pattern rather than a plain miscompare.
+    // Word-sized beats only, so HRDATA compares straight against HWDATA with
+    // no byte-lane masking. Beat k carries tgt_data + k, so a beat-ordering
+    // bug shows up as a shifted pattern
     //-------------------------------------------------------------------------
     protected task write_read_check(ahb_burst_e              burst_type,
                                     bit [AHB_ADDR_WIDTH-1:0] tgt_addr,
@@ -118,9 +112,8 @@ class ahb_sanity_seq extends ahb_base_seq;
         send_and_wait(rd, ok);
         if (!ok) return;
 
-        // CHECK - beat k of the read must return beat k of the write.
-        // The slave runs its memory model, so an ERROR here is itself a
-        // failure: nothing in this sequence asks for one
+        // CHECK - beat k of the read must return beat k of the write. Nothing
+        // here asks for an ERROR, so any non-OKAY response is a failure
         foreach (rd.rdata[k]) begin
             num_checked++;
 

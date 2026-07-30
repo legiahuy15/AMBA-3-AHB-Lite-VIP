@@ -31,25 +31,21 @@ class ahb_transaction extends uvm_sequence_item;
     rand int unsigned             num_beats;
 
     // BUSY cycles driven before beat i. busy_cycles[0] == 0, so BUSY only
-    // appears between beats and a fixed-length burst always ends with SEQ
+    // appears between beats
     rand int unsigned             busy_cycles[];
 
     // INCR only: BUSY cycles after the last beat, then IDLE/NONSEQ
-    // (termination out of BUSY). 0 for SINGLE and fixed-length bursts
     rand int unsigned             trailing_busy_cycles;
 
     // ERROR policy: 1 = cancel remaining beats, 0 = continue (both spec-legal)
     rand bit                      abort_on_error;
 
-    // Completion flag. item_done() fires when the item is queued (pipelined),
-    // so finish_item() returns before the transfer completes - wait on done;
-    // rdata[]/resp[] are valid only once it is set. Level flag (not an event)
-    // so a completion before the waiter arms cannot be missed. Cleared by the
-    // sequence between start_item() and finish_item()
+    // Completion flag, set by the driver when the transfer finishes on the bus.
+    // rdata[]/resp[] are valid only once it is set. A level flag rather than an
+    // event, so a completion before the waiter arms cannot be missed
     bit                           done;
 
-    // Set by the driver when a reset flushes the txn before it finished;
-    // rdata[]/resp[] are invalid. Written with done in complete_txn()
+    // Set with done when a reset flushed the txn; rdata[]/resp[] are invalid
     bit                           aborted;
 
     //-------------------------------------------------------------------------
@@ -154,8 +150,7 @@ class ahb_transaction extends uvm_sequence_item;
             trans[0] == AHB_TRANS_NONSEQ;
     }
 
-    // No BUSY before beat 0 (burst starts NONSEQ; also excludes SINGLE).
-    // BUSY runs capped at 3 cycles; default none
+    // No BUSY before beat 0; BUSY runs capped at 3 cycles, default none
     constraint c_busy_cycles {
         if (num_beats > 0) busy_cycles[0] == 0;
         foreach (busy_cycles[i]) {

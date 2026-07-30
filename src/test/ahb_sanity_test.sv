@@ -2,15 +2,10 @@
 // File        : ahb_sanity_test.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Smoke test - the first thing to run after any VIP change.
-//               Runs ahb_sanity_seq against the slave memory model with zero
-//               wait states, so every transfer is one address cycle plus one
-//               data cycle. That keeps the bus on its simplest legal timing and
-//               makes any SVA firing here a real protocol break rather than a
-//               corner case.
-//               Covers AHB_RST_001 (single clock edge operation) and
-//               AHB_TRN_004 (NONSEQ for a single transfer and for the first
-//               beat of a burst) in doc/ahb_lite_vplan.xlsx.
+// Description : Smoke test. Runs ahb_sanity_seq against the slave memory model
+//               with zero wait states, so every transfer is one address cycle
+//               plus one data cycle.
+//               Covers AHB_RST_001 and AHB_TRN_004 in doc/ahb_lite_vplan.xlsx.
 //               This file is `included inside ahb_test_pkg.sv.
 //=============================================================================
 
@@ -32,10 +27,8 @@ class ahb_sanity_test extends ahb_base_test;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Build phase - base test builds env_cfg; pin the slave to the simplest
-    // legal timing here. Zero wait states is what makes this a smoke test:
-    // no extended data phases, so the driver pipeline is exercised on the
-    // straight path only
+    // Build phase - base test builds env_cfg; pin the slave to zero wait
+    // states so the driver pipeline runs on the straight path only
     //-------------------------------------------------------------------------
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);

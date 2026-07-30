@@ -2,12 +2,10 @@
 // File        : ahb_base_test.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Base UVM test for AHB_Lite VIP.
-//               Sets up the environment with a shared interface (passthrough
-//               mode - master drives, slave responds on the same bus).
-//               Only provides build, end_of_elaboration, and report phases.
-//               Derived tests implement their own run_phase with specific
-//               sequences and test scenarios.
+// Description : Base UVM test for the AHB-Lite VIP. Builds the environment in
+//               passthrough mode (master drives, slave responds on the same
+//               bus) and provides build, end_of_elaboration and report phases.
+//               Derived tests supply their own run_phase.
 //               This file is `included inside ahb_test_pkg.sv.
 //=============================================================================
 
@@ -32,38 +30,23 @@ class ahb_base_test extends uvm_test;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Build phase
-    //   1. Create environment config
-    //   2. Get virtual interface from tb_top
-    //   3. Push config to environment
-    //   4. Create environment
-    //
-    //   Derived tests can override build_phase to customise env_cfg
-    //   AFTER calling super.build_phase() but BEFORE env is built:
-    //
-    //     function void build_phase(uvm_phase phase);
-    //         super.build_phase(phase);
-    //         env_cfg.slave_agent_cfg.ready_delay_max = 5;
-    //         env_cfg.has_coverage = 0;
-    //     endfunction
+    // Build phase - create env_cfg, fetch the vif from tb_top, build the env.
+    // Derived tests customise env_cfg after calling super.build_phase()
     //-------------------------------------------------------------------------
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
 
-        // Create env config (default: both agents ACTIVE, scoreboard ON, coverage ON)
+        // Defaults: both agents ACTIVE, scoreboard ON, coverage ON
         env_cfg = ahb_vip_env_config::type_id::create("env_cfg");
 
-        // Get virtual interface set by tb_top
         if (!uvm_config_db#(virtual ahb_if)::get(this, "", "vif", env_cfg.master_vif))
             `uvm_fatal(get_type_name(),
                        "Virtual interface 'vif' not found - must be set by tb_top")
 
         // slave_vif remains null -> passthrough mode (both agents on same bus)
 
-        // Push config to environment
         uvm_config_db#(ahb_vip_env_config)::set(this, "env", "cfg", env_cfg);
 
-        // Create environment
         env = ahb_vip_env::type_id::create("env", this);
     endfunction : build_phase
 

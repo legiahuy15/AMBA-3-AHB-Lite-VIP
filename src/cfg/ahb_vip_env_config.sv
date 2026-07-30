@@ -12,20 +12,17 @@ class ahb_vip_env_config extends uvm_object;
     `uvm_object_utils(ahb_vip_env_config)
 
     //-------------------------------------------------------------------------
-    // Agent configuration objects
-    //   Created with defaults in constructor (both ACTIVE, coverage ON).
-    //   Tests can override individual fields before env build_phase.
+    // Agent configuration objects - defaulted in the constructor, overridable
+    // by a test before the env build_phase
     //-------------------------------------------------------------------------
     ahb_agent_config master_agent_cfg;
     ahb_agent_config slave_agent_cfg;
 
     //-------------------------------------------------------------------------
     // Virtual interfaces
-    //   master_vif : ahb interface on master side of DUT (required)
-    //   slave_vif  : ahb interface on slave side of DUT (optional)
-    //
-    //   If slave_vif is null, master_vif is used for both agents.
-    //   This is the "passthrough mode" - both agents observe the same bus.
+    //   master_vif : master side of the DUT (required)
+    //   slave_vif  : slave side of the DUT (optional). When null, master_vif
+    //                serves both agents - passthrough mode, one shared bus
     //-------------------------------------------------------------------------
     virtual ahb_if master_vif;
     virtual ahb_if slave_vif;

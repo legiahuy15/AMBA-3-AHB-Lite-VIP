@@ -23,15 +23,13 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
 
     //-------------------------------------------------------------------------
     // send_and_wait - send one item and block until the bus transfer finishes.
-    //   The driver is pipelined: item_done() fires when the item is queued, so
-    //   finish_item() returns before the transfer completes. rdata[]/resp[] are
-    //   valid only after tr.done.
-    //   Returns 0 if a reset flushed the item (rdata[]/resp[] invalid).
+    // The driver is pipelined, so finish_item() returns before the transfer
+    // completes; rdata[]/resp[] are valid only after tr.done.
+    // ok = 0 when a reset flushed the item
     //-------------------------------------------------------------------------
     virtual task send_and_wait(ahb_transaction tr, output bit ok);
         start_item(tr);
-        // Arm before finish_item() hands the item to the driver; also allows
-        // reusing the same transaction object across calls
+        // Arm before the item reaches the driver
         tr.done    = 1'b0;
         tr.aborted = 1'b0;
         finish_item(tr);

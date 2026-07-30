@@ -43,14 +43,12 @@ class ahb_master_agent extends uvm_agent;
         end
         is_active = cfg.is_active;
 
-        // Propagate cfg to children via config_db
-        uvm_config_db#(ahb_agent_config)::set(this, "*", "cfg", cfg);
-
-        // Virtual Interface
+        // Virtual interface
         if (!uvm_config_db#(virtual ahb_if)::get(this, "", "vif", vif))
             `uvm_fatal(get_type_name(), "Virtual interface not found in config_db")
 
-        // Propagate vif to children via config_db
+        // Propagate cfg + vif to all children
+        uvm_config_db#(ahb_agent_config)::set(this, "*", "cfg", cfg);
         uvm_config_db#(virtual ahb_if)::set(this, "*", "vif", vif);
 
         // Monitor (always created)

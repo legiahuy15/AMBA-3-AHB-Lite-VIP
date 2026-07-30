@@ -100,8 +100,7 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
 
     //-------------------------------------------------------------------------
     // Bus drive loop - drive queued txns FIFO. A txn from the overlap slot
-    // (next_tr) already has beat-0 addr phase accepted. On completion drop
-    // the objection and complete the txn (rdata/resp valid only here)
+    // (next_tr) already has its beat-0 address phase accepted
     //-------------------------------------------------------------------------
     task bus_drive_loop();
         forever begin
@@ -134,9 +133,8 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
     endtask : bus_drive_loop
 
     //-------------------------------------------------------------------------
-    // Release a waiting sequence. Must stay a function (zero-time) so aborted
-    // and done land in the same time step - a waiter can never see done=1 with
-    // a stale aborted
+    // Release a waiting sequence. Must stay a function so aborted and done
+    // land in the same time step
     //-------------------------------------------------------------------------
     function void complete_txn(ahb_transaction tr, bit is_aborted);
         tr.aborted = is_aborted;
@@ -161,10 +159,8 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
     endfunction
 
     //-------------------------------------------------------------------------
-    // Flush on reset. item_done() fires when queued, so accepted txns already
-    // returned from finish_item(). Complete the in-flight txn, overlap slot,
-    // and queued txns (marked aborted) so waiters don't hang. Objections are
-    // released by clear_objections()
+    // Flush on reset - complete the in-flight txn, the overlap slot and the
+    // queue as aborted so waiting sequences don't hang
     //-------------------------------------------------------------------------
     function void flush_pending(string reason = "");
         ahb_transaction tr;
@@ -195,10 +191,9 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
     endfunction
 
     //-------------------------------------------------------------------------
-    // Drive one transaction, pipelined: addr[i+1] overlaps data[i]. Covers
-    // BUSY insertion, INCR termination out of BUSY, ERROR policy, and
-    // back-to-back overlap of the next txn.
-    // addr_in_flight=1: beat 0 already accepted by the previous overlap slot
+    // Drive one transaction, pipelined: addr[i+1] overlaps data[i]. Covers BUSY
+    // insertion, INCR termination out of BUSY, ERROR policy and back-to-back
+    // overlap. addr_in_flight=1: beat 0 accepted by the previous overlap slot
     //-------------------------------------------------------------------------
     task drive_transaction(ahb_transaction tr, bit addr_in_flight = 0);
         int num_beats;

@@ -68,10 +68,11 @@ ifeq ($(USE_COVERAGE),1)
 endif
 
 # Dynamic Seed Generation (shuf when available, else $RANDOM composition)
+#   ':=' is required so the seed is drawn once and -sv_seed matches the .ucdb name
 ifeq ($(SEED),random)
-    GEN_SEED = $(shell shuf -i 1-99999999 -n 1 2>/dev/null || echo $$(( ($$RANDOM * 32768 + $$RANDOM) % 99999999 + 1 )))
+    GEN_SEED := $(shell shuf -i 1-99999999 -n 1 2>/dev/null || echo $$(( ($$RANDOM * 32768 + $$RANDOM) % 99999999 + 1 )))
 else
-    GEN_SEED = $(SEED)
+    GEN_SEED := $(SEED)
 endif
 
 # ==============================================================================

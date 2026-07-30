@@ -23,30 +23,24 @@ class ahb_agent_config extends uvm_object;
     //-------------------------------------------------------------------------
     bit has_coverage = 1;       // Enable functional coverage collection
 
-    // Master back-to-back: overlap next queued txn's beat-0 address phase
-    // into the last data phase (no IDLE bubble). Driver always calls
-    // item_done() when queued (pipelined) - wait on tr.done
+    // Master back-to-back: overlap the next queued txn's beat-0 address phase
+    // into the last data phase (no IDLE bubble)
     bit en_back_to_back = 1;
 
-    // Master backpressure: max accepted-but-not-completed txns. Accept loop
-    // stalls at this depth. 0 = unlimited
+    // Master backpressure: max accepted-but-not-completed txns. 0 = unlimited
     int unsigned max_outstanding = 0;
 
     //-------------------------------------------------------------------------
     // Slave response mode (slave agent only)
     //-------------------------------------------------------------------------
-    //   1 - slave driver auto-generates responses per the AHB-Lite spec
-    //       (internal memory model, OKAY responses, ready_delay_min/max wait
-    //       states). No sequencer traffic required.
-    //   0 - slave driver pulls ahb_slave_response items from its sequencer;
-    //       the sequence controls ready delay, HRESP, and HRDATA per beat.
+    //   1 - internal memory model, OKAY responses, ready_delay_min/max wait
+    //       states. No sequencer traffic required.
+    //   0 - ahb_slave_response items from the sequencer control ready delay,
+    //       HRESP and HRDATA per beat.
     bit auto_gen_resp = 1;
 
     //-------------------------------------------------------------------------
-    // Slave driver timing - back-pressure delays (slave agent only).
-    // Applied only in auto-generate mode (auto_gen_resp = 1); ignored when
-    // responses come from a sequence.
-    //   max = 0 -> no delay (fastest response)
+    // Slave driver timing - applied in auto-generate mode only
     //-------------------------------------------------------------------------
     int unsigned ready_delay_min = 0;   // Min cycles before HREADY
     int unsigned ready_delay_max = 0;   // Max cycles before HREADY

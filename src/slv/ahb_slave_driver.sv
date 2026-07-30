@@ -4,10 +4,9 @@
 // Author      : Huy Le
 // Description : AHB-Lite slave driver. Answers bus transfers in two modes
 //               (ahb_agent_config.auto_gen_resp):
-//                 1 (auto)     - OKAY from an internal memory model, random
-//                                ready_delay_min/max wait states.
-//                 0 (sequence) - drives ready delay / HRESP / HRDATA from
-//                                ahb_slave_response items.
+//                 1 (auto)     - OKAY from an internal memory model
+//                 0 (sequence) - ready delay / HRESP / HRDATA from
+//                                ahb_slave_response items
 //               Reactive component: raises no run-phase objection.
 //=============================================================================
 
@@ -71,10 +70,9 @@ class ahb_slave_driver extends uvm_driver #(ahb_slave_response);
     endtask : run_phase
 
     //-------------------------------------------------------------------------
-    // Serve loop - one iteration per address phase presented on the bus.
-    // IDLE/BUSY get a zero-wait OKAY; NONSEQ/SEQ get a full data-phase response.
-    // Each branch consumes the exact cycles of the transfer it handled, so the
-    // next iteration always reads HTRANS at a fresh address phase.
+    // Serve loop - one iteration per address phase on the bus. IDLE/BUSY get a
+    // zero-wait OKAY; NONSEQ/SEQ get a full data-phase response. Each branch
+    // consumes exactly the cycles of the transfer it handled
     //-------------------------------------------------------------------------
     task serve_bus();
         @(vif.slave_cb);                     // align to the clocking block
@@ -107,8 +105,8 @@ class ahb_slave_driver extends uvm_driver #(ahb_slave_response);
 
     //-------------------------------------------------------------------------
     // Resolve the response for one beat. Auto mode builds it locally; sequence
-    // mode pulls an ahb_slave_response (item_done in the same time step, so no
-    // item is ever held across a clock edge -> reset-safe)
+    // mode pulls an ahb_slave_response and calls item_done in the same time
+    // step, so no item is held across a clock edge (reset-safe)
     //-------------------------------------------------------------------------
     task get_response(input  bit [AHB_ADDR_WIDTH-1:0] addr,
                       input  ahb_dir_e                write,
@@ -134,9 +132,8 @@ class ahb_slave_driver extends uvm_driver #(ahb_slave_response);
     //   1) 'delay' wait states  (HREADY=0, HRESP=OKAY)
     //   2) response:
     //        OKAY  - HREADY=1, HRESP=OKAY (+ HRDATA on read); capture write data
-    //        ERROR - spec two-cycle response: (HREADY=0,ERROR) then (HREADY=1,ERROR)
-    // The final @(slave_cb) lands on the completion edge, where the master
-    // presents the next address phase.
+    //        ERROR - two-cycle: (HREADY=0,ERROR) then (HREADY=1,ERROR)
+    // The final @(slave_cb) lands on the completion edge
     //-------------------------------------------------------------------------
     task drive_beat(input bit [AHB_ADDR_WIDTH-1:0] addr,
                     input ahb_dir_e                write,
