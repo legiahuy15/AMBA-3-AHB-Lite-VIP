@@ -50,7 +50,8 @@ USE_COVERAGE  ?= 1
 PLUSARGS      += +DUMP_VCD
 
 # List of tests to run during a regression
-TEST_LIST     ?= ahb_sanity_test ahb_read_after_write_test
+TEST_LIST     ?= ahb_sanity_test ahb_single_transfer_test ahb_incr_burst_test \
+                 ahb_wrap_burst_test ahb_read_after_write_test
 
 # ==============================================================================
 # 3. Simulator Flags & Conditional Options

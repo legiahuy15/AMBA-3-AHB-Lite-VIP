@@ -24,6 +24,9 @@ package ahb_seq_pkg;
     //-------------------------------------------------------------------------
     `include "mst_seq/ahb_base_seq.sv"
     `include "mst_seq/ahb_sanity_seq.sv"
+    `include "mst_seq/ahb_single_seq.sv"
+    `include "mst_seq/ahb_incr_burst_seq.sv"
+    `include "mst_seq/ahb_wrap_burst_seq.sv"
     `include "mst_seq/ahb_read_after_write_seq.sv"
 
     //-------------------------------------------------------------------------
