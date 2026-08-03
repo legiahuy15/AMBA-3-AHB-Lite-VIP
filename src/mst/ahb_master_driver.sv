@@ -199,6 +199,7 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
         int num_beats;
         int n_busy;
         bit pipelined_own;   // overlap slot belongs to this burst (cancel on ERROR)
+        bit busy_retracted;  // BUSY already withdrawn during this wait
         bit [AHB_ADDR_WIDTH-1:0] beat_addr[];
 
         num_beats = tr.get_num_beats();
@@ -260,12 +261,37 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
 
             // Wait HREADY; on the ERROR first cycle cancel the overlapped
             // transfer to IDLE (own slot only, only when aborting)
+            busy_retracted = 1'b0;
             forever begin
                 @(vif.master_cb);
                 if (vif.master_cb.HREADY === 1'b1) break;
+
                 if (vif.master_cb.HRESP === AHB_RESP_ERROR &&
-                    tr.abort_on_error && pipelined_own)
+                    tr.abort_on_error && pipelined_own) begin
                     vif.master_cb.HTRANS <= AHB_TRANS_IDLE;
+                end
+                // Withdraw the BUSY presented above and go straight to the
+                // transfer that ends the BUSY run. Once only: the replacement
+                // is an address phase and must hold until HREADY
+                else if (tr.busy_retract_in_wait && n_busy > 0 && !busy_retracted) begin
+                    busy_retracted = 1'b1;
+                    n_busy         = 0;             // BUSY run is over
+                    if (i < num_beats - 1) begin
+                        // BUSY -> SEQ, address already presented with the BUSY
+                        vif.master_cb.HTRANS <= tr.trans[i+1];
+                    end else begin
+                        // End of an INCR burst: hand the slot to the next txn
+                        // if there is one, else close with IDLE
+                        if (en_back_to_back && drive_queue.size() > 0)
+                            next_tr = drive_queue.pop_front();
+                        if (next_tr != null) begin
+                            drive_addr_phase0(next_tr);     // BUSY -> NONSEQ
+                            pipelined_own = 1'b0;
+                        end else begin
+                            vif.master_cb.HTRANS <= AHB_TRANS_IDLE;
+                        end
+                    end
+                end
             end
 
             // Sample response (valid on the HREADY=1 cycle)

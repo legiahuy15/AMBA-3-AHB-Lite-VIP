@@ -40,6 +40,10 @@ class ahb_transaction extends uvm_sequence_item;
     // ERROR policy: 1 = cancel remaining beats, 0 = continue (both spec-legal)
     rand bit                      abort_on_error;
 
+    // Withdraw a presented BUSY while the previous data phase is still waited,
+    // replacing it with the transfer that ends the BUSY run (IHI0033A 3.6.1)
+    rand bit                      busy_retract_in_wait;
+
     // Completion flag, set by the driver when the transfer finishes on the bus.
     // rdata[]/resp[] are valid only once it is set. A level flag rather than an
     // event, so a completion before the waiter arms cannot be missed
@@ -65,6 +69,7 @@ class ahb_transaction extends uvm_sequence_item;
         `uvm_field_array_int(              busy_cycles, UVM_ALL_ON)
         `uvm_field_int(                    trailing_busy_cycles, UVM_ALL_ON)
         `uvm_field_int(                    abort_on_error, UVM_ALL_ON)
+        `uvm_field_int(                    busy_retract_in_wait, UVM_ALL_ON)
         // Note: trans[] & resp[] has no built-in macro for enum dynamic
         //       arrays, so do_copy/do_compare/do_print handle it manually
     `uvm_object_utils_end
@@ -171,6 +176,11 @@ class ahb_transaction extends uvm_sequence_item;
         soft abort_on_error == 1'b1;
     }
 
+    // Retracting a waited BUSY is optional master behaviour; default off
+    constraint c_busy_retract {
+        soft busy_retract_in_wait == 1'b0;
+    }
+
     // Default distribution: favour common burst types
     constraint c_burst_dist {
         burst dist {
@@ -195,10 +205,11 @@ class ahb_transaction extends uvm_sequence_item;
     //-------------------------------------------------------------------------
     function new(string name = "ahb_transaction");
         super.new(name);
-        // Default for non-randomized transactions: cancel on ERROR
-        abort_on_error = 1'b1;
-        aborted        = 1'b0;
-        done           = 1'b0;
+        // Defaults for non-randomized transactions
+        abort_on_error       = 1'b1;
+        busy_retract_in_wait = 1'b0;
+        aborted              = 1'b0;
+        done                 = 1'b0;
     endfunction : new
 
     //-------------------------------------------------------------------------

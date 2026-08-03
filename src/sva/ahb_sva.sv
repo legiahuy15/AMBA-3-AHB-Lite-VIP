@@ -387,4 +387,30 @@ module ahb_sva #(
     BUSY_OKAY_RESP: assert property (p_busy_okay_resp)
         else `uvm_warning("AHB_SVA", "Slave did not respond OKAY to BUSY transfer")
 
+    //-------------------------------------------------------------------------
+    // COVERAGE - transfer-type changes during a wait state
+    //   The assertions above permit these; the cover directives record whether
+    //   stimulus ever produced them. A passing assertion only proves nothing
+    //   illegal happened, not that the legal case was reached
+    //-------------------------------------------------------------------------
+
+    // IDLE may become NONSEQ while HREADY is low
+    C_IDLE_TO_NONSEQ_IN_WAIT: cover property (@(posedge clk) disable iff (!rst_n)
+        (!HREADY && HTRANS == IDLE) |=> (HTRANS == NONSEQ));
+
+    // BUSY may become SEQ while HREADY is low (any burst type)
+    C_BUSY_TO_SEQ_IN_WAIT: cover property (@(posedge clk) disable iff (!rst_n)
+        (!HREADY && HTRANS == BUSY) |=> (HTRANS == SEQ));
+
+    // BUSY may become IDLE or NONSEQ while HREADY is low (INCR only)
+    C_BUSY_TO_IDLE_IN_WAIT: cover property (@(posedge clk) disable iff (!rst_n)
+        (!HREADY && HTRANS == BUSY && HBURST == INCR) |=> (HTRANS == IDLE));
+
+    C_BUSY_TO_NONSEQ_IN_WAIT: cover property (@(posedge clk) disable iff (!rst_n)
+        (!HREADY && HTRANS == BUSY && HBURST == INCR) |=> (HTRANS == NONSEQ));
+
+    // Baseline: a waited BUSY simply held until HREADY
+    C_BUSY_HELD_IN_WAIT: cover property (@(posedge clk) disable iff (!rst_n)
+        (!HREADY && HTRANS == BUSY) |=> (HTRANS == BUSY));
+
 endmodule : ahb_sva
