@@ -64,8 +64,11 @@ class ahb_reset_seq extends ahb_base_seq;
                             num_iter, reset_every), UVM_LOW)
 
         //---------------------------------------------------------------------
-        // Reset phase - long bursts with HRESETn pulled part way through
+        // Reset phase - long bursts with HRESETn pulled part way through.
+        // Aborts are the point here, so they are logged rather than warned
         //---------------------------------------------------------------------
+        expect_reset_abort = 1'b1;
+
         for (int unsigned i = 0; i < num_iter; i++) begin
             slot = base_addr + i * SLOT_SIZE;
 
@@ -107,8 +110,11 @@ class ahb_reset_seq extends ahb_base_seq;
 
         //---------------------------------------------------------------------
         // Recovery phase - no more resets, everything must complete and the
-        // scoreboard reference memory must agree with the read-back
+        // scoreboard reference memory must agree with the read-back.
+        // Back to warning: an abort here is a genuine recovery failure
         //---------------------------------------------------------------------
+        expect_reset_abort = 1'b0;
+
         `uvm_info(get_type_name(),
                   $sformatf("Recovery phase: %0d write/read pairs", num_recover), UVM_LOW)
 

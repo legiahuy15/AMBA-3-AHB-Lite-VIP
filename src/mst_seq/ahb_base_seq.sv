@@ -22,6 +22,13 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
     int unsigned beats_mismatch;
 
     //-------------------------------------------------------------------------
+    // Set by a sequence that provokes resets on purpose. A flushed transaction
+    // is then reported as information; anywhere else it stays a warning,
+    // because losing a transfer to a reset nobody asked for is worth flagging
+    //-------------------------------------------------------------------------
+    bit expect_reset_abort = 1'b0;
+
+    //-------------------------------------------------------------------------
     // Constructor
     //-------------------------------------------------------------------------
     function new(string name = "ahb_base_seq");
@@ -39,10 +46,16 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
         // Level-sensitive: returns immediately if the driver already completed
         wait (tr.done);
         ok = !tr.aborted;
-        if (!ok)
-            `uvm_warning(get_type_name(),
-                         $sformatf("Transaction aborted by reset: %s 0x%08h",
-                                   tr.write.name(), tr.addr))
+        if (!ok) begin
+            if (expect_reset_abort)
+                `uvm_info(get_type_name(),
+                          $sformatf("Transaction aborted by reset: %s 0x%08h",
+                                    tr.write.name(), tr.addr), UVM_MEDIUM)
+            else
+                `uvm_warning(get_type_name(),
+                             $sformatf("Transaction aborted by reset: %s 0x%08h",
+                                       tr.write.name(), tr.addr))
+        end
     endtask : send_and_wait
 
     //-------------------------------------------------------------------------
@@ -116,9 +129,14 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
             wait (wr.done);
             wait (rd.done);
             if (wr.aborted || rd.aborted) begin
-                `uvm_warning(get_type_name(),
-                             $sformatf("Pipelined pair aborted by reset: %s 0x%08h",
-                                       wr.burst.name(), wr.addr))
+                if (expect_reset_abort)
+                    `uvm_info(get_type_name(),
+                              $sformatf("Pipelined pair aborted by reset: %s 0x%08h",
+                                        wr.burst.name(), wr.addr), UVM_MEDIUM)
+                else
+                    `uvm_warning(get_type_name(),
+                                 $sformatf("Pipelined pair aborted by reset: %s 0x%08h",
+                                           wr.burst.name(), wr.addr))
                 return;
             end
         end else begin
