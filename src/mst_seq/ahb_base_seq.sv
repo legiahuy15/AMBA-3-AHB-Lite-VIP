@@ -35,11 +35,7 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
     // ok = 0 when a reset flushed the item
     //-------------------------------------------------------------------------
     virtual task send_and_wait(ahb_transaction tr, output bit ok);
-        start_item(tr);
-        // Arm before the item reaches the driver
-        tr.done    = 1'b0;
-        tr.aborted = 1'b0;
-        finish_item(tr);
+        queue_item(tr);
         // Level-sensitive: returns immediately if the driver already completed
         wait (tr.done);
         ok = !tr.aborted;
@@ -48,6 +44,19 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
                          $sformatf("Transaction aborted by reset: %s 0x%08h",
                                    tr.write.name(), tr.addr))
     endtask : send_and_wait
+
+    //-------------------------------------------------------------------------
+    // queue_item - hand one item to the driver without blocking. Returns as
+    // soon as the driver has queued it, so a caller can stack several
+    // transactions and let the driver run them back to back
+    //-------------------------------------------------------------------------
+    virtual task queue_item(ahb_transaction tr);
+        start_item(tr);
+        // Arm before the item reaches the driver
+        tr.done    = 1'b0;
+        tr.aborted = 1'b0;
+        finish_item(tr);
+    endtask : queue_item
 
     //-------------------------------------------------------------------------
     // beat_address - address of beat i, honouring INCR increment and WRAP.
@@ -73,9 +82,12 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
     // write_read_burst - send an already randomized write burst, then read the
     // same address with identical control and compare every beat.
     // Only the active byte lanes are compared: a narrow transfer leaves the
-    // remaining lanes undefined, so a full-word compare would be wrong
+    // remaining lanes undefined, so a full-word compare would be wrong.
+    // pipelined = 1 queues both transfers before waiting, so the driver always
+    // has one behind the transfer it is driving. AHB is in order, so the read
+    // still returns the data the write committed
     //-------------------------------------------------------------------------
-    virtual task write_read_burst(ahb_transaction wr);
+    virtual task write_read_burst(ahb_transaction wr, bit pipelined = 0);
         ahb_transaction          rd;
         bit                      ok;
         bit [AHB_ADDR_WIDTH-1:0] a;
@@ -84,9 +96,8 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
         bit [7:0]                exp_b, got_b;
         bit                      beat_bad;
 
-        send_and_wait(wr, ok);
-        if (!ok) return;                    // reset flush - skip the pair
-
+        // Built up front: pipelined mode has to queue it while the write is
+        // still on the bus
         rd = ahb_transaction::type_id::create("rd");
         if (!rd.randomize() with {
                 write     == AHB_READ;
@@ -99,8 +110,23 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
                        $sformatf("Read randomization failed (%s @0x%08h)",
                                  wr.burst.name(), wr.addr))
 
-        send_and_wait(rd, ok);
-        if (!ok) return;
+        if (pipelined) begin
+            queue_item(wr);
+            queue_item(rd);
+            wait (wr.done);
+            wait (rd.done);
+            if (wr.aborted || rd.aborted) begin
+                `uvm_warning(get_type_name(),
+                             $sformatf("Pipelined pair aborted by reset: %s 0x%08h",
+                                       wr.burst.name(), wr.addr))
+                return;
+            end
+        end else begin
+            send_and_wait(wr, ok);
+            if (!ok) return;                // reset flush - skip the pair
+            send_and_wait(rd, ok);
+            if (!ok) return;
+        end
 
         bytes = 1 << wr.size;
         foreach (rd.rdata[k]) begin

@@ -47,6 +47,8 @@ class ahb_undefined_burst_seq extends ahb_base_seq;
         int unsigned             pin_beats;
         bit                      want_trailing;
         bit                      want_retract;
+        bit                      want_pipeline;
+        bit                      pipe_toggle;
 
         `uvm_info(get_type_name(),
                   $sformatf("Starting undefined-length INCR bursts: %0d iterations from 0x%08h",
@@ -72,6 +74,16 @@ class ahb_undefined_burst_seq extends ahb_base_seq;
             // only ever held; with it the BUSY is withdrawn mid-wait for SEQ
             // (mid-burst) or IDLE/NONSEQ (end of burst)
             want_retract = (((i / 2) % 2) == 1);
+
+            // A retracted trailing BUSY hands its slot to whatever the driver
+            // has queued, so it becomes NONSEQ when a transfer is waiting and
+            // IDLE when none is. Alternate pipelining across the bursts that
+            // retract a trailing BUSY to produce both endings
+            want_pipeline = 1'b0;
+            if (want_trailing && want_retract) begin
+                want_pipeline = pipe_toggle;
+                pipe_toggle   = !pipe_toggle;
+            end
 
             wr = ahb_transaction::type_id::create("wr");
             if (!wr.randomize() with {
@@ -103,12 +115,13 @@ class ahb_undefined_burst_seq extends ahb_base_seq;
                            $sformatf("Write randomization failed @slot 0x%08h", slot))
 
             `uvm_info(get_type_name(),
-                      $sformatf("INCR %0d beats, %s @0x%08h, trailing_busy=%0d, retract=%0b",
+                      $sformatf("INCR %0d beats, %s @0x%08h, trailing_busy=%0d, retract=%0b, pipelined=%0b",
                                 wr.num_beats, wr.size.name(), wr.addr,
-                                wr.trailing_busy_cycles, wr.busy_retract_in_wait),
+                                wr.trailing_busy_cycles, wr.busy_retract_in_wait,
+                                want_pipeline),
                       UVM_MEDIUM)
 
-            write_read_burst(wr);
+            write_read_burst(wr, want_pipeline);
         end
 
         `uvm_info(get_type_name(),
