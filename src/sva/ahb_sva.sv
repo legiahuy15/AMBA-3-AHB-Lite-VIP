@@ -408,6 +408,12 @@ module ahb_sva #(
     C_BUSY_TO_SEQ_IN_WAIT: cover property (@(posedge clk) disable iff (!rst_n)
         (!HREADY && HTRANS == BUSY) |=> (HTRANS == SEQ));
 
+    // Same, restricted to a fixed-length burst. Kept separate because the
+    // undefined-length case alone would light up the unqualified cover
+    C_BUSY_TO_SEQ_IN_WAIT_FIXED: cover property (@(posedge clk) disable iff (!rst_n)
+        (!HREADY && HTRANS == BUSY && HBURST != INCR && HBURST != SINGLE)
+        |=> (HTRANS == SEQ));
+
     // BUSY may become IDLE or NONSEQ while HREADY is low (INCR only)
     C_BUSY_TO_IDLE_IN_WAIT: cover property (@(posedge clk) disable iff (!rst_n)
         (!HREADY && HTRANS == BUSY && HBURST == INCR) |=> (HTRANS == IDLE));
