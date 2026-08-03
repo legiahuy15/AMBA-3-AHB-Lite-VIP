@@ -202,7 +202,8 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
         bit busy_retracted;  // BUSY already withdrawn during this wait
         bit [AHB_ADDR_WIDTH-1:0] beat_addr[];
 
-        num_beats = tr.get_num_beats();
+        num_beats     = tr.get_num_beats();
+        tr.beats_done = 0;
 
         // Pre-compute beat addresses
         beat_addr = new[num_beats];
@@ -269,6 +270,12 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
                 if (vif.master_cb.HRESP === AHB_RESP_ERROR &&
                     tr.abort_on_error && pipelined_own) begin
                     vif.master_cb.HTRANS <= AHB_TRANS_IDLE;
+                    // Cancelling on ERROR is one of the few cases where the
+                    // address may move with HREADY low. Point at whatever is
+                    // queued next; the address is ignored while HTRANS is IDLE
+                    if (tr.addr_change_on_error)
+                        vif.master_cb.HADDR <= (drive_queue.size() > 0)
+                                               ? drive_queue[0].addr : '0;
                 end
                 // Withdraw the BUSY presented above and go straight to the
                 // transfer that ends the BUSY run. Once only: the replacement
@@ -297,7 +304,8 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
             // Sample response (valid on the HREADY=1 cycle)
             if (tr.write == AHB_READ)
                 tr.rdata[i] = vif.master_cb.HRDATA;
-            tr.resp[i] = ahb_resp_e'(vif.master_cb.HRESP);
+            tr.resp[i]    = ahb_resp_e'(vif.master_cb.HRESP);
+            tr.beats_done = i + 1;
 
             `uvm_info(get_type_name(),
                       $sformatf("Beat[%0d/%0d] addr=0x%08h trans=%s resp=%s %s=0x%08h",

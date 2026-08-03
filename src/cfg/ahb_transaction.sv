@@ -44,6 +44,10 @@ class ahb_transaction extends uvm_sequence_item;
     // replacing it with the transfer that ends the BUSY run (IHI0033A 3.6.1)
     rand bit                      busy_retract_in_wait;
 
+    // Move the address while cancelling a burst on ERROR. One of the few cases
+    // where address and control may change with HREADY low (IHI0033A 3.6.2)
+    rand bit                      addr_change_on_error;
+
     // Completion flag, set by the driver when the transfer finishes on the bus.
     // rdata[]/resp[] are valid only once it is set. A level flag rather than an
     // event, so a completion before the waiter arms cannot be missed
@@ -51,6 +55,11 @@ class ahb_transaction extends uvm_sequence_item;
 
     // Set with done when a reset flushed the txn; rdata[]/resp[] are invalid
     bit                           aborted;
+
+    // Beats the driver actually completed on the bus. Below num_beats when an
+    // ERROR cancelled the rest of the burst, so a sequence can tell a
+    // cancelled burst from one that ran to the end
+    int unsigned                  beats_done;
 
     //-------------------------------------------------------------------------
     // UVM utility macro
@@ -70,6 +79,7 @@ class ahb_transaction extends uvm_sequence_item;
         `uvm_field_int(                    trailing_busy_cycles, UVM_ALL_ON)
         `uvm_field_int(                    abort_on_error, UVM_ALL_ON)
         `uvm_field_int(                    busy_retract_in_wait, UVM_ALL_ON)
+        `uvm_field_int(                    addr_change_on_error, UVM_ALL_ON)
         // Note: trans[] & resp[] has no built-in macro for enum dynamic
         //       arrays, so do_copy/do_compare/do_print handle it manually
     `uvm_object_utils_end
@@ -181,6 +191,11 @@ class ahb_transaction extends uvm_sequence_item;
         soft busy_retract_in_wait == 1'b0;
     }
 
+    // Moving the address on an ERROR cancel is optional too; default off
+    constraint c_addr_change_on_error {
+        soft addr_change_on_error == 1'b0;
+    }
+
     // Default distribution: favour common burst types
     constraint c_burst_dist {
         burst dist {
@@ -208,8 +223,10 @@ class ahb_transaction extends uvm_sequence_item;
         // Defaults for non-randomized transactions
         abort_on_error       = 1'b1;
         busy_retract_in_wait = 1'b0;
+        addr_change_on_error = 1'b0;
         aborted              = 1'b0;
         done                 = 1'b0;
+        beats_done           = 0;
     endfunction : new
 
     //-------------------------------------------------------------------------

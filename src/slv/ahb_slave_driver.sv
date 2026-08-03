@@ -17,6 +17,10 @@ class ahb_slave_driver extends uvm_driver #(ahb_slave_response);
     // Virtual interface handle
     virtual ahb_if vif;
 
+    // Sequencer handle, wired by the agent. Used only in sequence mode, to
+    // publish the address phase being answered
+    ahb_slave_sequencer sqr;
+
     // Response mode + auto-mode wait-state range (from ahb_agent_config)
     bit          auto_gen_resp   = 1;
     int unsigned ready_delay_min = 0;
@@ -119,6 +123,12 @@ class ahb_slave_driver extends uvm_driver #(ahb_slave_response);
             rdata = mem.exists(addr) ? mem[addr] : '0;   // read loopback
         end else begin
             ahb_slave_response rsp;
+            // Publish the address phase before asking, so the sequence can
+            // read it out of the sequencer once start_item() returns
+            if (sqr != null) begin
+                sqr.req_addr  = addr;
+                sqr.req_write = write;
+            end
             seq_item_port.get_next_item(rsp);
             delay = rsp.ready_delay;
             resp  = rsp.resp;

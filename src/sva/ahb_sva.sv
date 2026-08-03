@@ -89,12 +89,14 @@ module ahb_sva #(
     //-------------------------------------------------------------------------
 
     // Address/control stable during wait, for any non-IDLE transfer.
-    // Exception: an INCR burst ended out of BUSY (-> NONSEQ/IDLE)
+    // Exceptions: an INCR burst ended out of BUSY (-> NONSEQ/IDLE), and a
+    // burst cancelled to IDLE on an ERROR response
     property p_addr_ctrl_stable_during_wait;
         @(posedge clk) disable iff (!rst_n)
         (!HREADY && HTRANS != IDLE) |=>
             ($past(HTRANS) == BUSY && $past(HBURST) == INCR &&
              (HTRANS == IDLE || HTRANS == NONSEQ)) ||
+            ($past(HRESP) == 1'b1 && HTRANS == IDLE) ||
             ($stable(HADDR) && $stable(HWRITE) && $stable(HSIZE) && $stable(HBURST));
     endproperty
     ADDR_CTRL_STABLE_DURING_WAIT: assert property (p_addr_ctrl_stable_during_wait)
@@ -203,14 +205,14 @@ module ahb_sva #(
         else `uvm_error("AHB_SVA", "HPROT changed mid-burst")
 
     // HMASTLOCK has address-phase timing: stable on every beat of a burst and
-    // across wait states. Same INCR-ended-out-of-BUSY exception as
-    // ADDR_CTRL_STABLE_DURING_WAIT
+    // across wait states. Same exceptions as ADDR_CTRL_STABLE_DURING_WAIT
     property p_mastlock_addr_timing;
         @(posedge clk) disable iff (!rst_n)
         ((HREADY && (HTRANS == SEQ || HTRANS == BUSY)) ||
          (!$past(HREADY) && $past(HTRANS) != IDLE &&
           !($past(HTRANS) == BUSY && $past(HBURST) == INCR &&
-            (HTRANS == IDLE || HTRANS == NONSEQ))))
+            (HTRANS == IDLE || HTRANS == NONSEQ)) &&
+          !($past(HRESP) == 1'b1 && HTRANS == IDLE)))
         |-> ($stable(HMASTLOCK));
     endproperty
     MASTLOCK_ADDR_TIMING: assert property (p_mastlock_addr_timing)
@@ -412,5 +414,10 @@ module ahb_sva #(
     // Baseline: a waited BUSY simply held until HREADY
     C_BUSY_HELD_IN_WAIT: cover property (@(posedge clk) disable iff (!rst_n)
         (!HREADY && HTRANS == BUSY) |=> (HTRANS == BUSY));
+
+    // The address moved while cancelling a burst on ERROR
+    C_ADDR_CHANGE_AFTER_ERROR: cover property (@(posedge clk) disable iff (!rst_n)
+        (!HREADY && HRESP == 1'b1 && HTRANS != IDLE)
+        |=> (HTRANS == IDLE && !$stable(HADDR)));
 
 endmodule : ahb_sva

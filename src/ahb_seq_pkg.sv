@@ -28,13 +28,15 @@ package ahb_seq_pkg;
     `include "mst_seq/ahb_incr_burst_seq.sv"
     `include "mst_seq/ahb_wrap_burst_seq.sv"
     `include "mst_seq/ahb_undefined_burst_seq.sv"
+    `include "mst_seq/ahb_error_seq.sv"
     `include "mst_seq/ahb_read_after_write_seq.sv"
 
     //-------------------------------------------------------------------------
     // Slave-sequence Library  (src/slv_seq/)
-    //   Empty: the slave agent runs in auto-response mode (auto_gen_resp = 1).
-    //   Add slave sequences here when driving ahb_slave_response items.
+    //   Used only when the slave agent runs in sequence mode
+    //   (ahb_agent_config.auto_gen_resp = 0)
     //-------------------------------------------------------------------------
+    `include "slv_seq/ahb_slave_error_seq.sv"
 
 endpackage : ahb_seq_pkg
 

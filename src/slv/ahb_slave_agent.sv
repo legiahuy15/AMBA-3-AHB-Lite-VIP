@@ -72,8 +72,10 @@ class ahb_slave_agent extends uvm_agent;
     //-------------------------------------------------------------------------
     function void connect_phase(uvm_phase phase);
         super.connect_phase(phase);
-        if (is_active == UVM_ACTIVE)
+        if (is_active == UVM_ACTIVE) begin
             drv.seq_item_port.connect(sqr.seq_item_export);
+            drv.sqr = sqr;      // lets the driver publish the observed address
+        end
     endfunction : connect_phase
 
 endclass : ahb_slave_agent
