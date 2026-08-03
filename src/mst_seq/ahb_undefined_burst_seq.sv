@@ -83,8 +83,10 @@ class ahb_undefined_burst_seq extends ahb_base_seq;
                     (pin_beats != 0) -> (num_beats == pin_beats);
                     (pin_beats == 0) -> (num_beats inside {[2:64]});
 
-                    // Burst fits inside its own 1KB slot
-                    addr >= slot;
+                    // Burst fits inside its own 1KB slot. The inside range is
+                    // what bounds addr: without it the solver can satisfy the
+                    // span constraint by letting addr + span wrap past 32 bits
+                    addr inside {[slot : slot + SLOT_SIZE - 1]};
                     addr + num_beats * (1 << size) <= slot + SLOT_SIZE;
 
                     // BUSY between beats, and trailing BUSY on demand

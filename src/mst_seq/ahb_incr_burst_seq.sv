@@ -64,7 +64,11 @@ class ahb_incr_burst_seq extends ahb_base_seq;
                     write == AHB_WRITE;
                     burst inside {AHB_BURST_INCR4, AHB_BURST_INCR8, AHB_BURST_INCR16};
                     size inside {AHB_SIZE_8B, AHB_SIZE_16B, AHB_SIZE_32B};
-                    addr >= slot;
+                    // The inside range is what bounds addr. Without it the
+                    // solver can satisfy the span constraint by letting
+                    // addr + span wrap past 32 bits, landing at the top of
+                    // the address map instead of in this slot
+                    addr inside {[slot : slot + SLOT_SIZE - 1]};
                     addr + num_beats * (1 << size) <= slot + SLOT_SIZE;
                     pin_top -> (addr + num_beats * (1 << size) == slot + SLOT_SIZE);
                 })
