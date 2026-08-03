@@ -320,10 +320,11 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
             // abort=0 -> continue. Both spec-legal
             if (tr.resp[i] == AHB_RESP_ERROR) begin
                 if (tr.abort_on_error) begin
-                    `uvm_warning(get_type_name(),
-                                 $sformatf("ERROR response on beat %0d/%0d%s",
-                                           i, num_beats,
-                                           (i < num_beats - 1) ? " - cancelling remaining burst" : ""))
+                    `uvm_info(get_type_name(),
+                              $sformatf("ERROR response on beat %0d/%0d%s",
+                                        i, num_beats,
+                                        (i < num_beats - 1) ? " - cancelling remaining burst" : ""),
+                              UVM_MEDIUM)
                     if (pipelined_own)
                         vif.master_cb.HTRANS <= AHB_TRANS_IDLE;
                     break;
