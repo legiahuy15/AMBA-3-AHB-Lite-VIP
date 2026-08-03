@@ -266,19 +266,23 @@ module ahb_sva #(
     FIRST_TRANSFER_AFTER_RESET: assert property (p_first_transfer_after_reset)
         else `uvm_error("AHB_SVA", "First transfer after reset must be IDLE or NONSEQ")
 
-    // HTRANS must be IDLE while reset is asserted
+    // HTRANS must be IDLE while reset is asserted.
+    // One clock of grace: HRESETn is asynchronous, but the driver is a clocked
+    // process and can only restore its defaults on the first clocking edge
+    // after the assertion. $fell excludes exactly that edge
     property p_idle_during_reset;
         @(posedge clk)
-        (!rst_n) |-> (HTRANS == IDLE);
+        (!rst_n && !$fell(rst_n)) |-> (HTRANS == IDLE);
     endproperty
     IDLE_DURING_RESET: assert property (p_idle_during_reset)
         else `uvm_error("AHB_SVA", "HTRANS is not IDLE during reset")
 
     // Slave drives HREADYOUT HIGH for the whole reset period
-    // (single-slave passthrough topology, so HREADY is the slave's HREADYOUT)
+    // (single-slave passthrough topology, so HREADY is the slave's HREADYOUT).
+    // Same one-clock grace as IDLE_DURING_RESET
     property p_readyout_high_in_reset;
         @(posedge clk)
-        (!rst_n) |-> (HREADY == 1'b1);
+        (!rst_n && !$fell(rst_n)) |-> (HREADY == 1'b1);
     endproperty
     READYOUT_HIGH_IN_RESET: assert property (p_readyout_high_in_reset)
         else `uvm_error("AHB_SVA", "HREADY (HREADYOUT) is not HIGH during reset")

@@ -27,6 +27,7 @@ package ahb_test_pkg;
     `include "test/ahb_wrap_burst_test.sv"
     `include "test/ahb_undefined_burst_test.sv"
     `include "test/ahb_error_response_test.sv"
+    `include "test/ahb_reset_test.sv"
     `include "test/ahb_read_after_write_test.sv"
 
 endpackage : ahb_test_pkg
