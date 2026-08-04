@@ -27,21 +27,18 @@ class ahb_wait_state_seq extends ahb_base_seq;
 
     bit [AHB_ADDR_WIDTH-1:0] base_addr = 32'h0000_D000;
 
-    // Ceiling applied to every window, so a long run can be shortened without
-    // changing the sweep itself
+    // Ceiling applied to every window, to shorten a long run
     int unsigned wait_max = 16;
 
-    // Slave driver whose wait-state window this sequence sweeps, set by the
-    // test. The driver copies ready_delay_min/max out of ahb_agent_config in
-    // its build_phase, so rewriting the config object at run time would have no
-    // effect - the fields have to be poked directly.
-    // Left null, the traffic simply runs at whatever window the test configured
+    // Slave driver whose wait-state window is swept, set by the test. The
+    // driver latches ready_delay_min/max in build_phase, so the fields must be
+    // poked directly. Null: traffic runs at the configured window
     ahb_slave_driver slv_drv;
 
     localparam int unsigned NUM_WINDOWS = 8;
 
-    // One slot per iteration, big enough for a 16-beat word burst. 64-byte
-    // aligned, so a WRAP burst's wrap region also falls inside the slot
+    // One slot per iteration, sized for a 16-beat word burst and 64-byte
+    // aligned so a WRAP region also falls inside it
     localparam int unsigned SLOT_SIZE = 64;
 
     //-------------------------------------------------------------------------
@@ -59,13 +56,13 @@ class ahb_wait_state_seq extends ahb_base_seq;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // The windows, swept in order. Each is a [lo:hi] range from which the slave
-    // driver draws the wait-state count of every beat independently:
-    //   0        - zero wait, the pipelined baseline
-    //   1, 2, 3  - the short fixed waits
-    //   1:7, 8:15- mixed, so beats of one burst are waited by differing amounts
-    //   16       - the recommended maximum of IHI0033A 5.1.2 (AHB_WAI_009)
-    //   0:16     - the whole range inside a single burst
+    // The windows, swept in order. Each is a [lo:hi] range the slave driver
+    // draws every beat's wait count from, independently:
+    //   0        - zero wait (pipelined baseline)
+    //   1, 2, 3  - short fixed waits
+    //   1:7, 8:15- mixed, beats of one burst waited by differing amounts
+    //   16       - recommended maximum, IHI0033A 5.1.2 (AHB_WAI_009)
+    //   0:16     - whole range inside a single burst
     //-------------------------------------------------------------------------
     function void get_window(input  int unsigned idx,
                              output int unsigned lo,
@@ -87,8 +84,8 @@ class ahb_wait_state_seq extends ahb_base_seq;
     endfunction : get_window
 
     //-------------------------------------------------------------------------
-    // Hand the window to the slave. Called only between transactions, with the
-    // bus idle, so no beat ever sees its wait count change underneath it
+    // Hand the window to the slave. Called between transactions only, so no
+    // beat sees its wait count change underneath it
     //-------------------------------------------------------------------------
     function void apply_window(int unsigned lo, int unsigned hi);
         if (slv_drv == null) return;
@@ -122,20 +119,17 @@ class ahb_wait_state_seq extends ahb_base_seq;
             apply_window(lo, hi);
             iter_per_window[i % NUM_WINDOWS]++;
 
-            // A deep window costs up to hi cycles on every beat, and the burst
-            // is paid for twice (write then read-back), so keep those short.
-            // The threshold sits above the 1:7 window on purpose: that one is
-            // where the long burst types still meet a non-trivial wait
+            // A deep window costs up to hi cycles per beat, twice over (write
+            // then read-back), so keep those bursts short. Threshold above the
+            // 1:7 window, where long burst types still meet a non-trivial wait
             deep = (hi > 7);
 
-            // Every other pair is queued together, so the read's NONSEQ address
-            // phase is presented while the write's last data phase is still
-            // waited. That is what holds HTRANS and the address/control group
-            // still across a wait (AHB_WAI_002, AHB_WAI_003), and with
-            // en_idle_to_nonseq_in_wait set on the master it is also what turns
-            // the presented IDLE into that NONSEQ mid-wait (AHB_WAI_004).
-            // The odd iterations are exactly the windows that insert at least
-            // one wait state, so the slot always has a wait to be upgraded in
+            // Every other pair is queued together, presenting the read's NONSEQ
+            // address phase while the write's last data phase is still waited:
+            // exercises HTRANS/address-control stability across a wait
+            // (AHB_WAI_002, AHB_WAI_003) and, with en_idle_to_nonseq_in_wait,
+            // the IDLE-to-NONSEQ upgrade mid-wait (AHB_WAI_004). Odd iterations
+            // are the windows that insert at least one wait state
             pipelined = ((i % 2) == 1);
             if (pipelined) num_pipelined++;
 
@@ -151,12 +145,12 @@ class ahb_wait_state_seq extends ahb_base_seq;
                                             AHB_BURST_WRAP4,  AHB_BURST_WRAP8});
                     (burst == AHB_BURST_INCR) -> (num_beats inside {[2:8]});
 
-                    // No BUSY here: a master stall would blur what the slave's
-                    // back-pressure did on its own
+                    // No BUSY - a master stall would blur the slave's
+                    // back-pressure
                     foreach (busy_cycles[k]) busy_cycles[k] == 0;
                     trailing_busy_cycles == 0;
 
-                    // Bounded by the inside range so the sum cannot wrap
+                    // inside range bounds addr so the span sum cannot wrap
                     addr inside {[slot : slot + SLOT_SIZE - 1]};
                     (burst inside {AHB_BURST_INCR,  AHB_BURST_INCR4,
                                    AHB_BURST_INCR8, AHB_BURST_INCR16}) ->

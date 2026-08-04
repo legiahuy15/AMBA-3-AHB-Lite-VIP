@@ -28,8 +28,8 @@ class ahb_undefined_burst_test extends ahb_base_test;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Build phase - wait states are what put BUSY on the bus while HREADY is
-    // low, which is the case BUSY_WAIT_TRANSITION checks
+    // Build phase - wait states put BUSY on the bus with HREADY low, the case
+    // BUSY_WAIT_TRANSITION checks
     //-------------------------------------------------------------------------
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);

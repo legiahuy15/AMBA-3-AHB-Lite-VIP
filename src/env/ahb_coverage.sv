@@ -53,8 +53,7 @@ class ahb_coverage extends uvm_subscriber #(ahb_transaction);
             bins byte_8   = {AHB_SIZE_8B};
             bins half_16  = {AHB_SIZE_16B};
             bins word_32  = {AHB_SIZE_32B};
-            // Larger HSIZE encodings are illegal on a 32-bit data bus and
-            // are excluded by the transaction's c_size_max constraint.
+            // Illegal on a 32-bit bus, excluded by c_size_max
             ignore_bins wide = {AHB_SIZE_64B, AHB_SIZE_128B, AHB_SIZE_256B,
                                 AHB_SIZE_512B, AHB_SIZE_1024B};
         }

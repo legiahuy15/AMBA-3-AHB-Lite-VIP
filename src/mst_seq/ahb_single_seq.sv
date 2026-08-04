@@ -23,10 +23,9 @@ class ahb_single_seq extends ahb_base_seq;
 
     bit [AHB_ADDR_WIDTH-1:0] base_addr = 32'h0000_2000;
 
-    // One word-sized slot per iteration. The transfer takes a random aligned
-    // offset inside it, so narrow transfers land on every byte lane. Slots are
-    // never reused, so no two transfers of different sizes alias in the
-    // scoreboard reference memory
+    // One word-sized slot per iteration, at a random aligned offset so narrow
+    // transfers hit every byte lane. Slots are never reused, so transfers of
+    // different sizes cannot alias in the scoreboard reference memory
     localparam int unsigned SLOT_SIZE = 4;
 
     //-------------------------------------------------------------------------

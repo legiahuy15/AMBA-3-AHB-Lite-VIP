@@ -144,8 +144,7 @@ class ahb_scoreboard extends uvm_scoreboard;
         int unsigned lane;
         bit [7:0] exp_b, got_b;
 
-        // No reset filter needed: the monitor drops bursts truncated by reset
-        // (see publish_if_complete / rst_watch), and aborted is driver-only
+        // No reset filter needed - the monitor drops bursts truncated by reset
         bytes = 1 << t.size;
 
         foreach (t.trans[i]) begin

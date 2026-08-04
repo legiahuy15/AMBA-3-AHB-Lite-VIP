@@ -25,9 +25,9 @@ class ahb_slave_error_seq extends uvm_sequence #(ahb_slave_response);
     int unsigned error_rate_pct  = 25;   // share of mapped beats given ERROR
     int unsigned ready_delay_max = 2;    // wait states inserted before a response
 
-    // Region with no slave behind it. Every active beat here is answered with
-    // ERROR, which is what a default slave does. IDLE and BUSY never reach
-    // this sequence - the driver answers them zero-wait OKAY on its own
+    // Region with no slave behind it: every active beat is answered ERROR,
+    // like a default slave. IDLE/BUSY never reach here - the driver answers
+    // them zero-wait OKAY
     bit [AHB_ADDR_WIDTH-1:0] unmapped_base = 32'h0000_9000;
     bit [AHB_ADDR_WIDTH-1:0] unmapped_size = 32'h0000_1000;
 
@@ -47,10 +47,9 @@ class ahb_slave_error_seq extends uvm_sequence #(ahb_slave_response);
 
     //-------------------------------------------------------------------------
     // Body - one response per active beat, for as long as the test runs.
-    //   Fields are assigned rather than randomized on purpose: the item's
-    //   c_ready_delay_default and c_resp_default are soft equalities to 0 and
-    //   OKAY, and an inline dist does not conflict with a satisfiable soft
-    //   constraint, so randomize() would quietly return zero-wait OKAY forever
+    // Fields are assigned, not randomized: an inline dist does not conflict
+    // with the item's satisfiable soft c_ready_delay_default / c_resp_default,
+    // so randomize() would return zero-wait OKAY forever
     //-------------------------------------------------------------------------
     virtual task body();
         ahb_slave_response       rsp;
@@ -65,8 +64,8 @@ class ahb_slave_error_seq extends uvm_sequence #(ahb_slave_response);
         forever begin
             rsp = ahb_slave_response::type_id::create("rsp");
 
-            // Blocks until the driver asks for an item, which is after it has
-            // published the address phase it is answering
+            // Blocks until the driver asks, i.e. after it published the
+            // address phase it is answering
             start_item(rsp);
 
             addr     = p_sequencer.req_addr;

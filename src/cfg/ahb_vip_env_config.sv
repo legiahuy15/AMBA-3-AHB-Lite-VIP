@@ -21,8 +21,8 @@ class ahb_vip_env_config extends uvm_object;
     //-------------------------------------------------------------------------
     // Virtual interfaces
     //   master_vif : master side of the DUT (required)
-    //   slave_vif  : slave side of the DUT (optional). When null, master_vif
-    //                serves both agents - passthrough mode, one shared bus
+    //   slave_vif  : slave side of the DUT (optional). Null -> master_vif
+    //                serves both agents (passthrough, one shared bus)
     //-------------------------------------------------------------------------
     virtual ahb_if master_vif;
     virtual ahb_if slave_vif;

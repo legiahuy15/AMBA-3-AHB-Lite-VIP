@@ -17,9 +17,8 @@ class ahb_slave_response extends uvm_sequence_item;
     // completes. 0 = zero-wait (HREADY high immediately)
     rand int unsigned             ready_delay;
 
-    // Transfer response for this beat. ERROR is driven as the spec-mandated
-    // two-cycle response by the driver (HREADY low + HRESP high, then
-    // HREADY high + HRESP high)
+    // Transfer response for this beat. The driver expands ERROR into the
+    // two-cycle response (HREADY=0,HRESP=1 then HREADY=1,HRESP=1)
     rand ahb_resp_e               resp;
 
     // Read data returned on HRDATA (used when the observed transfer is a read)
@@ -38,10 +37,10 @@ class ahb_slave_response extends uvm_sequence_item;
     // Constraints
     //-------------------------------------------------------------------------
 
-    // Default: zero-wait so a bare sequence still makes forward progress
+    // Default: zero-wait
     constraint c_ready_delay_default {
         soft ready_delay == 0;
-        ready_delay <= 16;              // keep directed randomization bounded
+        ready_delay <= 16;              // bound directed randomization
     }
 
     // Default: successful transfer

@@ -32,8 +32,8 @@ class ahb_error_response_test extends ahb_base_test;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Build phase - the slave takes its responses from the sequencer, so the
-    // memory model and ready_delay_min/max are out of the picture
+    // Build phase - responses come from the sequencer, so the memory model and
+    // ready_delay_min/max are unused
     //-------------------------------------------------------------------------
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
@@ -45,9 +45,8 @@ class ahb_error_response_test extends ahb_base_test;
     endfunction : build_phase
 
     //-------------------------------------------------------------------------
-    // Run phase - the slave sequence runs forever, so it is forked off and
-    // left to be killed when the phase ends. Only the master traffic holds
-    // the objection
+    // Run phase - the slave sequence runs forever: forked off and killed at
+    // phase end. Only the master traffic holds the objection
     //-------------------------------------------------------------------------
     task run_phase(uvm_phase phase);
         ahb_error_seq       mst_seq;
@@ -59,8 +58,7 @@ class ahb_error_response_test extends ahb_base_test;
         mst_seq          = ahb_error_seq::type_id::create("mst_seq");
         mst_seq.num_iter = num_iter;
 
-        // Both sides must agree on where the unmapped region is; the master
-        // sequence owns the value
+        // Unmapped region is owned by the master sequence; mirror it here
         slv_seq                = ahb_slave_error_seq::type_id::create("slv_seq");
         slv_seq.error_rate_pct = error_rate_pct;
         slv_seq.unmapped_base  = mst_seq.unmapped_base;

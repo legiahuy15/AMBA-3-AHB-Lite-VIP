@@ -29,8 +29,8 @@ class ahb_reset_test extends ahb_base_test;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Build phase - a couple of wait states keep transfers on the bus long
-    // enough for a reset to land inside a data phase
+    // Build phase - wait states keep transfers on the bus long enough for a
+    // reset to land inside a data phase
     //-------------------------------------------------------------------------
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
@@ -43,8 +43,8 @@ class ahb_reset_test extends ahb_base_test;
     endfunction : build_phase
 
     //-------------------------------------------------------------------------
-    // Run phase - the drain has to outlast a reset pulse (8 clocks) so the
-    // phase never ends with one still in flight
+    // Run phase - the drain must outlast a reset pulse (8 clocks), so the
+    // phase never ends with one in flight
     //-------------------------------------------------------------------------
     task run_phase(uvm_phase phase);
         ahb_reset_seq seq;

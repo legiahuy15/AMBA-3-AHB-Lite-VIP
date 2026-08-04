@@ -22,8 +22,8 @@ class ahb_sanity_seq extends ahb_base_seq;
 
     bit [AHB_ADDR_WIDTH-1:0] base_addr = 32'h0000_1000;   // 1KB-aligned
 
-    // Address slot per iteration: SINGLE word at slot+0, INCR4 burst at
-    // slot+32. Slots never overlap and every burst stays clear of a 1KB boundary
+    // Slot layout: SINGLE word at slot+0, INCR4 burst at slot+32. Slots never
+    // overlap and every burst stays clear of a 1KB boundary
     localparam int unsigned SLOT_SIZE  = 64;
     localparam int unsigned BURST_OFFS = 32;
 
@@ -69,10 +69,9 @@ class ahb_sanity_seq extends ahb_base_seq;
     endtask : body
 
     //-------------------------------------------------------------------------
-    // One write/read pair at the same address with the same burst type.
-    // Word-sized beats only, so HRDATA compares straight against HWDATA with
-    // no byte-lane masking. Beat k carries tgt_data + k, so a beat-ordering
-    // bug shows up as a shifted pattern
+    // One write/read pair at the same address and burst type. Word-sized beats
+    // only, so HRDATA compares directly against HWDATA. Beat k carries
+    // tgt_data + k, so a beat-ordering bug shows up as a shifted pattern
     //-------------------------------------------------------------------------
     protected task write_read_check(ahb_burst_e              burst_type,
                                     bit [AHB_ADDR_WIDTH-1:0] tgt_addr,
@@ -112,8 +111,8 @@ class ahb_sanity_seq extends ahb_base_seq;
         send_and_wait(rd, ok);
         if (!ok) return;
 
-        // CHECK - beat k of the read must return beat k of the write. Nothing
-        // here asks for an ERROR, so any non-OKAY response is a failure
+        // CHECK - beat k of the read must return beat k of the write. No ERROR
+        // is requested here, so any non-OKAY response is a failure
         foreach (rd.rdata[k]) begin
             num_checked++;
 

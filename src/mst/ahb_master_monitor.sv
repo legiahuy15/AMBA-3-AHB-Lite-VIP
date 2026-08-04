@@ -32,7 +32,7 @@ class ahb_master_monitor extends uvm_monitor;
     protected ahb_prot_e                cur_prot;
 
     // Per-beat accumulators. addr_q/trans_q/busy_q grow at address-phase
-    // accept; data_q/resp_q grow one HREADY edge later (data phase)
+    // accept; data_q/resp_q one HREADY edge later (data phase)
     protected bit [AHB_ADDR_WIDTH-1:0]  addr_q[$];
     protected ahb_trans_e               trans_q[$];
     protected int unsigned              busy_q[$];
@@ -44,8 +44,8 @@ class ahb_master_monitor extends uvm_monitor;
     protected bit                       pending_valid;
     protected int unsigned              pending_waits;   // HREADY=0 cycles seen
 
-    // BUSY cycles accepted since the last active beat (busy-before-beat,
-    // or trailing BUSY when the burst closes out of BUSY)
+    // BUSY cycles since the last active beat (busy-before-beat, or trailing
+    // BUSY when the burst closes out of BUSY)
     protected int unsigned              busy_cnt;
 
     //-------------------------------------------------------------------------
@@ -88,10 +88,10 @@ class ahb_master_monitor extends uvm_monitor;
 
     //-------------------------------------------------------------------------
     // Collect loop - one evaluation per HREADY=1 edge:
-    //   1) The in-flight data phase completes (sample HWDATA/HRDATA + HRESP)
-    //   2) The address phase presented this cycle is accepted
-    // NONSEQ/IDLE accept closes the previous burst (its last data completed
-    // in step 1 on the same edge - covers back-to-back)
+    //   1) complete the in-flight data phase (sample HWDATA/HRDATA + HRESP)
+    //   2) accept the address phase presented this cycle
+    // NONSEQ/IDLE accept closes the previous burst, whose last data phase
+    // completed in step 1 on the same edge (covers back-to-back)
     //-------------------------------------------------------------------------
     task collect_loop();
         forever begin
@@ -116,8 +116,7 @@ class ahb_master_monitor extends uvm_monitor;
                                     data_q[data_q.size()-1],
                                     resp_q[resp_q.size()-1].name()), UVM_HIGH)
 
-                // ERROR aborts the burst on the master side (remaining beats
-                // cancelled to IDLE) - closing happens below via IDLE/NONSEQ
+                // An ERROR-cancelled burst closes below, via IDLE/NONSEQ
             end
 
             // Decode the accepted address phase
@@ -170,16 +169,15 @@ class ahb_master_monitor extends uvm_monitor;
     endfunction : accept_beat
 
     //-------------------------------------------------------------------------
-    // Close the open burst and publish it. Called at NONSEQ/IDLE accept,
-    // after step 1 completed the last data phase, so data_q is full.
-    // Leftover busy_cnt is the trailing BUSY run (INCR ended out of BUSY)
+    // Close the open burst and publish it. Called at NONSEQ/IDLE accept, after
+    // step 1 filled data_q. Leftover busy_cnt is the trailing BUSY run
     //-------------------------------------------------------------------------
     function void publish_if_complete();
         ahb_transaction tr;
         int n;
 
         if (!burst_open) begin
-            busy_cnt = 0;               // stray BUSY count without a burst
+            busy_cnt = 0;               // stray BUSY, no open burst
             return;
         end
         n = addr_q.size();

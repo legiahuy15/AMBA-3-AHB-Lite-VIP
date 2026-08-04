@@ -28,8 +28,8 @@ class ahb_reset_seq extends ahb_base_seq;
 
     localparam int unsigned SLOT_SIZE = 64;
 
-    // A 16-beat burst lasts at least 160 ns, so a reset fired inside this
-    // window reliably lands mid-burst rather than between transfers
+    // A 16-beat burst lasts at least 160 ns, so a reset in this window lands
+    // mid-burst rather than between transfers
     localparam int unsigned RESET_DELAY_MIN_NS = 50;
     localparam int unsigned RESET_DELAY_MAX_NS = 150;
 
@@ -65,7 +65,7 @@ class ahb_reset_seq extends ahb_base_seq;
 
         //---------------------------------------------------------------------
         // Reset phase - long bursts with HRESETn pulled part way through.
-        // Aborts are the point here, so they are logged rather than warned
+        // Aborts are expected, so they are logged rather than warned
         //---------------------------------------------------------------------
         expect_reset_abort = 1'b1;
 
@@ -75,9 +75,8 @@ class ahb_reset_seq extends ahb_base_seq;
             if ((i % reset_every) == (reset_every - 1)) begin
                 delay_ns = $urandom_range(RESET_DELAY_MAX_NS, RESET_DELAY_MIN_NS);
                 num_resets++;
-                // Fired from a forked process so the burst is already on the
-                // bus when HRESETn drops. The delay is not clock aligned, which
-                // is what makes the assertion asynchronous
+                // Forked, so the burst is already on the bus when HRESETn
+                // drops. The delay is not clock aligned: asynchronous assert
                 fork
                     begin
                         #(delay_ns * 1ns);
@@ -104,14 +103,14 @@ class ahb_reset_seq extends ahb_base_seq;
             if (!ok) num_aborted++;
         end
 
-        // Let any reset still in flight finish before the recovery phase
+        // Let any in-flight reset finish before the recovery phase
         wait fork;
         #500ns;
 
         //---------------------------------------------------------------------
-        // Recovery phase - no more resets, everything must complete and the
-        // scoreboard reference memory must agree with the read-back.
-        // Back to warning: an abort here is a genuine recovery failure
+        // Recovery phase - no more resets: everything must complete and the
+        // read-back must match the scoreboard reference memory. An abort here
+        // is a recovery failure, so warnings are back on
         //---------------------------------------------------------------------
         expect_reset_abort = 1'b0;
 
@@ -152,8 +151,7 @@ class ahb_reset_seq extends ahb_base_seq;
                   $sformatf("Reset sequence done: sent=%0d aborted=%0d resets=%0d",
                             num_sent, num_aborted, num_resets), UVM_LOW)
 
-        // A reset that never caught a transfer would leave the recovery path
-        // untested, so the run proves nothing
+        // A reset that never caught a transfer leaves the recovery path untested
         if (num_resets > 0 && num_aborted == 0)
             `uvm_error(get_type_name(),
                        "No transaction was aborted - reset never landed on an active transfer")

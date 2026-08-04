@@ -28,8 +28,8 @@ class ahb_incr_burst_test extends ahb_base_test;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Build phase - memory-model slave with a few wait states, so beats inside
-    // a burst see back-pressure as well as zero-wait completions
+    // Build phase - memory-model slave with a few wait states, so beats see
+    // both back-pressure and zero-wait completions
     //-------------------------------------------------------------------------
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);

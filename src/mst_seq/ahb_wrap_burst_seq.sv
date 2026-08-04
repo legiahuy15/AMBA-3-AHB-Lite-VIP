@@ -24,10 +24,10 @@ class ahb_wrap_burst_seq extends ahb_base_seq;
 
     bit [AHB_ADDR_WIDTH-1:0] base_addr = 32'h0000_4000;
 
-    // Slot holds the largest wrap region this sequence issues (16 beats x 4
-    // bytes). A wrap region is a power of two and naturally aligned, so any
-    // region containing an address in this slot lies wholly inside it - the
-    // start address can be randomized freely without aliasing the next slot
+    // Slot holds the largest wrap region issued here (16 beats x 4 bytes). A
+    // wrap region is a power of two and naturally aligned, so any region
+    // containing an address in this slot lies wholly inside it - the start
+    // address randomizes freely without aliasing the next slot
     localparam int unsigned SLOT_SIZE = 64;
 
     //-------------------------------------------------------------------------
@@ -52,7 +52,7 @@ class ahb_wrap_burst_seq extends ahb_base_seq;
             slot = base_addr + i * SLOT_SIZE;
 
             wr = ahb_transaction::type_id::create("wr");
-            // A free offset inside the slot gives start addresses both at the
+            // Free offset inside the slot: start addresses land both on the
             // wrap boundary and part way through the region
             if (!wr.randomize() with {
                     write == AHB_WRITE;

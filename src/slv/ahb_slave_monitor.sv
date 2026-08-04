@@ -27,7 +27,7 @@ class ahb_slave_monitor extends uvm_monitor;
     protected ahb_prot_e                cur_prot;
 
     // Per-beat accumulators. addr/trans/busy grow at address-phase accept;
-    // data/resp/ready grow one HREADY edge later (data phase)
+    // data/resp/ready one HREADY edge later (data phase)
     protected bit [AHB_ADDR_WIDTH-1:0]  addr_q[$];
     protected ahb_trans_e               trans_q[$];
     protected int unsigned              busy_q[$];

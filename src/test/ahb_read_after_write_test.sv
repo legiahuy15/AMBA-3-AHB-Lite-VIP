@@ -27,8 +27,7 @@ class ahb_read_after_write_test extends ahb_base_test;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Build phase - base test builds env_cfg; a few slave wait states exercise
-    // the pipelined driver
+    // Build phase - a few slave wait states exercise the pipelined driver
     //-------------------------------------------------------------------------
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);

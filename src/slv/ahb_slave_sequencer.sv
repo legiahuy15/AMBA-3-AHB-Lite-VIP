@@ -12,9 +12,8 @@ class ahb_slave_sequencer extends uvm_sequencer #(ahb_slave_response);
 
     //-------------------------------------------------------------------------
     // Address phase the driver is about to answer, published just before it
-    // asks for an item. start_item() returns only once the driver has asked,
-    // so a response sequence can read these between start_item and finish_item
-    // and decide the response from the address
+    // asks for an item. Readable by a response sequence between start_item()
+    // and finish_item()
     //-------------------------------------------------------------------------
     bit [AHB_ADDR_WIDTH-1:0] req_addr;
     ahb_dir_e                req_write;

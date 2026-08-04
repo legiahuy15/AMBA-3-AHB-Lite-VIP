@@ -23,16 +23,14 @@ class ahb_error_seq extends ahb_base_seq;
     //-------------------------------------------------------------------------
     int unsigned num_iter = 16;
 
-    // Disjoint on purpose. In sequence mode the slave answers reads from the
-    // response item, not from its memory model, so a read of a written address
-    // would disagree with the scoreboard reference memory. Reads target a
-    // region that is never written, where the reference memory skips the beat
+    // Disjoint: in sequence mode the slave answers reads from the response
+    // item, not its memory model, so reads target a never-written region where
+    // the scoreboard reference memory skips the beat
     bit [AHB_ADDR_WIDTH-1:0] wr_base = 32'h0000_7000;
     bit [AHB_ADDR_WIDTH-1:0] rd_base = 32'h0000_8000;
 
-    // Region the slave sequence answers as a default slave would. Every beat
-    // here comes back ERROR, so the whole burst is skipped by the reference
-    // memory whichever direction it runs in
+    // Region the slave sequence answers as a default slave would: every beat
+    // returns ERROR, so the reference memory skips the whole burst
     bit [AHB_ADDR_WIDTH-1:0] unmapped_base = 32'h0000_9000;
 
     localparam int unsigned SLOT_SIZE = 64;   // 16 beats x 4 bytes
@@ -74,16 +72,16 @@ class ahb_error_seq extends ahb_base_seq;
             dir    = ((i % 2) == 0) ? AHB_WRITE : AHB_READ;
             cancel = (((i / 2) % 2) == 0);      // alternate on a longer period
 
-            // Period 3 keeps the unmapped bursts out of step with the
-            // direction and policy patterns, so both combinations reach it
-            // Only a cancelling burst can move its address, and alternating
-            // across those keeps the address-held case covered as well
+            // Only a cancelling burst may move its address; alternate so the
+            // address-held case is covered too
             move_addr = 1'b0;
             if (cancel) begin
                 move_addr   = addr_toggle;
                 addr_toggle = !addr_toggle;
             end
 
+            // Period 3 keeps unmapped bursts out of step with the direction
+            // and policy patterns, so both combinations reach the region
             unmapped = ((i % 3) == 2);
             if (unmapped) begin
                 slot = unmapped_base + (i / 3) * SLOT_SIZE;
@@ -96,8 +94,7 @@ class ahb_error_seq extends ahb_base_seq;
             if (!tr.randomize() with {
                     write == dir;
                     size inside {AHB_SIZE_8B, AHB_SIZE_16B, AHB_SIZE_32B};
-                    // INCR is capped so an undefined-length burst still fits
-                    // the slot; the other types are already bounded
+                    // Cap INCR so an undefined-length burst fits the slot
                     (burst == AHB_BURST_INCR) -> (num_beats inside {[1:16]});
                     addr inside {[slot : slot + SLOT_SIZE - 1]};
                     addr + num_beats * (1 << size) <= slot + SLOT_SIZE;
@@ -112,8 +109,8 @@ class ahb_error_seq extends ahb_base_seq;
 
             num_bursts++;
 
-            // resp[] is only written for beats the driver actually completed,
-            // so the first ERROR marks where the burst stopped when cancelling
+            // resp[] holds only completed beats, so the first ERROR marks
+            // where a cancelling burst stopped
             err_beat = -1;
             foreach (tr.resp[k]) begin
                 if (tr.resp[k] == AHB_RESP_ERROR) begin
@@ -134,8 +131,8 @@ class ahb_error_seq extends ahb_base_seq;
                           UVM_MEDIUM)
             end
 
-            // Cancel must stop on the ERROR beat; continue, and any burst that
-            // never saw an ERROR, must drive every beat
+            // Cancel stops on the ERROR beat; continue (and any error-free
+            // burst) drives every beat
             exp_beats = (err_beat >= 0 && tr.abort_on_error)
                         ? (err_beat + 1) : tr.get_num_beats();
 

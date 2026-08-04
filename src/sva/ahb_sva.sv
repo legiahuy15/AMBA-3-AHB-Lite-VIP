@@ -89,8 +89,8 @@ module ahb_sva #(
     //-------------------------------------------------------------------------
 
     // Address/control stable during wait, for any non-IDLE transfer.
-    // Exceptions: an INCR burst ended out of BUSY (-> NONSEQ/IDLE), and a
-    // burst cancelled to IDLE on an ERROR response
+    // Exceptions: INCR ended out of BUSY (-> NONSEQ/IDLE), burst cancelled to
+    // IDLE on ERROR
     property p_addr_ctrl_stable_during_wait;
         @(posedge clk) disable iff (!rst_n)
         (!HREADY && HTRANS != IDLE) |=>
@@ -103,7 +103,7 @@ module ahb_sva #(
         else `uvm_error("AHB_SVA", "HADDR/HWRITE/HSIZE/HBURST changed during wait state (HREADY=0)")
 
     // HTRANS stable during wait for active transfers (NONSEQ/SEQ).
-    // Exception: ERROR-cancel to IDLE (early burst termination)
+    // Exception: ERROR-cancel to IDLE
     property p_htrans_stable_during_wait;
         @(posedge clk) disable iff (!rst_n)
         (!HREADY && is_active_transfer) |=>
@@ -115,7 +115,7 @@ module ahb_sva #(
 
     // BUSY transition during wait:
     //   fixed-length -> BUSY or SEQ; INCR -> also NONSEQ or IDLE (burst end)
-    //   ERROR response -> IDLE also allowed (early burst termination)
+    //   ERROR -> IDLE also allowed
     property p_busy_wait_transition;
         @(posedge clk) disable iff (!rst_n)
         (!HREADY && HTRANS == BUSY) |=>
@@ -228,8 +228,7 @@ module ahb_sva #(
         else `uvm_error("AHB_SVA", "BUSY transfer used with SINGLE burst (not allowed)")
 
     // Fixed-length burst: accepted BUSY -> BUSY/SEQ only (must end with SEQ).
-    // Waited BUSY is covered by BUSY_WAIT_TRANSITION; HRESP==OKAY excludes
-    // the ERROR-cancel case
+    // Waited BUSY: see BUSY_WAIT_TRANSITION. HRESP==OKAY excludes ERROR-cancel
     property p_busy_fixed_len_no_terminate;
         @(posedge clk) disable iff (!rst_n)
         (HREADY && HTRANS == BUSY && HRESP == 1'b0 &&
@@ -266,10 +265,9 @@ module ahb_sva #(
     FIRST_TRANSFER_AFTER_RESET: assert property (p_first_transfer_after_reset)
         else `uvm_error("AHB_SVA", "First transfer after reset must be IDLE or NONSEQ")
 
-    // HTRANS must be IDLE while reset is asserted.
-    // One clock of grace: HRESETn is asynchronous, but the driver is a clocked
-    // process and can only restore its defaults on the first clocking edge
-    // after the assertion. $fell excludes exactly that edge
+    // HTRANS must be IDLE while reset is asserted. One clock of grace: HRESETn
+    // is asynchronous but the driver is clocked, so it restores defaults on the
+    // first clocking edge after assertion. $fell excludes that edge
     property p_idle_during_reset;
         @(posedge clk)
         (!rst_n && !$fell(rst_n)) |-> (HTRANS == IDLE);
@@ -277,9 +275,8 @@ module ahb_sva #(
     IDLE_DURING_RESET: assert property (p_idle_during_reset)
         else `uvm_error("AHB_SVA", "HTRANS is not IDLE during reset")
 
-    // Slave drives HREADYOUT HIGH for the whole reset period
-    // (single-slave passthrough topology, so HREADY is the slave's HREADYOUT).
-    // Same one-clock grace as IDLE_DURING_RESET
+    // Slave drives HREADYOUT HIGH for the whole reset period (passthrough
+    // topology: HREADY is the slave's HREADYOUT). Same grace as above
     property p_readyout_high_in_reset;
         @(posedge clk)
         (!rst_n && !$fell(rst_n)) |-> (HREADY == 1'b1);
@@ -368,7 +365,7 @@ module ahb_sva #(
         else `uvm_error("AHB_SVA", "ERROR response first cycle must have HREADY=LOW")
 
     // Wait states before an ERROR carry HRESP=OKAY: the cycle ending an ERROR
-    // must be preceded by the ERROR/HREADY=0 cycle, so ERROR is never one cycle
+    // must follow the ERROR/HREADY=0 cycle, so ERROR is never one cycle
     property p_okay_before_error;
         @(posedge clk) disable iff (!rst_n)
         (HRESP == 1'b1 && HREADY) |-> ($past(HRESP) == 1'b1 && !$past(HREADY));
@@ -395,9 +392,8 @@ module ahb_sva #(
 
     //-------------------------------------------------------------------------
     // COVERAGE - transfer-type changes during a wait state
-    //   The assertions above permit these; the cover directives record whether
-    //   stimulus ever produced them. A passing assertion only proves nothing
-    //   illegal happened, not that the legal case was reached
+    //   The assertions above permit these; these covers record whether the
+    //   stimulus ever produced them
     //-------------------------------------------------------------------------
 
     // IDLE may become NONSEQ while HREADY is low
@@ -408,8 +404,8 @@ module ahb_sva #(
     C_BUSY_TO_SEQ_IN_WAIT: cover property (@(posedge clk) disable iff (!rst_n)
         (!HREADY && HTRANS == BUSY) |=> (HTRANS == SEQ));
 
-    // Same, restricted to a fixed-length burst. Kept separate because the
-    // undefined-length case alone would light up the unqualified cover
+    // Same, fixed-length burst only. Separate because the undefined-length
+    // case alone would hit the unqualified cover
     C_BUSY_TO_SEQ_IN_WAIT_FIXED: cover property (@(posedge clk) disable iff (!rst_n)
         (!HREADY && HTRANS == BUSY && HBURST != INCR && HBURST != SINGLE)
         |=> (HTRANS == SEQ));

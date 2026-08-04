@@ -56,12 +56,12 @@ class ahb_busy_seq extends ahb_base_seq;
         for (int unsigned i = 0; i < num_iter; i++) begin
             slot = base_addr + i * SLOT_SIZE;
 
-            // Three of every four bursts are fixed length, which is where
-            // BUSY_FIXED_LEN_NO_TERMINATE and AHB_WAI_005 apply
+            // 3 of every 4 bursts fixed length - the case
+            // BUSY_FIXED_LEN_NO_TERMINATE and AHB_WAI_005 apply to
             fixed_len = ((i % 4) != 3);
 
-            // Alternate on a longer period so both the withdrawn BUSY and the
-            // plain held BUSY occur for each burst kind
+            // Longer period, so both withdrawn and held BUSY occur for each
+            // burst kind
             retract = (((i / 2) % 2) == 1);
 
             if (fixed_len) num_fixed++; else num_undef++;
@@ -72,25 +72,25 @@ class ahb_busy_seq extends ahb_base_seq;
                     write == AHB_WRITE;
                     size inside {AHB_SIZE_8B, AHB_SIZE_16B, AHB_SIZE_32B};
 
-                    // SINGLE has no gap between beats, so it can never carry BUSY
+                    // SINGLE has no inter-beat gap, so it cannot carry BUSY
                     fixed_len  -> (burst inside {AHB_BURST_INCR4,  AHB_BURST_INCR8,
                                                  AHB_BURST_INCR16, AHB_BURST_WRAP4,
                                                  AHB_BURST_WRAP8,  AHB_BURST_WRAP16});
                     !fixed_len -> (burst == AHB_BURST_INCR && num_beats inside {[2:16]});
 
-                    // A BUSY run before every beat except the first
+                    // BUSY run before every beat except the first
                     foreach (busy_cycles[k]) {
                         if (k > 0) busy_cycles[k] inside {[1:3]};
                         else       busy_cycles[k] == 0;
                     }
 
-                    // Ending out of BUSY belongs to the undefined-burst test;
-                    // here every burst must finish on a SEQ beat
+                    // Every burst finishes on a SEQ beat; ending out of BUSY
+                    // belongs to the undefined-burst test
                     trailing_busy_cycles == 0;
 
                     busy_retract_in_wait == retract;
 
-                    // Bounded by the inside range so the sum cannot wrap
+                    // inside range bounds addr so the span sum cannot wrap
                     addr inside {[slot : slot + SLOT_SIZE - 1]};
                     (burst inside {AHB_BURST_INCR,  AHB_BURST_INCR4,
                                    AHB_BURST_INCR8, AHB_BURST_INCR16}) ->

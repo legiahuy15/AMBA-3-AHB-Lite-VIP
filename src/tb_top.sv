@@ -49,8 +49,8 @@ module tb_top;
     end
 
     //-------------------------------------------------------------------------
-    // Mid-simulation reset - an extra pulse requested by a test through the
-    // global UVM event "ahb_reset_req", independent of the power-on reset
+    // Mid-simulation reset - extra pulse requested by a test through the global
+    // UVM event "ahb_reset_req", independent of the power-on reset
     //-------------------------------------------------------------------------
     initial begin
         automatic uvm_event reset_ev = uvm_event_pool::get_global("ahb_reset_req");
@@ -76,9 +76,9 @@ module tb_top;
     );
 
     //-------------------------------------------------------------------------
-    // Time-0 signal initialisation - the drivers only take the bus on their
-    // first clocking edge, so without this the signals are X at the first
-    // sampling edge. Values match the drivers' reset_signals()
+    // Time-0 signal initialisation - the drivers take the bus on their first
+    // clocking edge, so the signals would otherwise be X at the first sampling
+    // edge. Values match the drivers' reset_signals()
     //-------------------------------------------------------------------------
     initial begin
         intf.HADDR     = '0;

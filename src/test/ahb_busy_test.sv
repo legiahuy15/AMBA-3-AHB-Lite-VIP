@@ -27,9 +27,8 @@ class ahb_busy_test extends ahb_base_test;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Build phase - wait states are required, not cosmetic: AHB_WAI_005 is
-    // about a BUSY that changes while HREADY is low, which cannot happen if
-    // the slave always answers in one cycle
+    // Build phase - wait states are required: AHB_WAI_005 covers a BUSY that
+    // changes while HREADY is low, impossible with a zero-wait slave
     //-------------------------------------------------------------------------
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);

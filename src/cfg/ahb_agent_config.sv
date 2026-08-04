@@ -27,12 +27,10 @@ class ahb_agent_config extends uvm_object;
     // into the last data phase (no IDLE bubble)
     bit en_back_to_back = 1;
 
-    // Master: defer that overlap into the wait state. The pipelined slot opens
-    // as IDLE at the last data phase and is changed to NONSEQ while HREADY is
-    // low, which IHI0033A 3.6.1 allows as long as HTRANS is then held. With a
-    // zero-wait data phase there is nothing to defer into and the burst simply
-    // ends with IDLE, so this trades some overlap for the waited transition.
-    // Has no effect unless en_back_to_back is set
+    // Master: defer that overlap into the wait state. The slot opens as IDLE
+    // and becomes NONSEQ while HREADY is low (IHI0033A 3.6.1, HTRANS then
+    // held). A zero-wait data phase has nothing to defer into and ends with
+    // IDLE. Requires en_back_to_back
     bit en_idle_to_nonseq_in_wait = 0;
 
     // Master backpressure: max accepted-but-not-completed txns. 0 = unlimited

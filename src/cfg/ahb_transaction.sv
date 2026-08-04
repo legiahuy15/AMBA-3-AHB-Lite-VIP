@@ -40,25 +40,23 @@ class ahb_transaction extends uvm_sequence_item;
     // ERROR policy: 1 = cancel remaining beats, 0 = continue (both spec-legal)
     rand bit                      abort_on_error;
 
-    // Withdraw a presented BUSY while the previous data phase is still waited,
-    // replacing it with the transfer that ends the BUSY run (IHI0033A 3.6.1)
+    // Withdraw a presented BUSY during a wait state, replacing it with the
+    // transfer that ends the BUSY run (IHI0033A 3.6.1)
     rand bit                      busy_retract_in_wait;
 
-    // Move the address while cancelling a burst on ERROR. One of the few cases
-    // where address and control may change with HREADY low (IHI0033A 3.6.2)
+    // Move the address while cancelling a burst on ERROR - address/control may
+    // change with HREADY low (IHI0033A 3.6.2)
     rand bit                      addr_change_on_error;
 
-    // Completion flag, set by the driver when the transfer finishes on the bus.
-    // rdata[]/resp[] are valid only once it is set. A level flag rather than an
-    // event, so a completion before the waiter arms cannot be missed
+    // Set by the driver at end of transfer; rdata[]/resp[] valid only then.
+    // Level flag, not an event, so an early completion cannot be missed
     bit                           done;
 
     // Set with done when a reset flushed the txn; rdata[]/resp[] are invalid
     bit                           aborted;
 
-    // Beats the driver actually completed on the bus. Below num_beats when an
-    // ERROR cancelled the rest of the burst, so a sequence can tell a
-    // cancelled burst from one that ran to the end
+    // Beats actually completed on the bus. Below num_beats when an ERROR
+    // cancelled the rest of the burst
     int unsigned                  beats_done;
 
     //-------------------------------------------------------------------------
@@ -80,8 +78,8 @@ class ahb_transaction extends uvm_sequence_item;
         `uvm_field_int(                    abort_on_error, UVM_ALL_ON)
         `uvm_field_int(                    busy_retract_in_wait, UVM_ALL_ON)
         `uvm_field_int(                    addr_change_on_error, UVM_ALL_ON)
-        // Note: trans[] & resp[] has no built-in macro for enum dynamic
-        //       arrays, so do_copy/do_compare/do_print handle it manually
+        // trans[]/resp[]: no macro for enum dynamic arrays - handled by
+        // do_copy/do_compare/do_print
     `uvm_object_utils_end
 
     //-------------------------------------------------------------------------
@@ -181,17 +179,17 @@ class ahb_transaction extends uvm_sequence_item;
         (burst != AHB_BURST_INCR) -> (trailing_busy_cycles == 0);
     }
 
-    // Cancel-on-ERROR is optional per spec; default cancel
+    // Cancel-on-ERROR optional per spec; default cancel
     constraint c_abort_on_error {
         soft abort_on_error == 1'b1;
     }
 
-    // Retracting a waited BUSY is optional master behaviour; default off
+    // BUSY retraction optional; default off
     constraint c_busy_retract {
         soft busy_retract_in_wait == 1'b0;
     }
 
-    // Moving the address on an ERROR cancel is optional too; default off
+    // Address move on ERROR cancel optional; default off
     constraint c_addr_change_on_error {
         soft addr_change_on_error == 1'b0;
     }
@@ -238,8 +236,8 @@ class ahb_transaction extends uvm_sequence_item;
             AHB_BURST_WRAP4,  AHB_BURST_INCR4:  return 4;
             AHB_BURST_WRAP8,  AHB_BURST_INCR8:  return 8;
             AHB_BURST_WRAP16, AHB_BURST_INCR16: return 16;
-            // INCR length is the canonical num_beats; fall back to the
-            // beat-array size for directed items that skip num_beats
+            // INCR: canonical num_beats, else beat-array size for directed
+            // items that skip it
             AHB_BURST_INCR:                     return (num_beats != 0) ? num_beats : wdata.size();
             default:                            return 1;
         endcase

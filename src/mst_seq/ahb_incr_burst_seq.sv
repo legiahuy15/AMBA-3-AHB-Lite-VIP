@@ -21,14 +21,12 @@ class ahb_incr_burst_seq extends ahb_base_seq;
     //-------------------------------------------------------------------------
     int unsigned num_iter = 16;
 
-    // 1KB aligned, so a 64-byte slot boundary is also a 1KB page boundary
-    // every 16 slots
+    // 1KB aligned: every 16th slot boundary is also a 1KB page boundary
     bit [AHB_ADDR_WIDTH-1:0] base_addr = 32'h0000_3000;
 
-    // Slot holds the largest burst this sequence issues (16 beats x 4 bytes).
-    // The burst is placed at a random aligned offset but always fits inside,
-    // so slots never alias in the scoreboard reference memory and no burst can
-    // cross a 1KB boundary
+    // Slot holds the largest burst issued here (16 beats x 4 bytes), placed at
+    // a random aligned offset but always fitting inside. Slots never alias in
+    // the scoreboard reference memory and no burst crosses a 1KB boundary
     localparam int unsigned SLOT_SIZE = 64;
 
     //-------------------------------------------------------------------------
@@ -53,10 +51,9 @@ class ahb_incr_burst_seq extends ahb_base_seq;
         for (int unsigned i = 0; i < num_iter; i++) begin
             slot = base_addr + i * SLOT_SIZE;
 
-            // Pin every fourth burst against the top of its slot. Every slot
-            // that closes a 1KB page has (i % 4 == 3), so each page ends with
-            // a burst finishing on the last byte before the boundary - the
-            // worst case INCR_1KB_BOUNDARY has to accept
+            // Pin every fourth burst against the top of its slot. Slots that
+            // close a 1KB page have (i % 4 == 3), so each page ends on the last
+            // byte before the boundary - the INCR_1KB_BOUNDARY worst case
             pin_top = ((i % 4) == 3);
 
             wr = ahb_transaction::type_id::create("wr");
@@ -64,10 +61,9 @@ class ahb_incr_burst_seq extends ahb_base_seq;
                     write == AHB_WRITE;
                     burst inside {AHB_BURST_INCR4, AHB_BURST_INCR8, AHB_BURST_INCR16};
                     size inside {AHB_SIZE_8B, AHB_SIZE_16B, AHB_SIZE_32B};
-                    // The inside range is what bounds addr. Without it the
-                    // solver can satisfy the span constraint by letting
-                    // addr + span wrap past 32 bits, landing at the top of
-                    // the address map instead of in this slot
+                    // The inside range bounds addr; without it the solver can
+                    // satisfy the span constraint by letting addr + span wrap
+                    // past 32 bits, landing outside this slot
                     addr inside {[slot : slot + SLOT_SIZE - 1]};
                     addr + num_beats * (1 << size) <= slot + SLOT_SIZE;
                     pin_top -> (addr + num_beats * (1 << size) == slot + SLOT_SIZE);

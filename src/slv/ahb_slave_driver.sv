@@ -17,8 +17,8 @@ class ahb_slave_driver extends uvm_driver #(ahb_slave_response);
     // Virtual interface handle
     virtual ahb_if vif;
 
-    // Sequencer handle, wired by the agent. Used only in sequence mode, to
-    // publish the address phase being answered
+    // Sequencer handle, wired by the agent. Sequence mode only - publishes the
+    // address phase being answered
     ahb_slave_sequencer sqr;
 
     // Response mode + auto-mode wait-state range (from ahb_agent_config)
@@ -74,9 +74,9 @@ class ahb_slave_driver extends uvm_driver #(ahb_slave_response);
     endtask : run_phase
 
     //-------------------------------------------------------------------------
-    // Serve loop - one iteration per address phase on the bus. IDLE/BUSY get a
-    // zero-wait OKAY; NONSEQ/SEQ get a full data-phase response. Each branch
-    // consumes exactly the cycles of the transfer it handled
+    // Serve loop - one iteration per address phase. IDLE/BUSY get a zero-wait
+    // OKAY; NONSEQ/SEQ get a full data-phase response. Each branch consumes
+    // exactly the cycles of the transfer it handled
     //-------------------------------------------------------------------------
     task serve_bus();
         @(vif.slave_cb);                     // align to the clocking block
@@ -109,7 +109,7 @@ class ahb_slave_driver extends uvm_driver #(ahb_slave_response);
 
     //-------------------------------------------------------------------------
     // Resolve the response for one beat. Auto mode builds it locally; sequence
-    // mode pulls an ahb_slave_response and calls item_done in the same time
+    // mode pulls an ahb_slave_response and calls item_done() in the same time
     // step, so no item is held across a clock edge (reset-safe)
     //-------------------------------------------------------------------------
     task get_response(input  bit [AHB_ADDR_WIDTH-1:0] addr,
@@ -123,8 +123,8 @@ class ahb_slave_driver extends uvm_driver #(ahb_slave_response);
             rdata = mem.exists(addr) ? mem[addr] : '0;   // read loopback
         end else begin
             ahb_slave_response rsp;
-            // Publish the address phase before asking, so the sequence can
-            // read it out of the sequencer once start_item() returns
+            // Publish the address phase before asking - the sequence reads it
+            // from the sequencer once start_item() returns
             if (sqr != null) begin
                 sqr.req_addr  = addr;
                 sqr.req_write = write;

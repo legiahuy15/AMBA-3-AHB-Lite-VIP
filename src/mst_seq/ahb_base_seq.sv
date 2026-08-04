@@ -22,9 +22,8 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
     int unsigned beats_mismatch;
 
     //-------------------------------------------------------------------------
-    // Set by a sequence that provokes resets on purpose. A flushed transaction
-    // is then reported as information; anywhere else it stays a warning,
-    // because losing a transfer to a reset nobody asked for is worth flagging
+    // Set by a sequence that provokes resets on purpose: a flushed transaction
+    // is then logged as info instead of a warning
     //-------------------------------------------------------------------------
     bit expect_reset_abort = 1'b0;
 
@@ -36,14 +35,13 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // send_and_wait - send one item and block until the bus transfer finishes.
-    // The driver is pipelined, so finish_item() returns before the transfer
-    // completes; rdata[]/resp[] are valid only after tr.done.
-    // ok = 0 when a reset flushed the item
+    // send_and_wait - send one item and block until the transfer finishes.
+    // The driver is pipelined: finish_item() returns early, rdata[]/resp[] are
+    // valid only after tr.done. ok = 0 when a reset flushed the item
     //-------------------------------------------------------------------------
     virtual task send_and_wait(ahb_transaction tr, output bit ok);
         queue_item(tr);
-        // Level-sensitive: returns immediately if the driver already completed
+        // Level-sensitive: passes immediately if already completed
         wait (tr.done);
         ok = !tr.aborted;
         if (!ok) begin
@@ -59,9 +57,8 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
     endtask : send_and_wait
 
     //-------------------------------------------------------------------------
-    // queue_item - hand one item to the driver without blocking. Returns as
-    // soon as the driver has queued it, so a caller can stack several
-    // transactions and let the driver run them back to back
+    // queue_item - hand one item to the driver without blocking, so a caller
+    // can stack transactions and let the driver run them back to back
     //-------------------------------------------------------------------------
     virtual task queue_item(ahb_transaction tr);
         start_item(tr);
@@ -72,8 +69,8 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
     endtask : queue_item
 
     //-------------------------------------------------------------------------
-    // beat_address - address of beat i, honouring INCR increment and WRAP.
-    // Mirrors the scoreboard so both agree on where a beat landed
+    // beat_address - address of beat i (INCR increment / WRAP). Mirrors the
+    // scoreboard
     //-------------------------------------------------------------------------
     function bit [AHB_ADDR_WIDTH-1:0] beat_address(ahb_transaction tr, int i);
         int unsigned bytes = 1 << tr.size;
@@ -92,13 +89,11 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
     endfunction : beat_address
 
     //-------------------------------------------------------------------------
-    // write_read_burst - send an already randomized write burst, then read the
-    // same address with identical control and compare every beat.
-    // Only the active byte lanes are compared: a narrow transfer leaves the
-    // remaining lanes undefined, so a full-word compare would be wrong.
-    // pipelined = 1 queues both transfers before waiting, so the driver always
-    // has one behind the transfer it is driving. AHB is in order, so the read
-    // still returns the data the write committed
+    // write_read_burst - send a randomized write burst, read it back with
+    // identical control and compare every beat. Only the active byte lanes are
+    // compared; a narrow transfer leaves the rest undefined.
+    // pipelined = 1 queues both transfers before waiting (AHB is in order, so
+    // the read still returns what the write committed)
     //-------------------------------------------------------------------------
     virtual task write_read_burst(ahb_transaction wr, bit pipelined = 0);
         ahb_transaction          rd;
@@ -109,8 +104,8 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
         bit [7:0]                exp_b, got_b;
         bit                      beat_bad;
 
-        // Built up front: pipelined mode has to queue it while the write is
-        // still on the bus
+        // Built up front - pipelined mode queues it while the write is still
+        // on the bus
         rd = ahb_transaction::type_id::create("rd");
         if (!rd.randomize() with {
                 write     == AHB_READ;
@@ -153,7 +148,7 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
             beat_bad = 0;
             beats_checked++;
 
-            // Nothing here asks for an ERROR, so any non-OKAY is a failure
+            // No ERROR is requested here, so any non-OKAY is a failure
             if (wr.resp[k] != AHB_RESP_OKAY || rd.resp[k] != AHB_RESP_OKAY) begin
                 beats_mismatch++;
                 `uvm_error(get_type_name(),

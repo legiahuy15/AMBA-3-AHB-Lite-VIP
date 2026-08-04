@@ -27,8 +27,8 @@ class ahb_sanity_test extends ahb_base_test;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Build phase - base test builds env_cfg; pin the slave to zero wait
-    // states so the driver pipeline runs on the straight path only
+    // Build phase - slave pinned to zero wait states, so the driver pipeline
+    // runs on the straight path only
     //-------------------------------------------------------------------------
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
