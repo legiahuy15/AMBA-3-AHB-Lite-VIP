@@ -16,6 +16,10 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
     // Back-to-back: overlap next txn's addr phase into the last data phase
     bit en_back_to_back = 1;
 
+    // Take that overlap from a presented IDLE during the wait instead of at
+    // HREADY (IHI0033A 3.6.1)
+    bit en_idle_to_nonseq_in_wait = 0;
+
     // Backpressure: max accepted-but-not-completed txns (0 = unlimited)
     int unsigned max_outstanding = 0;
 
@@ -49,8 +53,9 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
             `uvm_fatal(get_type_name(), "Virtual interface not found in config_db")
         // Agent config is optional - keep the default when absent
         if (uvm_config_db#(ahb_agent_config)::get(this, "", "cfg", cfg)) begin
-            en_back_to_back = cfg.en_back_to_back;
-            max_outstanding = cfg.max_outstanding;
+            en_back_to_back           = cfg.en_back_to_back;
+            en_idle_to_nonseq_in_wait = cfg.en_idle_to_nonseq_in_wait;
+            max_outstanding           = cfg.max_outstanding;
         end
     endfunction: build_phase
 
@@ -200,6 +205,7 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
         int n_busy;
         bit pipelined_own;   // overlap slot belongs to this burst (cancel on ERROR)
         bit busy_retracted;  // BUSY already withdrawn during this wait
+        bit idle_slot;       // slot holds an IDLE that may still become NONSEQ
         bit [AHB_ADDR_WIDTH-1:0] beat_addr[];
 
         num_beats     = tr.get_num_beats();
@@ -239,6 +245,7 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
 
             // Pipelined addr phase; during BUSY the bus holds the next transfer
             pipelined_own = 1'b1;
+            idle_slot     = 1'b0;
             if (n_busy > 0) begin
                 vif.master_cb.HTRANS <= AHB_TRANS_BUSY;
                 vif.master_cb.HADDR  <= (i < num_beats - 1)
@@ -249,14 +256,18 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
                 vif.master_cb.HTRANS <= tr.trans[i+1];
             end else begin
                 // Last beat: overlap the next queued txn's beat-0 addr phase,
-                // else IDLE. That NONSEQ is a new burst - never cancelled here
-                if (en_back_to_back && drive_queue.size() > 0)
+                // else IDLE. That NONSEQ is a new burst - never cancelled here.
+                // en_idle_to_nonseq_in_wait defers the overlap: the slot opens
+                // as IDLE and the wait loop below upgrades it instead
+                if (en_back_to_back && !en_idle_to_nonseq_in_wait &&
+                    drive_queue.size() > 0)
                     next_tr = drive_queue.pop_front();
                 if (next_tr != null) begin
                     drive_addr_phase0(next_tr);
                     pipelined_own = 1'b0;
                 end else begin
                     vif.master_cb.HTRANS <= AHB_TRANS_IDLE;
+                    idle_slot = en_back_to_back && en_idle_to_nonseq_in_wait;
                 end
             end
 
@@ -298,6 +309,18 @@ class ahb_master_driver extends uvm_driver #(ahb_transaction);
                             vif.master_cb.HTRANS <= AHB_TRANS_IDLE;
                         end
                     end
+                end
+                // An IDLE presented in the pipelined slot may become NONSEQ
+                // while HREADY is low; the transfer then has to hold until it
+                // is accepted, which the rest of this loop does. Once only.
+                // Skipped while HRESP is ERROR: that second cycle belongs to
+                // the error handshake, where IDLE is what cancels the pipeline
+                else if (idle_slot && drive_queue.size() > 0 &&
+                         vif.master_cb.HRESP === AHB_RESP_OKAY) begin
+                    idle_slot     = 1'b0;
+                    next_tr       = drive_queue.pop_front();
+                    drive_addr_phase0(next_tr);
+                    pipelined_own = 1'b0;
                 end
             end
 

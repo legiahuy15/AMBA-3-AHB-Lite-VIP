@@ -29,6 +29,7 @@ package ahb_test_pkg;
     `include "test/ahb_error_response_test.sv"
     `include "test/ahb_reset_test.sv"
     `include "test/ahb_busy_test.sv"
+    `include "test/ahb_wait_state_test.sv"
     `include "test/ahb_read_after_write_test.sv"
 
 endpackage : ahb_test_pkg
