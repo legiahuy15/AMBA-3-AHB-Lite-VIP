@@ -89,23 +89,12 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
     endfunction : beat_address
 
     //-------------------------------------------------------------------------
-    // write_read_burst - send a randomized write burst, read it back with
-    // identical control and compare every beat. Only the active byte lanes are
-    // compared; a narrow transfer leaves the rest undefined.
-    // pipelined = 1 queues both transfers before waiting (AHB is in order, so
-    // the read still returns what the write committed)
+    // build_read_back - a READ transfer carrying the same control as wr, so the
+    // burst can be read back beat for beat
     //-------------------------------------------------------------------------
-    virtual task write_read_burst(ahb_transaction wr, bit pipelined = 0);
-        ahb_transaction          rd;
-        bit                      ok;
-        bit [AHB_ADDR_WIDTH-1:0] a;
-        int unsigned             bytes;
-        int unsigned             lane;
-        bit [7:0]                exp_b, got_b;
-        bit                      beat_bad;
+    virtual function ahb_transaction build_read_back(ahb_transaction wr);
+        ahb_transaction rd;
 
-        // Built up front - pipelined mode queues it while the write is still
-        // on the bus
         rd = ahb_transaction::type_id::create("rd");
         if (!rd.randomize() with {
                 write     == AHB_READ;
@@ -117,29 +106,20 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
             `uvm_fatal(get_type_name(),
                        $sformatf("Read randomization failed (%s @0x%08h)",
                                  wr.burst.name(), wr.addr))
+        return rd;
+    endfunction : build_read_back
 
-        if (pipelined) begin
-            queue_item(wr);
-            queue_item(rd);
-            wait (wr.done);
-            wait (rd.done);
-            if (wr.aborted || rd.aborted) begin
-                if (expect_reset_abort)
-                    `uvm_info(get_type_name(),
-                              $sformatf("Pipelined pair aborted by reset: %s 0x%08h",
-                                        wr.burst.name(), wr.addr), UVM_MEDIUM)
-                else
-                    `uvm_warning(get_type_name(),
-                                 $sformatf("Pipelined pair aborted by reset: %s 0x%08h",
-                                           wr.burst.name(), wr.addr))
-                return;
-            end
-        end else begin
-            send_and_wait(wr, ok);
-            if (!ok) return;                // reset flush - skip the pair
-            send_and_wait(rd, ok);
-            if (!ok) return;
-        end
+    //-------------------------------------------------------------------------
+    // compare_burst - check a completed read-back against the write that
+    // produced it. Only the active byte lanes are compared; a narrow transfer
+    // leaves the rest undefined. Both transfers must be done and not aborted
+    //-------------------------------------------------------------------------
+    virtual function void compare_burst(ahb_transaction wr, ahb_transaction rd);
+        bit [AHB_ADDR_WIDTH-1:0] a;
+        int unsigned             bytes;
+        int unsigned             lane;
+        bit [7:0]                exp_b, got_b;
+        bit                      beat_bad;
 
         bytes = 1 << wr.size;
         foreach (rd.rdata[k]) begin
@@ -177,6 +157,46 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
                                     wr.burst.name(), wr.size.name(), k, a), UVM_HIGH)
             end
         end
+    endfunction : compare_burst
+
+    //-------------------------------------------------------------------------
+    // write_read_burst - send a randomized write burst, read it back with
+    // identical control and compare every beat.
+    // pipelined = 1 queues both transfers before waiting (AHB is in order, so
+    // the read still returns what the write committed)
+    //-------------------------------------------------------------------------
+    virtual task write_read_burst(ahb_transaction wr, bit pipelined = 0);
+        ahb_transaction rd;
+        bit             ok;
+
+        // Built up front - pipelined mode queues it while the write is still
+        // on the bus
+        rd = build_read_back(wr);
+
+        if (pipelined) begin
+            queue_item(wr);
+            queue_item(rd);
+            wait (wr.done);
+            wait (rd.done);
+            if (wr.aborted || rd.aborted) begin
+                if (expect_reset_abort)
+                    `uvm_info(get_type_name(),
+                              $sformatf("Pipelined pair aborted by reset: %s 0x%08h",
+                                        wr.burst.name(), wr.addr), UVM_MEDIUM)
+                else
+                    `uvm_warning(get_type_name(),
+                                 $sformatf("Pipelined pair aborted by reset: %s 0x%08h",
+                                           wr.burst.name(), wr.addr))
+                return;
+            end
+        end else begin
+            send_and_wait(wr, ok);
+            if (!ok) return;                // reset flush - skip the pair
+            send_and_wait(rd, ok);
+            if (!ok) return;
+        end
+
+        compare_burst(wr, rd);
     endtask : write_read_burst
 
 endclass : ahb_base_seq

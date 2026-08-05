@@ -54,7 +54,8 @@ TEST_LIST     ?= ahb_sanity_test ahb_single_transfer_test ahb_incr_burst_test \
                  ahb_wrap_burst_test ahb_undefined_burst_test \
                  ahb_error_response_test ahb_reset_test ahb_busy_test \
                  ahb_wait_state_test ahb_read_after_write_test \
-                 ahb_transfer_size_test ahb_byte_lane_test
+                 ahb_transfer_size_test ahb_byte_lane_test \
+                 ahb_back_to_back_test
 
 # ==============================================================================
 # 3. Simulator Flags & Conditional Options
