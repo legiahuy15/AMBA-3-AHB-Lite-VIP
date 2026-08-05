@@ -33,6 +33,7 @@ package ahb_seq_pkg;
     `include "mst_seq/ahb_error_seq.sv"
     `include "mst_seq/ahb_reset_seq.sv"
     `include "mst_seq/ahb_busy_seq.sv"
+    `include "mst_seq/ahb_idle_seq.sv"
     `include "mst_seq/ahb_wait_state_seq.sv"
     `include "mst_seq/ahb_read_after_write_seq.sv"
     `include "mst_seq/ahb_back_to_back_seq.sv"
