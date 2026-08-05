@@ -8,6 +8,8 @@
 //               lanes it must not use, so a lane-mapping error cannot read back
 //               as a match. Only the active lanes are ever compared - the
 //               checker never relies on data being replicated across the bus.
+//               The set of lanes walked is fixed; the order they reach the bus
+//               follows the seed.
 //               Requires the slave agent in auto-response mode (memory model).
 //               This file is `included inside ahb_seq_pkg.sv.
 //=============================================================================
@@ -94,40 +96,54 @@ class ahb_byte_lane_seq extends ahb_base_seq;
     endfunction : lane_pattern
 
     //-------------------------------------------------------------------------
-    // Body - one slot per iteration: a SINGLE at every legal offset of the
-    // first word, then a 4-beat burst that moves the active window along the
-    // bus from a rotating start lane
+    // Body - one slot per iteration, visited in shuffled order: a SINGLE at
+    // every legal offset of the first word, then a 4-beat burst that moves the
+    // active window along the bus from a rotating start lane
     //-------------------------------------------------------------------------
     virtual task body();
+        int unsigned             order[];
+        int unsigned             offs[];
+        int unsigned             idx;
         bit [AHB_ADDR_WIDTH-1:0] slot;
         ahb_size_e               sz;
         int unsigned             bytes;
-        int unsigned             num_offs;
         int unsigned             burst_offs;
 
         `uvm_info(get_type_name(),
                   $sformatf("Starting byte-lane walk: %0d iterations from 0x%08h, %0d lanes on a %0d-bit bus",
                             num_iter, base_addr, BUS_BYTES, AHB_DATA_WIDTH), UVM_LOW)
 
-        for (int unsigned i = 0; i < num_iter; i++) begin
-            slot  = base_addr + i * SLOT_SIZE;
-            sz    = get_size(i);
+        // Which slot takes which size is shuffled, and so is the order the
+        // lanes inside a slot are visited. Every seed covers the same lanes at
+        // the same addresses, but presents them to the bus in a different
+        // order, so the back-to-back and wait-state overlaps differ per run
+        order = new[num_iter];
+        foreach (order[j]) order[j] = j;
+        order.shuffle();
+
+        foreach (order[j]) begin
+            idx   = order[j];
+            slot  = base_addr + idx * SLOT_SIZE;
+            sz    = get_size(idx);
             bytes = 1 << sz;
 
             // Every legal offset inside one bus word: a byte transfer visits
             // all four lanes, a halfword lanes 0 and 2, a word the full width
-            num_offs = BUS_BYTES / bytes;
-            for (int unsigned k = 0; k < num_offs; k++) begin
-                lane_transfer(AHB_BURST_SINGLE, slot + k * bytes, sz);
+            offs = new[BUS_BYTES / bytes];
+            foreach (offs[k]) offs[k] = k * bytes;
+            offs.shuffle();
+
+            foreach (offs[k]) begin
+                lane_transfer(AHB_BURST_SINGLE, slot + offs[k], sz);
                 num_singles++;
             end
 
             // INCR4 through the upper half of the slot. Consecutive beats step
             // the active window along the bus; the start offset rotates with
-            // the iteration so a burst also enters on a non-zero lane. Widest
-            // case is a word burst, 16 bytes from BURST_OFFS - exactly the rest
-            // of the slot
-            burst_offs = BURST_OFFS + ((i % BUS_BYTES) & ~(bytes - 1));
+            // the slot so a burst also enters on a non-zero lane. Widest case
+            // is a word burst, 16 bytes from BURST_OFFS - exactly the rest of
+            // the slot, which is why this offset is not randomized
+            burst_offs = BURST_OFFS + ((idx % BUS_BYTES) & ~(bytes - 1));
             lane_transfer(AHB_BURST_INCR4, slot + burst_offs, sz);
             num_bursts++;
         end

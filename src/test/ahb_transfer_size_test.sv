@@ -5,7 +5,8 @@
 // Description : Transfer-size test. Runs ahb_size_seq, which sweeps HSIZE over
 //               every encoding legal on the data bus, at every alignment each
 //               one allows, as SINGLE and as multi-beat bursts, and checks that
-//               the wider encodings are rejected by constraint.
+//               the encodings fitting the bus are accepted by constraint while
+//               the wider ones are rejected.
 //               Covers AHB_SIZ_001 to AHB_SIZ_006 in doc/ahb_lite_vplan.xlsx.
 //               This file is `included inside ahb_test_pkg.sv.
 //=============================================================================
@@ -21,10 +22,10 @@ class ahb_transfer_size_test extends ahb_base_test;
     // the default runs it twice
     int unsigned num_iter = 24;
 
-    // Illegal-HSIZE negative check, overridable: +CHK_ILLEGAL_SIZE=0. The
-    // failed randomize() calls it makes are the expected result, but they do
-    // print a solver note per attempt
-    int unsigned chk_illegal_size = 1;
+    // HSIZE encoding check, overridable: +CHK_SIZE_ENCODINGS=0. The failed
+    // randomize() calls it makes on the wide encodings are the expected result,
+    // not an error
+    int unsigned chk_size_encodings = 1;
 
     //-------------------------------------------------------------------------
     // Constructor
@@ -45,7 +46,7 @@ class ahb_transfer_size_test extends ahb_base_test;
         env_cfg.slave_agent_cfg.ready_delay_max = 2;
 
         void'($value$plusargs("NUM_ITER=%d", num_iter));
-        void'($value$plusargs("CHK_ILLEGAL_SIZE=%d", chk_illegal_size));
+        void'($value$plusargs("CHK_SIZE_ENCODINGS=%d", chk_size_encodings));
     endfunction : build_phase
 
     //-------------------------------------------------------------------------
@@ -57,9 +58,9 @@ class ahb_transfer_size_test extends ahb_base_test;
         phase.raise_objection(this, "transfer size test running");
         phase.phase_done.set_drain_time(this, 200ns);
 
-        seq                  = ahb_size_seq::type_id::create("seq");
-        seq.num_iter         = num_iter;
-        seq.chk_illegal_size = (chk_illegal_size != 0);
+        seq                    = ahb_size_seq::type_id::create("seq");
+        seq.num_iter           = num_iter;
+        seq.chk_size_encodings = (chk_size_encodings != 0);
         seq.start(env.master_agent.sqr);
 
         phase.drop_objection(this, "transfer size test done");
