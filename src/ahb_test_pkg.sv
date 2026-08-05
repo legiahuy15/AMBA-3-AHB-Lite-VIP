@@ -23,6 +23,8 @@ package ahb_test_pkg;
     `include "test/ahb_base_test.sv"
     `include "test/ahb_sanity_test.sv"
     `include "test/ahb_single_transfer_test.sv"
+    `include "test/ahb_transfer_size_test.sv"
+    `include "test/ahb_byte_lane_test.sv"
     `include "test/ahb_incr_burst_test.sv"
     `include "test/ahb_wrap_burst_test.sv"
     `include "test/ahb_undefined_burst_test.sv"
