@@ -35,6 +35,7 @@ package ahb_test_pkg;
     `include "test/ahb_wait_state_test.sv"
     `include "test/ahb_read_after_write_test.sv"
     `include "test/ahb_back_to_back_test.sv"
+    `include "test/ahb_passive_test.sv"
 
 endpackage : ahb_test_pkg
 
