@@ -17,6 +17,11 @@ class ahb_slave_monitor extends uvm_monitor;
     // Completed transactions -> scoreboard / coverage
     uvm_analysis_port #(ahb_transaction) ap;
 
+    // One accepted address phase -> coverage. A reconstructed burst carries
+    // only its own beats, so IDLE never reaches ap; this port is the raw HTRANS
+    // the bus presented, IDLE included
+    uvm_analysis_port #(ahb_trans_e) trans_ap;
+
     // Burst reconstruction state (open = NONSEQ seen, not yet closed)
     protected bit                       burst_open;
     protected bit [AHB_ADDR_WIDTH-1:0]  cur_addr;
@@ -54,7 +59,8 @@ class ahb_slave_monitor extends uvm_monitor;
     //-------------------------------------------------------------------------
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
-        ap = new("ap", this);
+        ap       = new("ap", this);
+        trans_ap = new("trans_ap", this);
         if (!uvm_config_db#(virtual ahb_if)::get(this, "", "vif", vif))
             `uvm_fatal(get_type_name(), "Virtual interface not found in config_db")
     endfunction : build_phase
@@ -92,6 +98,11 @@ class ahb_slave_monitor extends uvm_monitor;
                 if (pending_valid) pending_waits++;
                 continue;
             end
+
+            // One transfer per accepted address phase, whatever its type. A
+            // transfer held across wait states is one transfer, so this counts
+            // it once - on the cycle it is accepted
+            trans_ap.write(ahb_trans_e'(vif.monitor_cb.HTRANS));
 
             // Complete the pending beat's data phase
             if (pending_valid) begin

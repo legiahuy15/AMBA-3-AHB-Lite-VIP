@@ -95,8 +95,11 @@ class ahb_vip_env extends uvm_env;
         if (cfg.has_coverage) begin
             master_agent.mon.ap.connect(master_cov.analysis_export);
             slave_agent.mon.ap.connect(slave_cov.analysis_export);
+            // Raw HTRANS stream - the only source of IDLE coverage
+            master_agent.mon.trans_ap.connect(master_cov.trans_export);
+            slave_agent.mon.trans_ap.connect(slave_cov.trans_export);
             `uvm_info(get_type_name(),
-                      "Coverage connected: master_mon.ap -> master_cov, slave_mon.ap -> slave_cov", UVM_HIGH)
+                      "Coverage connected: master_mon.ap/trans_ap -> master_cov, slave_mon.ap/trans_ap -> slave_cov", UVM_HIGH)
         end
     endfunction : connect_phase
 

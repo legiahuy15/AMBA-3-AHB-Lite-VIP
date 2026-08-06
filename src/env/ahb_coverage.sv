@@ -2,19 +2,40 @@
 // File        : ahb_coverage.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : AHB-Lite functional coverage collector. Subscribes to a monitor
-//               analysis port and samples each ahb_transaction into a covergroup.
+// Description : AHB-Lite functional coverage collector. Subscribes to both of
+//               a monitor's analysis ports:
+//                 ap       -> one completed ahb_transaction per burst, sampled
+//                             into ahb_cg (direction, burst, size, response)
+//                 trans_ap -> one HTRANS per accepted address phase, sampled
+//                             into ahb_trans_cg. A reconstructed burst carries
+//                             no IDLE, so the transfer-type coverage has to
+//                             come off the raw bus stream
 //               One instance per agent; the instance name tags the report.
 //==============================================================================
+
+// Second stream alongside the uvm_subscriber write() that takes ahb_transaction
+`uvm_analysis_imp_decl(_trans)
 
 class ahb_coverage extends uvm_subscriber #(ahb_transaction);
 
     `uvm_component_utils(ahb_coverage)
 
     //-------------------------------------------------------------------------
+    // Transfer-type stream from the monitor (name matches ahb_vip_env
+    // connect_phase). analysis_export, for the burst stream, comes from
+    // uvm_subscriber
+    //-------------------------------------------------------------------------
+    uvm_analysis_imp_trans #(ahb_trans_e, ahb_coverage) trans_export;
+
+    //-------------------------------------------------------------------------
     // Sampled transaction handle (covergroup reads from this)
     //-------------------------------------------------------------------------
     ahb_transaction tr;
+
+    //-------------------------------------------------------------------------
+    // Last transfer type accepted on the bus (ahb_trans_cg reads from this)
+    //-------------------------------------------------------------------------
+    ahb_trans_e bus_trans;
 
     //-------------------------------------------------------------------------
     // Per-transaction derived scalars (populated in write() before sampling)
@@ -92,12 +113,39 @@ class ahb_coverage extends uvm_subscriber #(ahb_transaction);
     endgroup : ahb_cg
 
     //-------------------------------------------------------------------------
-    // Constructor - covergroup must be built here
+    // Transfer-type coverage - HTRANS, one sample per accepted address phase.
+    // Separate from ahb_cg because its sampling event is a bus cycle, not a
+    // completed burst: sampling it per burst would never see an IDLE and would
+    // count the same transfer type once per burst instead of once per transfer
+    //-------------------------------------------------------------------------
+    covergroup ahb_trans_cg;
+        option.per_instance = 1;
+
+        // Transfer type - HTRANS
+        cp_trans : coverpoint bus_trans {
+            bins idle   = {AHB_TRANS_IDLE};
+            bins busy   = {AHB_TRANS_BUSY};
+            bins nonseq = {AHB_TRANS_NONSEQ};
+            bins seq    = {AHB_TRANS_SEQ};
+        }
+    endgroup : ahb_trans_cg
+
+    //-------------------------------------------------------------------------
+    // Constructor - covergroups must be built here
     //-------------------------------------------------------------------------
     function new(string name, uvm_component parent);
         super.new(name, parent);
-        ahb_cg = new();
+        ahb_cg       = new();
+        ahb_trans_cg = new();
     endfunction : new
+
+    //-------------------------------------------------------------------------
+    // Build phase - create the transfer-type export
+    //-------------------------------------------------------------------------
+    function void build_phase(uvm_phase phase);
+        super.build_phase(phase);
+        trans_export = new("trans_export", this);
+    endfunction : build_phase
 
     //-------------------------------------------------------------------------
     // write - analysis callback; derive scalars then sample
@@ -127,13 +175,24 @@ class ahb_coverage extends uvm_subscriber #(ahb_transaction);
     endfunction : write
 
     //-------------------------------------------------------------------------
+    // write_trans - transfer-type callback; one accepted address phase
+    //-------------------------------------------------------------------------
+    function void write_trans(ahb_trans_e t);
+        bus_trans = t;
+        ahb_trans_cg.sample();
+    endfunction : write_trans
+
+    //-------------------------------------------------------------------------
     // report_phase - print achieved coverage for this instance
     //-------------------------------------------------------------------------
     function void report_phase(uvm_phase phase);
         super.report_phase(phase);
+        // Reported per covergroup, not averaged: the merged figure is the
+        // UCDB's to compute, and it weights by bins rather than by group
         `uvm_info(get_type_name(),
-                  $sformatf("[%s] functional coverage = %.2f%%",
-                            get_name(), ahb_cg.get_coverage()), UVM_LOW)
+                  $sformatf("[%s] functional coverage: ahb_cg = %.2f%%, ahb_trans_cg = %.2f%%",
+                            get_name(), ahb_cg.get_coverage(),
+                            ahb_trans_cg.get_coverage()), UVM_LOW)
     endfunction : report_phase
 
 endclass : ahb_coverage
