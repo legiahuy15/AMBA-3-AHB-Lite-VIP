@@ -22,6 +22,10 @@ class ahb_slave_monitor extends uvm_monitor;
     // the bus presented, IDLE included
     uvm_analysis_port #(ahb_trans_e) trans_ap;
 
+    // Completed transactions published on ap. Tests may use this observable
+    // statistic to verify that passive monitoring did not silently drop data.
+    int unsigned num_observed;
+
     // Burst reconstruction state (open = NONSEQ seen, not yet closed)
     protected bit                       burst_open;
     protected bit [AHB_ADDR_WIDTH-1:0]  cur_addr;
@@ -207,6 +211,7 @@ class ahb_slave_monitor extends uvm_monitor;
                             tr.write.name(), tr.addr, tr.burst.name(),
                             tr.size.name(), n), UVM_MEDIUM)
 
+        num_observed++;
         ap.write(tr);
         flush_burst();
     endfunction : publish_if_complete

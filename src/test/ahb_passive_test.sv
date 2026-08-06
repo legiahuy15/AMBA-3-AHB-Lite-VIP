@@ -13,6 +13,7 @@ class ahb_passive_test extends ahb_base_test;
     `uvm_component_utils(ahb_passive_test)
 
     int unsigned num_iter = 12;
+    int unsigned num_sent;
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
@@ -23,6 +24,10 @@ class ahb_passive_test extends ahb_base_test;
 
         env_cfg.slave_agent_cfg.is_active = UVM_PASSIVE;
         void'($value$plusargs("NUM_ITER=%d", num_iter));
+
+        if (num_iter < 6)
+            `uvm_fatal(get_type_name(),
+                       "NUM_ITER must be at least 6 to cover SINGLE/INCR4 x 8/16/32-bit")
     endfunction : build_phase
 
     function void end_of_elaboration_phase(uvm_phase phase);
@@ -44,9 +49,28 @@ class ahb_passive_test extends ahb_base_test;
         seq = ahb_passive_seq::type_id::create("seq");
         seq.num_iter = num_iter;
         seq.start(env.master_agent.sqr);
+        num_sent = seq.num_sent;
 
         phase.drop_objection(this, "passive test done");
     endtask : run_phase
+
+    function void check_phase(uvm_phase phase);
+        super.check_phase(phase);
+
+        if (num_sent != num_iter)
+            `uvm_error(get_type_name(),
+                       $sformatf("Master completed %0d/%0d expected transactions",
+                                 num_sent, num_iter))
+
+        if (env.slave_agent.mon.num_observed != num_iter)
+            `uvm_error(get_type_name(),
+                       $sformatf("Passive monitor published %0d/%0d expected transactions",
+                                 env.slave_agent.mon.num_observed, num_iter))
+        else
+            `uvm_info(get_type_name(),
+                      $sformatf("Passive monitor observed all %0d directed transactions",
+                                num_iter), UVM_LOW)
+    endfunction : check_phase
 
 endclass : ahb_passive_test
 
