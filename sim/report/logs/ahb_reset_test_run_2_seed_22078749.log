@@ -1,0 +1,1157 @@
+# vsim -c -coverage -sv_seed 22078749 "+UVM_TESTNAME=ahb_reset_test" "+UVM_VERBOSITY=UVM_HIGH" "+DUMP_VCD" -l ./report/logs/ahb_reset_test_run_2_seed_22078749.log -do "coverage save -onexit ./report/coverage/ahb_reset_test_run_2_seed_22078749.ucdb; run -all; quit -f" opt_tb_top 
+# Start time: 14:14:45 on Aug 06,2026
+# //  Questa Sim-64
+# //  Version 10.6b linux_x86_64 May 25 2017
+# //
+# //  Copyright 1991-2017 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  QuestaSim and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
+# //
+# Loading sv_std.std
+# Loading work.ahb_if(fast)
+# Loading mtiUvm.uvm_pkg
+# Loading work.ahb_pkg(fast)
+# Loading work.ahb_seq_pkg(fast)
+# Loading work.ahb_test_pkg(fast)
+# Loading work.tb_top(fast)
+# Loading work.ahb_if(fast)
+# Loading work.ahb_sva(fast)
+# Loading mtiUvm.questa_uvm_pkg(fast)
+# Loading /cadtools/mentor/Questa_10.6b/questasim/uvm-1.1d/linux_x86_64/uvm_dpi.so
+# coverage save -onexit ./report/coverage/ahb_reset_test_run_2_seed_22078749.ucdb
+#  run -all
+# ----------------------------------------------------------------
+# UVM-1.1d
+# (C) 2007-2013 Mentor Graphics Corporation
+# (C) 2007-2013 Cadence Design Systems, Inc.
+# (C) 2006-2013 Synopsys, Inc.
+# (C) 2011-2013 Cypress Semiconductor Corp.
+# ----------------------------------------------------------------
+# 
+#   ***********       IMPORTANT RELEASE NOTES         ************
+# 
+#   You are using a version of the UVM library that has been compiled
+#   with `UVM_NO_DEPRECATED undefined.
+#   See http://www.eda.org/svdb/view.php?id=3313 for more details.
+# 
+#   You are using a version of the UVM library that has been compiled
+#   with `UVM_OBJECT_MUST_HAVE_CONSTRUCTOR undefined.
+#   See http://www.eda.org/svdb/view.php?id=3770 for more details.
+# 
+#       (Specify +UVM_NO_RELNOTES to turn off this notice)
+# 
+# UVM_INFO verilog_src/questa_uvm_pkg-1.2/src/questa_uvm_pkg.sv(215) @ 0: reporter [Questa UVM] QUESTA_UVM-1.2.3
+# UVM_INFO verilog_src/questa_uvm_pkg-1.2/src/questa_uvm_pkg.sv(217) @ 0: reporter [Questa UVM]  questa_uvm::init(+struct)
+# UVM_INFO ../src/tb_top.sv(126) @ 0: reporter [TB_TOP] Virtual interface set in config_db
+# UVM_INFO @ 0: reporter [RNTST] Running test ahb_reset_test...
+# UVM_INFO ../src/tb_top.sv(140) @ 0: reporter [TB_TOP] Waveform VCD dumping enabled (ahb_lite_vip.vcd)
+# UVM_INFO ../src/env/ahb_vip_env.sv(64) @ 0: uvm_test_top.env [ahb_vip_env] slave_vif not set - reusing master_vif (passthrough mode)
+# UVM_INFO ../src/env/ahb_vip_env.sv(72) @ 0: uvm_test_top.env [ahb_vip_env] Scoreboard created
+# UVM_INFO ../src/env/ahb_vip_env.sv(78) @ 0: uvm_test_top.env [ahb_vip_env] Coverage collectors created
+# UVM_INFO ../src/mst/ahb_master_agent.sv(61) @ 0: uvm_test_top.env.master_agent [ahb_master_agent] ACTIVE mode - driver + sequencer created
+# UVM_INFO ../src/slv/ahb_slave_agent.sv(64) @ 0: uvm_test_top.env.slave_agent [ahb_slave_agent] ACTIVE mode - driver + sequencer created (    auto responses)
+# UVM_INFO ../src/env/ahb_vip_env.sv(92) @ 0: uvm_test_top.env [ahb_vip_env] Scoreboard connected: master_mon.ap -> scb, slave_mon.ap -> scb
+# UVM_INFO ../src/env/ahb_vip_env.sv(102) @ 0: uvm_test_top.env [ahb_vip_env] Coverage connected: master_mon.ap/trans_ap -> master_cov, slave_mon.ap/trans_ap -> slave_cov
+# UVM_INFO @ 0: reporter [UVMTOP] UVM testbench topology:
+# ---------------------------------------------------------------
+# Name                       Type                     Size  Value
+# ---------------------------------------------------------------
+# uvm_test_top               ahb_reset_test           -     @475 
+#   env                      ahb_vip_env              -     @490 
+#     master_agent           ahb_master_agent         -     @505 
+#       drv                  ahb_master_driver        -     @570 
+#         rsp_port           uvm_analysis_port        -     @585 
+#         seq_item_port      uvm_seq_item_pull_port   -     @577 
+#       mon                  ahb_master_monitor       -     @563 
+#         ap                 uvm_analysis_port        -     @704 
+#         trans_ap           uvm_analysis_port        -     @712 
+#       sqr                  ahb_master_sequencer     -     @593 
+#         rsp_export         uvm_analysis_export      -     @600 
+#         seq_item_export    uvm_seq_item_pull_imp    -     @694 
+#         arbitration_queue  array                    0     -    
+#         lock_queue         array                    0     -    
+#         num_last_reqs      integral                 32    'd1  
+#         num_last_rsps      integral                 32    'd1  
+#     master_cov             ahb_coverage             -     @526 
+#       analysis_imp         uvm_analysis_imp         -     @533 
+#       trans_export         uvm_analysis_imp_trans   -     @726 
+#     scb                    ahb_scoreboard           -     @519 
+#       master_export        uvm_analysis_imp_master  -     @734 
+#       slave_export         uvm_analysis_imp_slave   -     @742 
+#     slave_agent            ahb_slave_agent          -     @512 
+#       drv                  ahb_slave_driver         -     @764 
+#         rsp_port           uvm_analysis_port        -     @779 
+#         seq_item_port      uvm_seq_item_pull_port   -     @771 
+#       mon                  ahb_slave_monitor        -     @757 
+#         ap                 uvm_analysis_port        -     @898 
+#         trans_ap           uvm_analysis_port        -     @906 
+#       sqr                  ahb_slave_sequencer      -     @787 
+#         rsp_export         uvm_analysis_export      -     @794 
+#         seq_item_export    uvm_seq_item_pull_imp    -     @888 
+#         arbitration_queue  array                    0     -    
+#         lock_queue         array                    0     -    
+#         num_last_reqs      integral                 32    'd1  
+#         num_last_rsps      integral                 32    'd1  
+#     slave_cov              ahb_coverage             -     @541 
+#       analysis_imp         uvm_analysis_imp         -     @548 
+#       trans_export         uvm_analysis_imp_trans   -     @920 
+# ---------------------------------------------------------------
+# 
+# UVM_INFO verilog_src/questa_uvm_pkg-1.2/src/questa_uvm_pkg.sv(277) @ 0: reporter [Questa UVM] End Of Elaboration
+# UVM_INFO ../src/mst_seq/ahb_reset_seq.sv(64) @ 0: uvm_test_top.env.master_agent.sqr@@seq [ahb_reset_seq] Reset phase: 18 bursts, reset on every 3th
+# UVM_INFO ../src/mst/ahb_master_driver.sv(183) @ 5000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Flushed pending transactions (reset)
+# UVM_INFO ../src/tb_top.sv(48) @ 95000: reporter [TB_TOP] Reset de-asserted
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(63) @ 95000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Reset deasserted - slave driver active (    auto mode)
+# UVM_INFO ../src/mst/ahb_master_driver.sv(72) @ 95000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Reset deasserted - master driver active
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(81) @ 95000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Reset deasserted - master monitor active
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(79) @ 95000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Reset deasserted - slave monitor active
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 95000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_WRITE]: HADDR=0x0000a000, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 95000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_WRITE]: HADDR=0x0000a000, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 135000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/16] addr=0x0000a000 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY wdata=0x9e70f9d0
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 135000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a000 resp=AHB_RESP_OKAY waits=2 wdata=0x9e70f9d0
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 135000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000a000 wdata=0x9e70f9d0 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 165000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/16] addr=0x0000a004 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x21bef409
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 165000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a004 resp=AHB_RESP_OKAY waits=2 wdata=0x21bef409
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 165000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000a004 wdata=0x21bef409 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 195000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[2/16] addr=0x0000a008 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xe5c3d638
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 195000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a008 resp=AHB_RESP_OKAY waits=2 wdata=0xe5c3d638
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 195000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[2] addr=0x0000a008 wdata=0xe5c3d638 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 215000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[3/16] addr=0x0000a00c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x9140d61d
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 215000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a00c resp=AHB_RESP_OKAY waits=1 wdata=0x9140d61d
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 215000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[3] addr=0x0000a00c wdata=0x9140d61d resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 245000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[4/16] addr=0x0000a010 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x84b02c6f
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 245000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a010 resp=AHB_RESP_OKAY waits=2 wdata=0x84b02c6f
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 245000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[4] addr=0x0000a010 wdata=0x84b02c6f resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 265000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[5/16] addr=0x0000a014 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x60ca6b0f
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 265000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a014 resp=AHB_RESP_OKAY waits=1 wdata=0x60ca6b0f
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 265000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[5] addr=0x0000a014 wdata=0x60ca6b0f resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 275000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[6/16] addr=0x0000a018 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x8589a99c
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 275000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a018 resp=AHB_RESP_OKAY waits=0 wdata=0x8589a99c
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 275000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[6] addr=0x0000a018 wdata=0x8589a99c resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 285000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[7/16] addr=0x0000a01c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xc7223d9e
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 285000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a01c resp=AHB_RESP_OKAY waits=0 wdata=0xc7223d9e
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 285000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[7] addr=0x0000a01c wdata=0xc7223d9e resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 305000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[8/16] addr=0x0000a020 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x6cf1b944
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 305000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a020 resp=AHB_RESP_OKAY waits=1 wdata=0x6cf1b944
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 305000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[8] addr=0x0000a020 wdata=0x6cf1b944 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 335000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[9/16] addr=0x0000a024 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x37668055
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 335000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a024 resp=AHB_RESP_OKAY waits=2 wdata=0x37668055
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 335000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[9] addr=0x0000a024 wdata=0x37668055 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 345000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[10/16] addr=0x0000a028 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x7ba7e596
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 345000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a028 resp=AHB_RESP_OKAY waits=0 wdata=0x7ba7e596
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 345000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[10] addr=0x0000a028 wdata=0x7ba7e596 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 365000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[11/16] addr=0x0000a02c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x22159fb1
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 365000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a02c resp=AHB_RESP_OKAY waits=1 wdata=0x22159fb1
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 365000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[11] addr=0x0000a02c wdata=0x22159fb1 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 395000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[12/16] addr=0x0000a030 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x0aae777e
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 395000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a030 resp=AHB_RESP_OKAY waits=2 wdata=0x0aae777e
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 395000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[12] addr=0x0000a030 wdata=0x0aae777e resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 405000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[13/16] addr=0x0000a034 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xcbfd27b9
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 405000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a034 resp=AHB_RESP_OKAY waits=0 wdata=0xcbfd27b9
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 405000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[13] addr=0x0000a034 wdata=0xcbfd27b9 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 415000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[14/16] addr=0x0000a038 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xa4630357
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 415000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a038 resp=AHB_RESP_OKAY waits=0 wdata=0xa4630357
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 415000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[14] addr=0x0000a038 wdata=0xa4630357 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 435000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[15/16] addr=0x0000a03c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x68382cd1
+# UVM_INFO ../src/mst/ahb_master_driver.sv(376) @ 435000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Transaction complete: AHB_WRITE 0x0000a000, 16 beats, burst=AHB_BURST_INCR16
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 435000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a03c resp=AHB_RESP_OKAY waits=1 wdata=0x68382cd1
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(212) @ 435000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Observed [AHB_WRITE]: HADDR=0x0000a000, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 435000: uvm_test_top.env.slave_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR16 size=AHB_SIZE_32B beats=16 error=0
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 435000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[15] addr=0x0000a03c wdata=0x68382cd1 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(231) @ 435000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Observed [AHB_WRITE]: HADDR=0x0000a000, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 435000: uvm_test_top.env.master_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR16 size=AHB_SIZE_32B beats=16 error=0
+# UVM_INFO ../src/env/ahb_scoreboard.sv(104) @ 435000: uvm_test_top.env.scb [ahb_scoreboard] MATCH #1: [AHB_WRITE] HADDR=0x0000a000 AHB_BURST_INCR16 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 435000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_WRITE]: HADDR=0x0000a040, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 435000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_WRITE]: HADDR=0x0000a040, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 475000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/16] addr=0x0000a040 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY wdata=0x726715e3
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 475000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a040 resp=AHB_RESP_OKAY waits=1 wdata=0x726715e3
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 475000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000a040 wdata=0x726715e3 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 495000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/16] addr=0x0000a044 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xb36fabfa
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 495000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a044 resp=AHB_RESP_OKAY waits=1 wdata=0xb36fabfa
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 495000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000a044 wdata=0xb36fabfa resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 525000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[2/16] addr=0x0000a048 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x826fca29
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 525000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a048 resp=AHB_RESP_OKAY waits=2 wdata=0x826fca29
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 525000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[2] addr=0x0000a048 wdata=0x826fca29 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 555000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[3/16] addr=0x0000a04c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x24a7c801
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 555000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a04c resp=AHB_RESP_OKAY waits=2 wdata=0x24a7c801
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 555000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[3] addr=0x0000a04c wdata=0x24a7c801 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 585000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[4/16] addr=0x0000a050 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xfe25c620
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 585000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a050 resp=AHB_RESP_OKAY waits=2 wdata=0xfe25c620
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 585000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[4] addr=0x0000a050 wdata=0xfe25c620 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 595000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[5/16] addr=0x0000a054 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xf8fc3257
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 595000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a054 resp=AHB_RESP_OKAY waits=0 wdata=0xf8fc3257
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 595000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[5] addr=0x0000a054 wdata=0xf8fc3257 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 625000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[6/16] addr=0x0000a058 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x1a1ee367
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 625000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a058 resp=AHB_RESP_OKAY waits=2 wdata=0x1a1ee367
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 625000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[6] addr=0x0000a058 wdata=0x1a1ee367 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 645000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[7/16] addr=0x0000a05c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x8870def3
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 645000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a05c resp=AHB_RESP_OKAY waits=1 wdata=0x8870def3
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 645000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[7] addr=0x0000a05c wdata=0x8870def3 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 675000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[8/16] addr=0x0000a060 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x5b9638d6
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 675000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a060 resp=AHB_RESP_OKAY waits=2 wdata=0x5b9638d6
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 675000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[8] addr=0x0000a060 wdata=0x5b9638d6 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 705000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[9/16] addr=0x0000a064 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x72018f57
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 705000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a064 resp=AHB_RESP_OKAY waits=2 wdata=0x72018f57
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 705000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[9] addr=0x0000a064 wdata=0x72018f57 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 715000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[10/16] addr=0x0000a068 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xcf199dbf
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 715000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a068 resp=AHB_RESP_OKAY waits=0 wdata=0xcf199dbf
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 715000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[10] addr=0x0000a068 wdata=0xcf199dbf resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 725000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[11/16] addr=0x0000a06c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x55f38091
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 725000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a06c resp=AHB_RESP_OKAY waits=0 wdata=0x55f38091
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 725000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[11] addr=0x0000a06c wdata=0x55f38091 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 735000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[12/16] addr=0x0000a070 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x7276c037
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 735000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a070 resp=AHB_RESP_OKAY waits=0 wdata=0x7276c037
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 735000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[12] addr=0x0000a070 wdata=0x7276c037 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 755000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[13/16] addr=0x0000a074 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x6938567e
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 755000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a074 resp=AHB_RESP_OKAY waits=1 wdata=0x6938567e
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 755000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[13] addr=0x0000a074 wdata=0x6938567e resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 785000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[14/16] addr=0x0000a078 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x2c160d03
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 785000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a078 resp=AHB_RESP_OKAY waits=2 wdata=0x2c160d03
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 785000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[14] addr=0x0000a078 wdata=0x2c160d03 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 795000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[15/16] addr=0x0000a07c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x6555fa81
+# UVM_INFO ../src/mst/ahb_master_driver.sv(376) @ 795000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Transaction complete: AHB_WRITE 0x0000a040, 16 beats, burst=AHB_BURST_INCR16
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 795000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a07c resp=AHB_RESP_OKAY waits=0 wdata=0x6555fa81
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(212) @ 795000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Observed [AHB_WRITE]: HADDR=0x0000a040, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 795000: uvm_test_top.env.slave_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR16 size=AHB_SIZE_32B beats=16 error=0
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 795000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[15] addr=0x0000a07c wdata=0x6555fa81 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(231) @ 795000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Observed [AHB_WRITE]: HADDR=0x0000a040, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 795000: uvm_test_top.env.master_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR16 size=AHB_SIZE_32B beats=16 error=0
+# UVM_INFO ../src/env/ahb_scoreboard.sv(104) @ 795000: uvm_test_top.env.scb [ahb_scoreboard] MATCH #2: [AHB_WRITE] HADDR=0x0000a040 AHB_BURST_INCR16 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 795000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_WRITE]: HADDR=0x0000a080, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 795000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_WRITE]: HADDR=0x0000a080, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 845000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/16] addr=0x0000a080 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY wdata=0x078b41a5
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 845000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a080 resp=AHB_RESP_OKAY waits=2 wdata=0x078b41a5
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 845000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000a080 wdata=0x078b41a5 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 855000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/16] addr=0x0000a084 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x9b9a2c33
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 855000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a084 resp=AHB_RESP_OKAY waits=0 wdata=0x9b9a2c33
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 855000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000a084 wdata=0x9b9a2c33 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 875000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[2/16] addr=0x0000a088 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x9b87c228
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 875000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a088 resp=AHB_RESP_OKAY waits=1 wdata=0x9b87c228
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 875000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[2] addr=0x0000a088 wdata=0x9b87c228 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 885000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[3/16] addr=0x0000a08c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xb13a77bd
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 885000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a08c resp=AHB_RESP_OKAY waits=0 wdata=0xb13a77bd
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 885000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[3] addr=0x0000a08c wdata=0xb13a77bd resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 905000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[4/16] addr=0x0000a090 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x7717e5b1
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 905000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a090 resp=AHB_RESP_OKAY waits=1 wdata=0x7717e5b1
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 905000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[4] addr=0x0000a090 wdata=0x7717e5b1 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 915000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[5/16] addr=0x0000a094 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x1fbb75a9
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 915000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a094 resp=AHB_RESP_OKAY waits=0 wdata=0x1fbb75a9
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 915000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[5] addr=0x0000a094 wdata=0x1fbb75a9 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 935000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[6/16] addr=0x0000a098 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x490ecd61
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 935000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a098 resp=AHB_RESP_OKAY waits=1 wdata=0x490ecd61
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 935000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[6] addr=0x0000a098 wdata=0x490ecd61 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst_seq/ahb_reset_seq.sv(85) @ 943000: uvm_test_top.env.master_agent.sqr@@seq [ahb_reset_seq] Asserting reset 148 ns into burst 2
+# UVM_INFO ../src/tb_top.sv(59) @ 943000: reporter [TB_TOP] Mid-sim reset requested - asserting rst_n
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(85) @ 943000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Reset asserted - discarding partial transaction
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(242) @ 943000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Discarding partial burst at reset (8 beats accepted)
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(88) @ 943000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Reset asserted - discarding partial transaction
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(260) @ 943000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Discarding partial burst at reset (8 beats accepted)
+# UVM_INFO ../src/mst/ahb_master_driver.sv(97) @ 943000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Reset asserted - aborting transaction
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(69) @ 943000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Reset asserted - slave driver idle
+# UVM_INFO ../src/mst/ahb_master_driver.sv(183) @ 945000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Flushed pending transactions (reset)
+# UVM_INFO ../src/mst_seq/ahb_base_seq.sv(51) @ 945000: uvm_test_top.env.master_agent.sqr@@seq [ahb_reset_seq] Transaction aborted by reset: AHB_WRITE 0x0000a080
+# UVM_INFO ../src/tb_top.sv(63) @ 1015000: reporter [TB_TOP] Mid-sim reset pulse complete - rst_n deasserted
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(63) @ 1015000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Reset deasserted - slave driver active (    auto mode)
+# UVM_INFO ../src/mst/ahb_master_driver.sv(72) @ 1015000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Reset deasserted - master driver active
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(81) @ 1015000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Reset deasserted - master monitor active
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(79) @ 1015000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Reset deasserted - slave monitor active
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 1015000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_WRITE]: HADDR=0x0000a0c0, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 1015000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_WRITE]: HADDR=0x0000a0c0, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1035000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/16] addr=0x0000a0c0 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY wdata=0xbe3d930a
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1035000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a0c0 resp=AHB_RESP_OKAY waits=0 wdata=0xbe3d930a
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1035000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000a0c0 wdata=0xbe3d930a resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1065000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/16] addr=0x0000a0c4 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x9d68202e
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1065000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a0c4 resp=AHB_RESP_OKAY waits=2 wdata=0x9d68202e
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1065000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000a0c4 wdata=0x9d68202e resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1095000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[2/16] addr=0x0000a0c8 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xd576c989
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1095000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a0c8 resp=AHB_RESP_OKAY waits=2 wdata=0xd576c989
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1095000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[2] addr=0x0000a0c8 wdata=0xd576c989 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1125000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[3/16] addr=0x0000a0cc trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x7e294d7b
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1125000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a0cc resp=AHB_RESP_OKAY waits=2 wdata=0x7e294d7b
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1125000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[3] addr=0x0000a0cc wdata=0x7e294d7b resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1145000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[4/16] addr=0x0000a0d0 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xc1600b21
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1145000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a0d0 resp=AHB_RESP_OKAY waits=1 wdata=0xc1600b21
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1145000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[4] addr=0x0000a0d0 wdata=0xc1600b21 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1165000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[5/16] addr=0x0000a0d4 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xbbc736f3
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1165000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a0d4 resp=AHB_RESP_OKAY waits=1 wdata=0xbbc736f3
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1165000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[5] addr=0x0000a0d4 wdata=0xbbc736f3 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1185000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[6/16] addr=0x0000a0d8 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xd78ae4ec
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1185000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a0d8 resp=AHB_RESP_OKAY waits=1 wdata=0xd78ae4ec
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1185000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[6] addr=0x0000a0d8 wdata=0xd78ae4ec resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1195000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[7/16] addr=0x0000a0dc trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xfc17fdd1
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1195000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a0dc resp=AHB_RESP_OKAY waits=0 wdata=0xfc17fdd1
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1195000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[7] addr=0x0000a0dc wdata=0xfc17fdd1 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1205000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[8/16] addr=0x0000a0e0 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xb045c20d
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1205000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a0e0 resp=AHB_RESP_OKAY waits=0 wdata=0xb045c20d
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1205000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[8] addr=0x0000a0e0 wdata=0xb045c20d resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1215000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[9/16] addr=0x0000a0e4 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x434ad049
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1215000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a0e4 resp=AHB_RESP_OKAY waits=0 wdata=0x434ad049
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1215000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[9] addr=0x0000a0e4 wdata=0x434ad049 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1245000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[10/16] addr=0x0000a0e8 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x7881ba8d
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1245000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a0e8 resp=AHB_RESP_OKAY waits=2 wdata=0x7881ba8d
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1245000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[10] addr=0x0000a0e8 wdata=0x7881ba8d resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1265000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[11/16] addr=0x0000a0ec trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x1ffb722c
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1265000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a0ec resp=AHB_RESP_OKAY waits=1 wdata=0x1ffb722c
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1265000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[11] addr=0x0000a0ec wdata=0x1ffb722c resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1285000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[12/16] addr=0x0000a0f0 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x5885ece7
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1285000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a0f0 resp=AHB_RESP_OKAY waits=1 wdata=0x5885ece7
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1285000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[12] addr=0x0000a0f0 wdata=0x5885ece7 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1315000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[13/16] addr=0x0000a0f4 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xa8e8d6c8
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1315000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a0f4 resp=AHB_RESP_OKAY waits=2 wdata=0xa8e8d6c8
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1315000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[13] addr=0x0000a0f4 wdata=0xa8e8d6c8 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1325000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[14/16] addr=0x0000a0f8 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xe934f087
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1325000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a0f8 resp=AHB_RESP_OKAY waits=0 wdata=0xe934f087
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1325000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[14] addr=0x0000a0f8 wdata=0xe934f087 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1355000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[15/16] addr=0x0000a0fc trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xa50e543a
+# UVM_INFO ../src/mst/ahb_master_driver.sv(376) @ 1355000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Transaction complete: AHB_WRITE 0x0000a0c0, 16 beats, burst=AHB_BURST_INCR16
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1355000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a0fc resp=AHB_RESP_OKAY waits=2 wdata=0xa50e543a
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(212) @ 1355000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Observed [AHB_WRITE]: HADDR=0x0000a0c0, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 1355000: uvm_test_top.env.slave_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR16 size=AHB_SIZE_32B beats=16 error=0
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1355000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[15] addr=0x0000a0fc wdata=0xa50e543a resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(231) @ 1355000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Observed [AHB_WRITE]: HADDR=0x0000a0c0, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 1355000: uvm_test_top.env.master_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR16 size=AHB_SIZE_32B beats=16 error=0
+# UVM_INFO ../src/env/ahb_scoreboard.sv(104) @ 1355000: uvm_test_top.env.scb [ahb_scoreboard] MATCH #3: [AHB_WRITE] HADDR=0x0000a0c0 AHB_BURST_INCR16 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 1355000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_WRITE]: HADDR=0x0000a100, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 1355000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_WRITE]: HADDR=0x0000a100, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1405000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/16] addr=0x0000a100 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY wdata=0x2487b3b1
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1405000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a100 resp=AHB_RESP_OKAY waits=2 wdata=0x2487b3b1
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1405000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000a100 wdata=0x2487b3b1 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1435000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/16] addr=0x0000a104 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x0cbabba3
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1435000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a104 resp=AHB_RESP_OKAY waits=2 wdata=0x0cbabba3
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1435000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000a104 wdata=0x0cbabba3 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1455000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[2/16] addr=0x0000a108 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x23bd3417
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1455000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a108 resp=AHB_RESP_OKAY waits=1 wdata=0x23bd3417
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1455000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[2] addr=0x0000a108 wdata=0x23bd3417 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1465000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[3/16] addr=0x0000a10c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x11177059
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1465000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a10c resp=AHB_RESP_OKAY waits=0 wdata=0x11177059
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1465000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[3] addr=0x0000a10c wdata=0x11177059 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1495000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[4/16] addr=0x0000a110 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x96652966
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1495000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a110 resp=AHB_RESP_OKAY waits=2 wdata=0x96652966
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1495000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[4] addr=0x0000a110 wdata=0x96652966 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1505000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[5/16] addr=0x0000a114 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xd0f4ecc7
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1505000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a114 resp=AHB_RESP_OKAY waits=0 wdata=0xd0f4ecc7
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1505000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[5] addr=0x0000a114 wdata=0xd0f4ecc7 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1525000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[6/16] addr=0x0000a118 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xed270562
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1525000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a118 resp=AHB_RESP_OKAY waits=1 wdata=0xed270562
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1525000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[6] addr=0x0000a118 wdata=0xed270562 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1545000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[7/16] addr=0x0000a11c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x1463bd1f
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1545000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a11c resp=AHB_RESP_OKAY waits=1 wdata=0x1463bd1f
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1545000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[7] addr=0x0000a11c wdata=0x1463bd1f resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1565000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[8/16] addr=0x0000a120 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xffdd2950
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1565000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a120 resp=AHB_RESP_OKAY waits=1 wdata=0xffdd2950
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1565000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[8] addr=0x0000a120 wdata=0xffdd2950 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1595000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[9/16] addr=0x0000a124 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xf8d0f688
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1595000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a124 resp=AHB_RESP_OKAY waits=2 wdata=0xf8d0f688
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1595000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[9] addr=0x0000a124 wdata=0xf8d0f688 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1605000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[10/16] addr=0x0000a128 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xab5a08cf
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1605000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a128 resp=AHB_RESP_OKAY waits=0 wdata=0xab5a08cf
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1605000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[10] addr=0x0000a128 wdata=0xab5a08cf resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1635000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[11/16] addr=0x0000a12c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x63f872e9
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1635000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a12c resp=AHB_RESP_OKAY waits=2 wdata=0x63f872e9
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1635000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[11] addr=0x0000a12c wdata=0x63f872e9 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1645000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[12/16] addr=0x0000a130 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x75163b46
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1645000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a130 resp=AHB_RESP_OKAY waits=0 wdata=0x75163b46
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1645000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[12] addr=0x0000a130 wdata=0x75163b46 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1675000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[13/16] addr=0x0000a134 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x18440999
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1675000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a134 resp=AHB_RESP_OKAY waits=2 wdata=0x18440999
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1675000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[13] addr=0x0000a134 wdata=0x18440999 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1705000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[14/16] addr=0x0000a138 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x4bff7308
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1705000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a138 resp=AHB_RESP_OKAY waits=2 wdata=0x4bff7308
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1705000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[14] addr=0x0000a138 wdata=0x4bff7308 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1715000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[15/16] addr=0x0000a13c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x32197c25
+# UVM_INFO ../src/mst/ahb_master_driver.sv(376) @ 1715000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Transaction complete: AHB_WRITE 0x0000a100, 16 beats, burst=AHB_BURST_INCR16
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1715000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a13c resp=AHB_RESP_OKAY waits=0 wdata=0x32197c25
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(212) @ 1715000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Observed [AHB_WRITE]: HADDR=0x0000a100, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 1715000: uvm_test_top.env.slave_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR16 size=AHB_SIZE_32B beats=16 error=0
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1715000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[15] addr=0x0000a13c wdata=0x32197c25 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(231) @ 1715000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Observed [AHB_WRITE]: HADDR=0x0000a100, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 1715000: uvm_test_top.env.master_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR16 size=AHB_SIZE_32B beats=16 error=0
+# UVM_INFO ../src/env/ahb_scoreboard.sv(104) @ 1715000: uvm_test_top.env.scb [ahb_scoreboard] MATCH #4: [AHB_WRITE] HADDR=0x0000a100 AHB_BURST_INCR16 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 1715000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_WRITE]: HADDR=0x0000a140, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 1715000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_WRITE]: HADDR=0x0000a140, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1745000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/16] addr=0x0000a140 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY wdata=0x8220d68c
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1745000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a140 resp=AHB_RESP_OKAY waits=0 wdata=0x8220d68c
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1745000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000a140 wdata=0x8220d68c resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1775000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/16] addr=0x0000a144 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xc816b341
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1775000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a144 resp=AHB_RESP_OKAY waits=2 wdata=0xc816b341
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1775000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000a144 wdata=0xc816b341 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1805000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[2/16] addr=0x0000a148 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x98953a84
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1805000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a148 resp=AHB_RESP_OKAY waits=2 wdata=0x98953a84
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1805000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[2] addr=0x0000a148 wdata=0x98953a84 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1815000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[3/16] addr=0x0000a14c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x8533c599
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1815000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a14c resp=AHB_RESP_OKAY waits=0 wdata=0x8533c599
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1815000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[3] addr=0x0000a14c wdata=0x8533c599 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1825000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[4/16] addr=0x0000a150 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x5e62b9e2
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1825000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a150 resp=AHB_RESP_OKAY waits=0 wdata=0x5e62b9e2
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1825000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[4] addr=0x0000a150 wdata=0x5e62b9e2 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst_seq/ahb_reset_seq.sv(85) @ 1840000: uvm_test_top.env.master_agent.sqr@@seq [ahb_reset_seq] Asserting reset 125 ns into burst 5
+# UVM_INFO ../src/tb_top.sv(59) @ 1840000: reporter [TB_TOP] Mid-sim reset requested - asserting rst_n
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(85) @ 1840000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Reset asserted - discarding partial transaction
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(242) @ 1840000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Discarding partial burst at reset (6 beats accepted)
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(88) @ 1840000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Reset asserted - discarding partial transaction
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(260) @ 1840000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Discarding partial burst at reset (6 beats accepted)
+# UVM_INFO ../src/mst/ahb_master_driver.sv(97) @ 1840000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Reset asserted - aborting transaction
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(69) @ 1840000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Reset asserted - slave driver idle
+# UVM_INFO ../src/mst/ahb_master_driver.sv(183) @ 1845000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Flushed pending transactions (reset)
+# UVM_INFO ../src/mst_seq/ahb_base_seq.sv(51) @ 1845000: uvm_test_top.env.master_agent.sqr@@seq [ahb_reset_seq] Transaction aborted by reset: AHB_WRITE 0x0000a140
+# UVM_INFO ../src/tb_top.sv(63) @ 1915000: reporter [TB_TOP] Mid-sim reset pulse complete - rst_n deasserted
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(63) @ 1915000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Reset deasserted - slave driver active (    auto mode)
+# UVM_INFO ../src/mst/ahb_master_driver.sv(72) @ 1915000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Reset deasserted - master driver active
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(81) @ 1915000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Reset deasserted - master monitor active
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(79) @ 1915000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Reset deasserted - slave monitor active
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 1915000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_WRITE]: HADDR=0x0000a180, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 1915000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_WRITE]: HADDR=0x0000a180, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1935000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/16] addr=0x0000a180 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY wdata=0x1ce64b53
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1935000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a180 resp=AHB_RESP_OKAY waits=0 wdata=0x1ce64b53
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1935000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000a180 wdata=0x1ce64b53 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1965000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/16] addr=0x0000a184 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x09e0b271
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1965000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a184 resp=AHB_RESP_OKAY waits=2 wdata=0x09e0b271
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1965000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000a184 wdata=0x09e0b271 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1975000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[2/16] addr=0x0000a188 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xb031cd4c
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1975000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a188 resp=AHB_RESP_OKAY waits=0 wdata=0xb031cd4c
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1975000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[2] addr=0x0000a188 wdata=0xb031cd4c resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 1995000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[3/16] addr=0x0000a18c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x7316386e
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 1995000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a18c resp=AHB_RESP_OKAY waits=1 wdata=0x7316386e
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 1995000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[3] addr=0x0000a18c wdata=0x7316386e resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2005000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[4/16] addr=0x0000a190 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xcb912590
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2005000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a190 resp=AHB_RESP_OKAY waits=0 wdata=0xcb912590
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2005000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[4] addr=0x0000a190 wdata=0xcb912590 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2015000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[5/16] addr=0x0000a194 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x84328e89
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2015000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a194 resp=AHB_RESP_OKAY waits=0 wdata=0x84328e89
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2015000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[5] addr=0x0000a194 wdata=0x84328e89 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2045000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[6/16] addr=0x0000a198 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xa051ed00
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2045000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a198 resp=AHB_RESP_OKAY waits=2 wdata=0xa051ed00
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2045000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[6] addr=0x0000a198 wdata=0xa051ed00 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2075000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[7/16] addr=0x0000a19c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xe9ee0b79
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2075000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a19c resp=AHB_RESP_OKAY waits=2 wdata=0xe9ee0b79
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2075000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[7] addr=0x0000a19c wdata=0xe9ee0b79 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2085000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[8/16] addr=0x0000a1a0 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x88dc997a
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2085000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a1a0 resp=AHB_RESP_OKAY waits=0 wdata=0x88dc997a
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2085000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[8] addr=0x0000a1a0 wdata=0x88dc997a resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2115000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[9/16] addr=0x0000a1a4 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xf5eb3a50
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2115000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a1a4 resp=AHB_RESP_OKAY waits=2 wdata=0xf5eb3a50
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2115000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[9] addr=0x0000a1a4 wdata=0xf5eb3a50 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2125000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[10/16] addr=0x0000a1a8 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xfca9e29d
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2125000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a1a8 resp=AHB_RESP_OKAY waits=0 wdata=0xfca9e29d
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2125000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[10] addr=0x0000a1a8 wdata=0xfca9e29d resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2135000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[11/16] addr=0x0000a1ac trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x47770b1e
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2135000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a1ac resp=AHB_RESP_OKAY waits=0 wdata=0x47770b1e
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2135000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[11] addr=0x0000a1ac wdata=0x47770b1e resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2165000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[12/16] addr=0x0000a1b0 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x7b980a3a
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2165000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a1b0 resp=AHB_RESP_OKAY waits=2 wdata=0x7b980a3a
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2165000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[12] addr=0x0000a1b0 wdata=0x7b980a3a resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2175000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[13/16] addr=0x0000a1b4 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xadd7be40
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2175000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a1b4 resp=AHB_RESP_OKAY waits=0 wdata=0xadd7be40
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2175000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[13] addr=0x0000a1b4 wdata=0xadd7be40 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2205000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[14/16] addr=0x0000a1b8 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x66543a78
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2205000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a1b8 resp=AHB_RESP_OKAY waits=2 wdata=0x66543a78
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2205000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[14] addr=0x0000a1b8 wdata=0x66543a78 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2215000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[15/16] addr=0x0000a1bc trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x3ace78a3
+# UVM_INFO ../src/mst/ahb_master_driver.sv(376) @ 2215000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Transaction complete: AHB_WRITE 0x0000a180, 16 beats, burst=AHB_BURST_INCR16
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2215000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a1bc resp=AHB_RESP_OKAY waits=0 wdata=0x3ace78a3
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(212) @ 2215000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Observed [AHB_WRITE]: HADDR=0x0000a180, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 2215000: uvm_test_top.env.slave_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR16 size=AHB_SIZE_32B beats=16 error=0
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2215000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[15] addr=0x0000a1bc wdata=0x3ace78a3 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(231) @ 2215000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Observed [AHB_WRITE]: HADDR=0x0000a180, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 2215000: uvm_test_top.env.master_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR16 size=AHB_SIZE_32B beats=16 error=0
+# UVM_INFO ../src/env/ahb_scoreboard.sv(104) @ 2215000: uvm_test_top.env.scb [ahb_scoreboard] MATCH #5: [AHB_WRITE] HADDR=0x0000a180 AHB_BURST_INCR16 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 2215000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_WRITE]: HADDR=0x0000a1c0, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 2215000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_WRITE]: HADDR=0x0000a1c0, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2245000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/16] addr=0x0000a1c0 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY wdata=0x3b8355c6
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2245000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a1c0 resp=AHB_RESP_OKAY waits=0 wdata=0x3b8355c6
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2245000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000a1c0 wdata=0x3b8355c6 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2265000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/16] addr=0x0000a1c4 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x4a80ae54
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2265000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a1c4 resp=AHB_RESP_OKAY waits=1 wdata=0x4a80ae54
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2265000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000a1c4 wdata=0x4a80ae54 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2295000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[2/16] addr=0x0000a1c8 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xe23725ac
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2295000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a1c8 resp=AHB_RESP_OKAY waits=2 wdata=0xe23725ac
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2295000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[2] addr=0x0000a1c8 wdata=0xe23725ac resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2325000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[3/16] addr=0x0000a1cc trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x88e43ac8
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2325000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a1cc resp=AHB_RESP_OKAY waits=2 wdata=0x88e43ac8
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2325000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[3] addr=0x0000a1cc wdata=0x88e43ac8 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2355000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[4/16] addr=0x0000a1d0 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xf9c6bc32
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2355000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a1d0 resp=AHB_RESP_OKAY waits=2 wdata=0xf9c6bc32
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2355000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[4] addr=0x0000a1d0 wdata=0xf9c6bc32 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2375000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[5/16] addr=0x0000a1d4 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xc81bddf4
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2375000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a1d4 resp=AHB_RESP_OKAY waits=1 wdata=0xc81bddf4
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2375000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[5] addr=0x0000a1d4 wdata=0xc81bddf4 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2395000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[6/16] addr=0x0000a1d8 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x2def9244
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2395000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a1d8 resp=AHB_RESP_OKAY waits=1 wdata=0x2def9244
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2395000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[6] addr=0x0000a1d8 wdata=0x2def9244 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2415000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[7/16] addr=0x0000a1dc trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x9a1857f4
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2415000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a1dc resp=AHB_RESP_OKAY waits=1 wdata=0x9a1857f4
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2415000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[7] addr=0x0000a1dc wdata=0x9a1857f4 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2425000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[8/16] addr=0x0000a1e0 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xa108e285
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2425000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a1e0 resp=AHB_RESP_OKAY waits=0 wdata=0xa108e285
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2425000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[8] addr=0x0000a1e0 wdata=0xa108e285 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2435000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[9/16] addr=0x0000a1e4 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x17cc45f9
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2435000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a1e4 resp=AHB_RESP_OKAY waits=0 wdata=0x17cc45f9
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2435000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[9] addr=0x0000a1e4 wdata=0x17cc45f9 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2445000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[10/16] addr=0x0000a1e8 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x84040e00
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2445000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a1e8 resp=AHB_RESP_OKAY waits=0 wdata=0x84040e00
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2445000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[10] addr=0x0000a1e8 wdata=0x84040e00 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2465000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[11/16] addr=0x0000a1ec trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x9193b2b2
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2465000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a1ec resp=AHB_RESP_OKAY waits=1 wdata=0x9193b2b2
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2465000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[11] addr=0x0000a1ec wdata=0x9193b2b2 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2475000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[12/16] addr=0x0000a1f0 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x62abac12
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2475000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a1f0 resp=AHB_RESP_OKAY waits=0 wdata=0x62abac12
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2475000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[12] addr=0x0000a1f0 wdata=0x62abac12 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2505000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[13/16] addr=0x0000a1f4 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xf93b39f9
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2505000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a1f4 resp=AHB_RESP_OKAY waits=2 wdata=0xf93b39f9
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2505000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[13] addr=0x0000a1f4 wdata=0xf93b39f9 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2535000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[14/16] addr=0x0000a1f8 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xda0a6a74
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2535000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a1f8 resp=AHB_RESP_OKAY waits=2 wdata=0xda0a6a74
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2535000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[14] addr=0x0000a1f8 wdata=0xda0a6a74 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2545000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[15/16] addr=0x0000a1fc trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x6be135a5
+# UVM_INFO ../src/mst/ahb_master_driver.sv(376) @ 2545000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Transaction complete: AHB_WRITE 0x0000a1c0, 16 beats, burst=AHB_BURST_INCR16
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2545000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a1fc resp=AHB_RESP_OKAY waits=0 wdata=0x6be135a5
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2545000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[15] addr=0x0000a1fc wdata=0x6be135a5 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(231) @ 2545000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Observed [AHB_WRITE]: HADDR=0x0000a1c0, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 2545000: uvm_test_top.env.master_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR16 size=AHB_SIZE_32B beats=16 error=0
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(212) @ 2545000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Observed [AHB_WRITE]: HADDR=0x0000a1c0, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/env/ahb_scoreboard.sv(104) @ 2545000: uvm_test_top.env.scb [ahb_scoreboard] MATCH #6: [AHB_WRITE] HADDR=0x0000a1c0 AHB_BURST_INCR16 16 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 2545000: uvm_test_top.env.slave_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR16 size=AHB_SIZE_32B beats=16 error=0
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 2545000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_WRITE]: HADDR=0x0000a200, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 2545000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_WRITE]: HADDR=0x0000a200, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2585000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/16] addr=0x0000a200 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY wdata=0x818dad07
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2585000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a200 resp=AHB_RESP_OKAY waits=1 wdata=0x818dad07
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2585000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000a200 wdata=0x818dad07 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2595000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/16] addr=0x0000a204 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xc6c7dcca
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2595000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a204 resp=AHB_RESP_OKAY waits=0 wdata=0xc6c7dcca
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2595000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000a204 wdata=0xc6c7dcca resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst_seq/ahb_reset_seq.sv(85) @ 2612000: uvm_test_top.env.master_agent.sqr@@seq [ahb_reset_seq] Asserting reset 67 ns into burst 8
+# UVM_INFO ../src/tb_top.sv(59) @ 2612000: reporter [TB_TOP] Mid-sim reset requested - asserting rst_n
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(85) @ 2612000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Reset asserted - discarding partial transaction
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(242) @ 2612000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Discarding partial burst at reset (3 beats accepted)
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(88) @ 2612000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Reset asserted - discarding partial transaction
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(260) @ 2612000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Discarding partial burst at reset (3 beats accepted)
+# UVM_INFO ../src/mst/ahb_master_driver.sv(97) @ 2612000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Reset asserted - aborting transaction
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(69) @ 2612000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Reset asserted - slave driver idle
+# UVM_INFO ../src/mst/ahb_master_driver.sv(183) @ 2615000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Flushed pending transactions (reset)
+# UVM_INFO ../src/mst_seq/ahb_base_seq.sv(51) @ 2615000: uvm_test_top.env.master_agent.sqr@@seq [ahb_reset_seq] Transaction aborted by reset: AHB_WRITE 0x0000a200
+# UVM_INFO ../src/tb_top.sv(63) @ 2685000: reporter [TB_TOP] Mid-sim reset pulse complete - rst_n deasserted
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(63) @ 2685000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Reset deasserted - slave driver active (    auto mode)
+# UVM_INFO ../src/mst/ahb_master_driver.sv(72) @ 2685000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Reset deasserted - master driver active
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(81) @ 2685000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Reset deasserted - master monitor active
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(79) @ 2685000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Reset deasserted - slave monitor active
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 2685000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_WRITE]: HADDR=0x0000a240, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 2685000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_WRITE]: HADDR=0x0000a240, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2705000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/16] addr=0x0000a240 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY wdata=0x3b089c00
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2705000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a240 resp=AHB_RESP_OKAY waits=0 wdata=0x3b089c00
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2705000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000a240 wdata=0x3b089c00 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2715000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/16] addr=0x0000a244 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xa565f00c
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2715000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a244 resp=AHB_RESP_OKAY waits=0 wdata=0xa565f00c
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2715000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000a244 wdata=0xa565f00c resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2725000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[2/16] addr=0x0000a248 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x75c0b197
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2725000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a248 resp=AHB_RESP_OKAY waits=0 wdata=0x75c0b197
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2725000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[2] addr=0x0000a248 wdata=0x75c0b197 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2735000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[3/16] addr=0x0000a24c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x064cb269
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2735000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a24c resp=AHB_RESP_OKAY waits=0 wdata=0x064cb269
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2735000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[3] addr=0x0000a24c wdata=0x064cb269 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2755000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[4/16] addr=0x0000a250 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x51a3d690
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2755000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a250 resp=AHB_RESP_OKAY waits=1 wdata=0x51a3d690
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2755000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[4] addr=0x0000a250 wdata=0x51a3d690 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2765000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[5/16] addr=0x0000a254 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x673562ef
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2765000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a254 resp=AHB_RESP_OKAY waits=0 wdata=0x673562ef
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2765000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[5] addr=0x0000a254 wdata=0x673562ef resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2795000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[6/16] addr=0x0000a258 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xa367d953
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2795000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a258 resp=AHB_RESP_OKAY waits=2 wdata=0xa367d953
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2795000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[6] addr=0x0000a258 wdata=0xa367d953 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2825000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[7/16] addr=0x0000a25c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x0e2b7e31
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2825000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a25c resp=AHB_RESP_OKAY waits=2 wdata=0x0e2b7e31
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2825000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[7] addr=0x0000a25c wdata=0x0e2b7e31 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2855000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[8/16] addr=0x0000a260 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x5d3aaaa9
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2855000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a260 resp=AHB_RESP_OKAY waits=2 wdata=0x5d3aaaa9
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2855000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[8] addr=0x0000a260 wdata=0x5d3aaaa9 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2885000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[9/16] addr=0x0000a264 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xa7c2d029
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2885000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a264 resp=AHB_RESP_OKAY waits=2 wdata=0xa7c2d029
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2885000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[9] addr=0x0000a264 wdata=0xa7c2d029 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2895000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[10/16] addr=0x0000a268 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x71852af8
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2895000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a268 resp=AHB_RESP_OKAY waits=0 wdata=0x71852af8
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2895000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[10] addr=0x0000a268 wdata=0x71852af8 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2905000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[11/16] addr=0x0000a26c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xfc28ff7a
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2905000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a26c resp=AHB_RESP_OKAY waits=0 wdata=0xfc28ff7a
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2905000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[11] addr=0x0000a26c wdata=0xfc28ff7a resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2925000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[12/16] addr=0x0000a270 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x53156fa1
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2925000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a270 resp=AHB_RESP_OKAY waits=1 wdata=0x53156fa1
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2925000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[12] addr=0x0000a270 wdata=0x53156fa1 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2945000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[13/16] addr=0x0000a274 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x34600a7d
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2945000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a274 resp=AHB_RESP_OKAY waits=1 wdata=0x34600a7d
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2945000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[13] addr=0x0000a274 wdata=0x34600a7d resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2965000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[14/16] addr=0x0000a278 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xb4f1cb5d
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2965000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a278 resp=AHB_RESP_OKAY waits=1 wdata=0xb4f1cb5d
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2965000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[14] addr=0x0000a278 wdata=0xb4f1cb5d resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 2975000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[15/16] addr=0x0000a27c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x39715131
+# UVM_INFO ../src/mst/ahb_master_driver.sv(376) @ 2975000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Transaction complete: AHB_WRITE 0x0000a240, 16 beats, burst=AHB_BURST_INCR16
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 2975000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a27c resp=AHB_RESP_OKAY waits=0 wdata=0x39715131
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 2975000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[15] addr=0x0000a27c wdata=0x39715131 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(231) @ 2975000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Observed [AHB_WRITE]: HADDR=0x0000a240, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 2975000: uvm_test_top.env.master_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR16 size=AHB_SIZE_32B beats=16 error=0
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(212) @ 2975000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Observed [AHB_WRITE]: HADDR=0x0000a240, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/env/ahb_scoreboard.sv(104) @ 2975000: uvm_test_top.env.scb [ahb_scoreboard] MATCH #7: [AHB_WRITE] HADDR=0x0000a240 AHB_BURST_INCR16 16 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 2975000: uvm_test_top.env.slave_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR16 size=AHB_SIZE_32B beats=16 error=0
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 2975000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_WRITE]: HADDR=0x0000a280, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 2975000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_WRITE]: HADDR=0x0000a280, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3005000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/16] addr=0x0000a280 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY wdata=0x229a6226
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3005000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a280 resp=AHB_RESP_OKAY waits=0 wdata=0x229a6226
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3005000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000a280 wdata=0x229a6226 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3015000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/16] addr=0x0000a284 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x21194708
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3015000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a284 resp=AHB_RESP_OKAY waits=0 wdata=0x21194708
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3015000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000a284 wdata=0x21194708 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3035000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[2/16] addr=0x0000a288 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xf63e69d8
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3035000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a288 resp=AHB_RESP_OKAY waits=1 wdata=0xf63e69d8
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3035000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[2] addr=0x0000a288 wdata=0xf63e69d8 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3065000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[3/16] addr=0x0000a28c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x7fbf385a
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3065000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a28c resp=AHB_RESP_OKAY waits=2 wdata=0x7fbf385a
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3065000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[3] addr=0x0000a28c wdata=0x7fbf385a resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3075000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[4/16] addr=0x0000a290 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x997b8164
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3075000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a290 resp=AHB_RESP_OKAY waits=0 wdata=0x997b8164
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3075000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[4] addr=0x0000a290 wdata=0x997b8164 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3105000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[5/16] addr=0x0000a294 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x2430815b
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3105000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a294 resp=AHB_RESP_OKAY waits=2 wdata=0x2430815b
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3105000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[5] addr=0x0000a294 wdata=0x2430815b resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3115000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[6/16] addr=0x0000a298 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xcc4546ad
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3115000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a298 resp=AHB_RESP_OKAY waits=0 wdata=0xcc4546ad
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3115000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[6] addr=0x0000a298 wdata=0xcc4546ad resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3125000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[7/16] addr=0x0000a29c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x69bbc557
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3125000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a29c resp=AHB_RESP_OKAY waits=0 wdata=0x69bbc557
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3125000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[7] addr=0x0000a29c wdata=0x69bbc557 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3155000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[8/16] addr=0x0000a2a0 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xbd7d2e15
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3155000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a2a0 resp=AHB_RESP_OKAY waits=2 wdata=0xbd7d2e15
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3155000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[8] addr=0x0000a2a0 wdata=0xbd7d2e15 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3165000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[9/16] addr=0x0000a2a4 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x6ff90af4
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3165000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a2a4 resp=AHB_RESP_OKAY waits=0 wdata=0x6ff90af4
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3165000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[9] addr=0x0000a2a4 wdata=0x6ff90af4 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3175000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[10/16] addr=0x0000a2a8 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xb1b30241
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3175000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a2a8 resp=AHB_RESP_OKAY waits=0 wdata=0xb1b30241
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3175000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[10] addr=0x0000a2a8 wdata=0xb1b30241 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3205000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[11/16] addr=0x0000a2ac trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x5e92d44a
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3205000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a2ac resp=AHB_RESP_OKAY waits=2 wdata=0x5e92d44a
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3205000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[11] addr=0x0000a2ac wdata=0x5e92d44a resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3225000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[12/16] addr=0x0000a2b0 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xbe94fc98
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3225000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a2b0 resp=AHB_RESP_OKAY waits=1 wdata=0xbe94fc98
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3225000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[12] addr=0x0000a2b0 wdata=0xbe94fc98 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3235000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[13/16] addr=0x0000a2b4 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xb43975bd
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3235000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a2b4 resp=AHB_RESP_OKAY waits=0 wdata=0xb43975bd
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3235000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[13] addr=0x0000a2b4 wdata=0xb43975bd resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3245000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[14/16] addr=0x0000a2b8 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xba22a501
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3245000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a2b8 resp=AHB_RESP_OKAY waits=0 wdata=0xba22a501
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3245000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[14] addr=0x0000a2b8 wdata=0xba22a501 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3275000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[15/16] addr=0x0000a2bc trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xac34d873
+# UVM_INFO ../src/mst/ahb_master_driver.sv(376) @ 3275000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Transaction complete: AHB_WRITE 0x0000a280, 16 beats, burst=AHB_BURST_INCR16
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3275000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a2bc resp=AHB_RESP_OKAY waits=2 wdata=0xac34d873
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3275000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[15] addr=0x0000a2bc wdata=0xac34d873 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(231) @ 3275000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Observed [AHB_WRITE]: HADDR=0x0000a280, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 3275000: uvm_test_top.env.master_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR16 size=AHB_SIZE_32B beats=16 error=0
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(212) @ 3275000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Observed [AHB_WRITE]: HADDR=0x0000a280, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/env/ahb_scoreboard.sv(104) @ 3275000: uvm_test_top.env.scb [ahb_scoreboard] MATCH #8: [AHB_WRITE] HADDR=0x0000a280 AHB_BURST_INCR16 16 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 3275000: uvm_test_top.env.slave_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR16 size=AHB_SIZE_32B beats=16 error=0
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 3275000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_WRITE]: HADDR=0x0000a2c0, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 3275000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_WRITE]: HADDR=0x0000a2c0, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3315000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/16] addr=0x0000a2c0 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY wdata=0xb051919d
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3315000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a2c0 resp=AHB_RESP_OKAY waits=1 wdata=0xb051919d
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3315000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000a2c0 wdata=0xb051919d resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3325000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/16] addr=0x0000a2c4 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xad7a552b
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3325000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a2c4 resp=AHB_RESP_OKAY waits=0 wdata=0xad7a552b
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3325000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000a2c4 wdata=0xad7a552b resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst_seq/ahb_reset_seq.sv(85) @ 3351000: uvm_test_top.env.master_agent.sqr@@seq [ahb_reset_seq] Asserting reset 76 ns into burst 11
+# UVM_INFO ../src/tb_top.sv(59) @ 3351000: reporter [TB_TOP] Mid-sim reset requested - asserting rst_n
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(85) @ 3351000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Reset asserted - discarding partial transaction
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(242) @ 3351000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Discarding partial burst at reset (3 beats accepted)
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(88) @ 3351000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Reset asserted - discarding partial transaction
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(260) @ 3351000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Discarding partial burst at reset (3 beats accepted)
+# UVM_INFO ../src/mst/ahb_master_driver.sv(97) @ 3351000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Reset asserted - aborting transaction
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(69) @ 3351000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Reset asserted - slave driver idle
+# UVM_INFO ../src/mst/ahb_master_driver.sv(183) @ 3355000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Flushed pending transactions (reset)
+# UVM_INFO ../src/mst_seq/ahb_base_seq.sv(51) @ 3355000: uvm_test_top.env.master_agent.sqr@@seq [ahb_reset_seq] Transaction aborted by reset: AHB_WRITE 0x0000a2c0
+# UVM_INFO ../src/tb_top.sv(63) @ 3425000: reporter [TB_TOP] Mid-sim reset pulse complete - rst_n deasserted
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(63) @ 3425000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Reset deasserted - slave driver active (    auto mode)
+# UVM_INFO ../src/mst/ahb_master_driver.sv(72) @ 3425000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Reset deasserted - master driver active
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(81) @ 3425000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Reset deasserted - master monitor active
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(79) @ 3425000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Reset deasserted - slave monitor active
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 3425000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_WRITE]: HADDR=0x0000a300, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 3425000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_WRITE]: HADDR=0x0000a300, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3445000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/16] addr=0x0000a300 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY wdata=0xf7786960
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3445000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a300 resp=AHB_RESP_OKAY waits=0 wdata=0xf7786960
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3445000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000a300 wdata=0xf7786960 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3455000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/16] addr=0x0000a304 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x2ca9dc81
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3455000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a304 resp=AHB_RESP_OKAY waits=0 wdata=0x2ca9dc81
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3455000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000a304 wdata=0x2ca9dc81 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3465000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[2/16] addr=0x0000a308 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xaf3958ff
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3465000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a308 resp=AHB_RESP_OKAY waits=0 wdata=0xaf3958ff
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3465000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[2] addr=0x0000a308 wdata=0xaf3958ff resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3495000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[3/16] addr=0x0000a30c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x6a0caed2
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3495000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a30c resp=AHB_RESP_OKAY waits=2 wdata=0x6a0caed2
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3495000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[3] addr=0x0000a30c wdata=0x6a0caed2 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3515000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[4/16] addr=0x0000a310 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x2112b936
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3515000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a310 resp=AHB_RESP_OKAY waits=1 wdata=0x2112b936
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3515000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[4] addr=0x0000a310 wdata=0x2112b936 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3545000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[5/16] addr=0x0000a314 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x9393ac1e
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3545000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a314 resp=AHB_RESP_OKAY waits=2 wdata=0x9393ac1e
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3545000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[5] addr=0x0000a314 wdata=0x9393ac1e resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3565000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[6/16] addr=0x0000a318 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xe77f7256
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3565000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a318 resp=AHB_RESP_OKAY waits=1 wdata=0xe77f7256
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3565000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[6] addr=0x0000a318 wdata=0xe77f7256 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3595000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[7/16] addr=0x0000a31c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xaa954c65
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3595000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a31c resp=AHB_RESP_OKAY waits=2 wdata=0xaa954c65
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3595000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[7] addr=0x0000a31c wdata=0xaa954c65 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3625000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[8/16] addr=0x0000a320 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x482271bc
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3625000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a320 resp=AHB_RESP_OKAY waits=2 wdata=0x482271bc
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3625000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[8] addr=0x0000a320 wdata=0x482271bc resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3655000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[9/16] addr=0x0000a324 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xda83fbdb
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3655000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a324 resp=AHB_RESP_OKAY waits=2 wdata=0xda83fbdb
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3655000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[9] addr=0x0000a324 wdata=0xda83fbdb resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3675000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[10/16] addr=0x0000a328 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x74545148
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3675000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a328 resp=AHB_RESP_OKAY waits=1 wdata=0x74545148
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3675000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[10] addr=0x0000a328 wdata=0x74545148 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3685000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[11/16] addr=0x0000a32c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x20e818d4
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3685000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a32c resp=AHB_RESP_OKAY waits=0 wdata=0x20e818d4
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3685000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[11] addr=0x0000a32c wdata=0x20e818d4 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3715000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[12/16] addr=0x0000a330 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x2b3cf043
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3715000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a330 resp=AHB_RESP_OKAY waits=2 wdata=0x2b3cf043
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3715000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[12] addr=0x0000a330 wdata=0x2b3cf043 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3725000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[13/16] addr=0x0000a334 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xd97f934d
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3725000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a334 resp=AHB_RESP_OKAY waits=0 wdata=0xd97f934d
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3725000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[13] addr=0x0000a334 wdata=0xd97f934d resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3735000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[14/16] addr=0x0000a338 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x357d278e
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3735000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a338 resp=AHB_RESP_OKAY waits=0 wdata=0x357d278e
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3735000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[14] addr=0x0000a338 wdata=0x357d278e resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3765000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[15/16] addr=0x0000a33c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x25b5a6bc
+# UVM_INFO ../src/mst/ahb_master_driver.sv(376) @ 3765000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Transaction complete: AHB_WRITE 0x0000a300, 16 beats, burst=AHB_BURST_INCR16
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3765000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a33c resp=AHB_RESP_OKAY waits=2 wdata=0x25b5a6bc
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(212) @ 3765000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Observed [AHB_WRITE]: HADDR=0x0000a300, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 3765000: uvm_test_top.env.slave_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR16 size=AHB_SIZE_32B beats=16 error=0
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3765000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[15] addr=0x0000a33c wdata=0x25b5a6bc resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(231) @ 3765000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Observed [AHB_WRITE]: HADDR=0x0000a300, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 3765000: uvm_test_top.env.master_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR16 size=AHB_SIZE_32B beats=16 error=0
+# UVM_INFO ../src/env/ahb_scoreboard.sv(104) @ 3765000: uvm_test_top.env.scb [ahb_scoreboard] MATCH #9: [AHB_WRITE] HADDR=0x0000a300 AHB_BURST_INCR16 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 3765000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_WRITE]: HADDR=0x0000a340, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 3765000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_WRITE]: HADDR=0x0000a340, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3795000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/16] addr=0x0000a340 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY wdata=0x3e083b96
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3795000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a340 resp=AHB_RESP_OKAY waits=0 wdata=0x3e083b96
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3795000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000a340 wdata=0x3e083b96 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3825000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/16] addr=0x0000a344 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xb370aa6f
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3825000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a344 resp=AHB_RESP_OKAY waits=2 wdata=0xb370aa6f
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3825000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000a344 wdata=0xb370aa6f resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3855000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[2/16] addr=0x0000a348 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x62a276df
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3855000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a348 resp=AHB_RESP_OKAY waits=2 wdata=0x62a276df
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3855000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[2] addr=0x0000a348 wdata=0x62a276df resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3865000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[3/16] addr=0x0000a34c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x66121b02
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3865000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a34c resp=AHB_RESP_OKAY waits=0 wdata=0x66121b02
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3865000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[3] addr=0x0000a34c wdata=0x66121b02 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3895000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[4/16] addr=0x0000a350 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x89c86d4a
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3895000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a350 resp=AHB_RESP_OKAY waits=2 wdata=0x89c86d4a
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3895000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[4] addr=0x0000a350 wdata=0x89c86d4a resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3925000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[5/16] addr=0x0000a354 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x2c420538
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3925000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a354 resp=AHB_RESP_OKAY waits=2 wdata=0x2c420538
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3925000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[5] addr=0x0000a354 wdata=0x2c420538 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3955000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[6/16] addr=0x0000a358 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x1fa70326
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3955000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a358 resp=AHB_RESP_OKAY waits=2 wdata=0x1fa70326
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3955000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[6] addr=0x0000a358 wdata=0x1fa70326 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 3975000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[7/16] addr=0x0000a35c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x39a0c90f
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 3975000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a35c resp=AHB_RESP_OKAY waits=1 wdata=0x39a0c90f
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 3975000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[7] addr=0x0000a35c wdata=0x39a0c90f resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4005000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[8/16] addr=0x0000a360 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xba529cba
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4005000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a360 resp=AHB_RESP_OKAY waits=2 wdata=0xba529cba
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4005000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[8] addr=0x0000a360 wdata=0xba529cba resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4025000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[9/16] addr=0x0000a364 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xf2130762
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4025000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a364 resp=AHB_RESP_OKAY waits=1 wdata=0xf2130762
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4025000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[9] addr=0x0000a364 wdata=0xf2130762 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4035000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[10/16] addr=0x0000a368 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xbeb0ffc5
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4035000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a368 resp=AHB_RESP_OKAY waits=0 wdata=0xbeb0ffc5
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4035000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[10] addr=0x0000a368 wdata=0xbeb0ffc5 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4065000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[11/16] addr=0x0000a36c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x6cadc68e
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4065000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a36c resp=AHB_RESP_OKAY waits=2 wdata=0x6cadc68e
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4065000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[11] addr=0x0000a36c wdata=0x6cadc68e resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4095000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[12/16] addr=0x0000a370 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xd7946207
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4095000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a370 resp=AHB_RESP_OKAY waits=2 wdata=0xd7946207
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4095000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[12] addr=0x0000a370 wdata=0xd7946207 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4105000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[13/16] addr=0x0000a374 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x3122e1e2
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4105000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a374 resp=AHB_RESP_OKAY waits=0 wdata=0x3122e1e2
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4105000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[13] addr=0x0000a374 wdata=0x3122e1e2 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4115000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[14/16] addr=0x0000a378 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x1a3a8501
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4115000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a378 resp=AHB_RESP_OKAY waits=0 wdata=0x1a3a8501
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4115000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[14] addr=0x0000a378 wdata=0x1a3a8501 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4145000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[15/16] addr=0x0000a37c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xaf8323ba
+# UVM_INFO ../src/mst/ahb_master_driver.sv(376) @ 4145000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Transaction complete: AHB_WRITE 0x0000a340, 16 beats, burst=AHB_BURST_INCR16
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4145000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a37c resp=AHB_RESP_OKAY waits=2 wdata=0xaf8323ba
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(212) @ 4145000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Observed [AHB_WRITE]: HADDR=0x0000a340, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 4145000: uvm_test_top.env.slave_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR16 size=AHB_SIZE_32B beats=16 error=0
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4145000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[15] addr=0x0000a37c wdata=0xaf8323ba resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(231) @ 4145000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Observed [AHB_WRITE]: HADDR=0x0000a340, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 4145000: uvm_test_top.env.master_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR16 size=AHB_SIZE_32B beats=16 error=0
+# UVM_INFO ../src/env/ahb_scoreboard.sv(104) @ 4145000: uvm_test_top.env.scb [ahb_scoreboard] MATCH #10: [AHB_WRITE] HADDR=0x0000a340 AHB_BURST_INCR16 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 4145000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_WRITE]: HADDR=0x0000a380, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 4145000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_WRITE]: HADDR=0x0000a380, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4195000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/16] addr=0x0000a380 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY wdata=0x5a0202ee
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4195000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a380 resp=AHB_RESP_OKAY waits=2 wdata=0x5a0202ee
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4195000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000a380 wdata=0x5a0202ee resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4215000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/16] addr=0x0000a384 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xa7bfb61c
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4215000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a384 resp=AHB_RESP_OKAY waits=1 wdata=0xa7bfb61c
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4215000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000a384 wdata=0xa7bfb61c resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4245000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[2/16] addr=0x0000a388 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x79cd8e44
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4245000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a388 resp=AHB_RESP_OKAY waits=2 wdata=0x79cd8e44
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4245000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[2] addr=0x0000a388 wdata=0x79cd8e44 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4275000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[3/16] addr=0x0000a38c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xb7f2cb2c
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4275000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a38c resp=AHB_RESP_OKAY waits=2 wdata=0xb7f2cb2c
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4275000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[3] addr=0x0000a38c wdata=0xb7f2cb2c resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst_seq/ahb_reset_seq.sv(85) @ 4281000: uvm_test_top.env.master_agent.sqr@@seq [ahb_reset_seq] Asserting reset 136 ns into burst 14
+# UVM_INFO ../src/tb_top.sv(59) @ 4281000: reporter [TB_TOP] Mid-sim reset requested - asserting rst_n
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(85) @ 4281000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Reset asserted - discarding partial transaction
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(242) @ 4281000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Discarding partial burst at reset (5 beats accepted)
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(88) @ 4281000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Reset asserted - discarding partial transaction
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(260) @ 4281000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Discarding partial burst at reset (5 beats accepted)
+# UVM_INFO ../src/mst/ahb_master_driver.sv(97) @ 4281000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Reset asserted - aborting transaction
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(69) @ 4281000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Reset asserted - slave driver idle
+# UVM_INFO ../src/mst/ahb_master_driver.sv(183) @ 4285000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Flushed pending transactions (reset)
+# UVM_INFO ../src/mst_seq/ahb_base_seq.sv(51) @ 4285000: uvm_test_top.env.master_agent.sqr@@seq [ahb_reset_seq] Transaction aborted by reset: AHB_WRITE 0x0000a380
+# UVM_INFO ../src/tb_top.sv(63) @ 4355000: reporter [TB_TOP] Mid-sim reset pulse complete - rst_n deasserted
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(63) @ 4355000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Reset deasserted - slave driver active (    auto mode)
+# UVM_INFO ../src/mst/ahb_master_driver.sv(72) @ 4355000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Reset deasserted - master driver active
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(81) @ 4355000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Reset deasserted - master monitor active
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(79) @ 4355000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Reset deasserted - slave monitor active
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 4355000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_WRITE]: HADDR=0x0000a3c0, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 4355000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_WRITE]: HADDR=0x0000a3c0, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4395000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/16] addr=0x0000a3c0 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY wdata=0x09d65a66
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4395000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a3c0 resp=AHB_RESP_OKAY waits=2 wdata=0x09d65a66
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4395000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000a3c0 wdata=0x09d65a66 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4425000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/16] addr=0x0000a3c4 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xb3bfa61b
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4425000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a3c4 resp=AHB_RESP_OKAY waits=2 wdata=0xb3bfa61b
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4425000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000a3c4 wdata=0xb3bfa61b resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4445000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[2/16] addr=0x0000a3c8 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x13ca8e89
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4445000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a3c8 resp=AHB_RESP_OKAY waits=1 wdata=0x13ca8e89
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4445000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[2] addr=0x0000a3c8 wdata=0x13ca8e89 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4475000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[3/16] addr=0x0000a3cc trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x96ba9077
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4475000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a3cc resp=AHB_RESP_OKAY waits=2 wdata=0x96ba9077
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4475000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[3] addr=0x0000a3cc wdata=0x96ba9077 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4505000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[4/16] addr=0x0000a3d0 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x8c8a2509
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4505000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a3d0 resp=AHB_RESP_OKAY waits=2 wdata=0x8c8a2509
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4505000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[4] addr=0x0000a3d0 wdata=0x8c8a2509 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4515000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[5/16] addr=0x0000a3d4 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xb4d7568d
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4515000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a3d4 resp=AHB_RESP_OKAY waits=0 wdata=0xb4d7568d
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4515000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[5] addr=0x0000a3d4 wdata=0xb4d7568d resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4535000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[6/16] addr=0x0000a3d8 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xf8327acd
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4535000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a3d8 resp=AHB_RESP_OKAY waits=1 wdata=0xf8327acd
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4535000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[6] addr=0x0000a3d8 wdata=0xf8327acd resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4565000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[7/16] addr=0x0000a3dc trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x95e9fd97
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4565000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a3dc resp=AHB_RESP_OKAY waits=2 wdata=0x95e9fd97
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4565000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[7] addr=0x0000a3dc wdata=0x95e9fd97 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4575000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[8/16] addr=0x0000a3e0 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x2e2fc401
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4575000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a3e0 resp=AHB_RESP_OKAY waits=0 wdata=0x2e2fc401
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4575000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[8] addr=0x0000a3e0 wdata=0x2e2fc401 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4595000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[9/16] addr=0x0000a3e4 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xff690dd2
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4595000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a3e4 resp=AHB_RESP_OKAY waits=1 wdata=0xff690dd2
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4595000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[9] addr=0x0000a3e4 wdata=0xff690dd2 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4605000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[10/16] addr=0x0000a3e8 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x52b2750b
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4605000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a3e8 resp=AHB_RESP_OKAY waits=0 wdata=0x52b2750b
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4605000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[10] addr=0x0000a3e8 wdata=0x52b2750b resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4625000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[11/16] addr=0x0000a3ec trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x895eb613
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4625000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a3ec resp=AHB_RESP_OKAY waits=1 wdata=0x895eb613
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4625000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[11] addr=0x0000a3ec wdata=0x895eb613 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4655000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[12/16] addr=0x0000a3f0 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x6b3dccdb
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4655000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a3f0 resp=AHB_RESP_OKAY waits=2 wdata=0x6b3dccdb
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4655000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[12] addr=0x0000a3f0 wdata=0x6b3dccdb resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4675000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[13/16] addr=0x0000a3f4 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x70c3dc06
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4675000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a3f4 resp=AHB_RESP_OKAY waits=1 wdata=0x70c3dc06
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4675000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[13] addr=0x0000a3f4 wdata=0x70c3dc06 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4705000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[14/16] addr=0x0000a3f8 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x57b7cee6
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4705000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a3f8 resp=AHB_RESP_OKAY waits=2 wdata=0x57b7cee6
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4705000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[14] addr=0x0000a3f8 wdata=0x57b7cee6 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4715000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[15/16] addr=0x0000a3fc trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x96c893fb
+# UVM_INFO ../src/mst/ahb_master_driver.sv(376) @ 4715000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Transaction complete: AHB_WRITE 0x0000a3c0, 16 beats, burst=AHB_BURST_INCR16
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4715000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a3fc resp=AHB_RESP_OKAY waits=0 wdata=0x96c893fb
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(212) @ 4715000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Observed [AHB_WRITE]: HADDR=0x0000a3c0, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 4715000: uvm_test_top.env.slave_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR16 size=AHB_SIZE_32B beats=16 error=0
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4715000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[15] addr=0x0000a3fc wdata=0x96c893fb resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(231) @ 4715000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Observed [AHB_WRITE]: HADDR=0x0000a3c0, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 4715000: uvm_test_top.env.master_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR16 size=AHB_SIZE_32B beats=16 error=0
+# UVM_INFO ../src/env/ahb_scoreboard.sv(104) @ 4715000: uvm_test_top.env.scb [ahb_scoreboard] MATCH #11: [AHB_WRITE] HADDR=0x0000a3c0 AHB_BURST_INCR16 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 4715000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_WRITE]: HADDR=0x0000a400, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 4715000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_WRITE]: HADDR=0x0000a400, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4765000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/16] addr=0x0000a400 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY wdata=0x57d60838
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4765000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a400 resp=AHB_RESP_OKAY waits=2 wdata=0x57d60838
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4765000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000a400 wdata=0x57d60838 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4785000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/16] addr=0x0000a404 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x3a88fea8
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4785000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a404 resp=AHB_RESP_OKAY waits=1 wdata=0x3a88fea8
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4785000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000a404 wdata=0x3a88fea8 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4815000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[2/16] addr=0x0000a408 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x8f86ce81
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4815000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a408 resp=AHB_RESP_OKAY waits=2 wdata=0x8f86ce81
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4815000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[2] addr=0x0000a408 wdata=0x8f86ce81 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4825000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[3/16] addr=0x0000a40c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x0a09a8e0
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4825000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a40c resp=AHB_RESP_OKAY waits=0 wdata=0x0a09a8e0
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4825000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[3] addr=0x0000a40c wdata=0x0a09a8e0 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4855000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[4/16] addr=0x0000a410 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xb3385a19
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4855000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a410 resp=AHB_RESP_OKAY waits=2 wdata=0xb3385a19
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4855000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[4] addr=0x0000a410 wdata=0xb3385a19 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4875000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[5/16] addr=0x0000a414 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x63bb8735
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4875000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a414 resp=AHB_RESP_OKAY waits=1 wdata=0x63bb8735
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4875000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[5] addr=0x0000a414 wdata=0x63bb8735 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4885000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[6/16] addr=0x0000a418 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xfd8c394b
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4885000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a418 resp=AHB_RESP_OKAY waits=0 wdata=0xfd8c394b
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4885000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[6] addr=0x0000a418 wdata=0xfd8c394b resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4905000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[7/16] addr=0x0000a41c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x7abd3d52
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4905000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a41c resp=AHB_RESP_OKAY waits=1 wdata=0x7abd3d52
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4905000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[7] addr=0x0000a41c wdata=0x7abd3d52 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4925000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[8/16] addr=0x0000a420 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xccded544
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4925000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a420 resp=AHB_RESP_OKAY waits=1 wdata=0xccded544
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4925000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[8] addr=0x0000a420 wdata=0xccded544 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4935000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[9/16] addr=0x0000a424 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x8b9a3e45
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4935000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a424 resp=AHB_RESP_OKAY waits=0 wdata=0x8b9a3e45
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4935000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[9] addr=0x0000a424 wdata=0x8b9a3e45 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4955000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[10/16] addr=0x0000a428 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x92cfb4ab
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4955000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a428 resp=AHB_RESP_OKAY waits=1 wdata=0x92cfb4ab
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4955000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[10] addr=0x0000a428 wdata=0x92cfb4ab resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4975000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[11/16] addr=0x0000a42c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x0c13b602
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4975000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a42c resp=AHB_RESP_OKAY waits=1 wdata=0x0c13b602
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4975000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[11] addr=0x0000a42c wdata=0x0c13b602 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4985000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[12/16] addr=0x0000a430 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x76010201
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4985000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a430 resp=AHB_RESP_OKAY waits=0 wdata=0x76010201
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4985000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[12] addr=0x0000a430 wdata=0x76010201 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 4995000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[13/16] addr=0x0000a434 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xb6f6f7e8
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 4995000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a434 resp=AHB_RESP_OKAY waits=0 wdata=0xb6f6f7e8
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 4995000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[13] addr=0x0000a434 wdata=0xb6f6f7e8 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 5025000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[14/16] addr=0x0000a438 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xe6f33f87
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 5025000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a438 resp=AHB_RESP_OKAY waits=2 wdata=0xe6f33f87
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 5025000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[14] addr=0x0000a438 wdata=0xe6f33f87 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 5055000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[15/16] addr=0x0000a43c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x962e46a7
+# UVM_INFO ../src/mst/ahb_master_driver.sv(376) @ 5055000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Transaction complete: AHB_WRITE 0x0000a400, 16 beats, burst=AHB_BURST_INCR16
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 5055000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a43c resp=AHB_RESP_OKAY waits=2 wdata=0x962e46a7
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(212) @ 5055000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Observed [AHB_WRITE]: HADDR=0x0000a400, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 5055000: uvm_test_top.env.slave_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR16 size=AHB_SIZE_32B beats=16 error=0
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 5055000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[15] addr=0x0000a43c wdata=0x962e46a7 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(231) @ 5055000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Observed [AHB_WRITE]: HADDR=0x0000a400, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 5055000: uvm_test_top.env.master_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR16 size=AHB_SIZE_32B beats=16 error=0
+# UVM_INFO ../src/env/ahb_scoreboard.sv(104) @ 5055000: uvm_test_top.env.scb [ahb_scoreboard] MATCH #12: [AHB_WRITE] HADDR=0x0000a400 AHB_BURST_INCR16 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 5055000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_WRITE]: HADDR=0x0000a440, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 5055000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_WRITE]: HADDR=0x0000a440, HBURST=AHB_BURST_INCR16, HSIZE=AHB_SIZE_32B, 16 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 5105000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/16] addr=0x0000a440 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY wdata=0x6205e521
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 5105000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a440 resp=AHB_RESP_OKAY waits=2 wdata=0x6205e521
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 5105000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000a440 wdata=0x6205e521 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 5115000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/16] addr=0x0000a444 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x74ca391b
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 5115000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a444 resp=AHB_RESP_OKAY waits=0 wdata=0x74ca391b
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 5115000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000a444 wdata=0x74ca391b resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 5145000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[2/16] addr=0x0000a448 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x11a5323d
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 5145000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000a448 resp=AHB_RESP_OKAY waits=2 wdata=0x11a5323d
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 5145000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[2] addr=0x0000a448 wdata=0x11a5323d resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst_seq/ahb_reset_seq.sv(85) @ 5173000: uvm_test_top.env.master_agent.sqr@@seq [ahb_reset_seq] Asserting reset 118 ns into burst 17
+# UVM_INFO ../src/tb_top.sv(59) @ 5173000: reporter [TB_TOP] Mid-sim reset requested - asserting rst_n
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(85) @ 5173000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Reset asserted - discarding partial transaction
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(242) @ 5173000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Discarding partial burst at reset (4 beats accepted)
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(88) @ 5173000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Reset asserted - discarding partial transaction
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(260) @ 5173000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Discarding partial burst at reset (4 beats accepted)
+# UVM_INFO ../src/mst/ahb_master_driver.sv(97) @ 5173000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Reset asserted - aborting transaction
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(69) @ 5173000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Reset asserted - slave driver idle
+# UVM_INFO ../src/mst/ahb_master_driver.sv(183) @ 5175000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Flushed pending transactions (reset)
+# UVM_INFO ../src/mst_seq/ahb_base_seq.sv(51) @ 5175000: uvm_test_top.env.master_agent.sqr@@seq [ahb_reset_seq] Transaction aborted by reset: AHB_WRITE 0x0000a440
+# UVM_INFO ../src/tb_top.sv(63) @ 5245000: reporter [TB_TOP] Mid-sim reset pulse complete - rst_n deasserted
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(63) @ 5245000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Reset deasserted - slave driver active (    auto mode)
+# UVM_INFO ../src/mst/ahb_master_driver.sv(72) @ 5245000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Reset deasserted - master driver active
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(81) @ 5245000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Reset deasserted - master monitor active
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(79) @ 5245000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Reset deasserted - slave monitor active
+# UVM_INFO ../src/mst_seq/ahb_reset_seq.sv(118) @ 5675000: uvm_test_top.env.master_agent.sqr@@seq [ahb_reset_seq] Recovery phase: 4 write/read pairs
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 5675000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_WRITE]: HADDR=0x0000b000, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 5675000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_WRITE]: HADDR=0x0000b000, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 5695000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/4] addr=0x0000b000 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY wdata=0x2a40ac8b
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 5695000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000b000 resp=AHB_RESP_OKAY waits=0 wdata=0x2a40ac8b
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 5695000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000b000 wdata=0x2a40ac8b resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 5715000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/4] addr=0x0000b004 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xd47d0e26
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 5715000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000b004 resp=AHB_RESP_OKAY waits=1 wdata=0xd47d0e26
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 5715000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000b004 wdata=0xd47d0e26 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 5725000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[2/4] addr=0x0000b008 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x8e20103a
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 5725000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000b008 resp=AHB_RESP_OKAY waits=0 wdata=0x8e20103a
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 5725000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[2] addr=0x0000b008 wdata=0x8e20103a resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 5755000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[3/4] addr=0x0000b00c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x965286d0
+# UVM_INFO ../src/mst/ahb_master_driver.sv(376) @ 5755000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Transaction complete: AHB_WRITE 0x0000b000, 4 beats, burst=AHB_BURST_INCR4
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 5755000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000b00c resp=AHB_RESP_OKAY waits=2 wdata=0x965286d0
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 5755000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[3] addr=0x0000b00c wdata=0x965286d0 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(231) @ 5755000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Observed [AHB_WRITE]: HADDR=0x0000b000, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 5755000: uvm_test_top.env.master_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR4 size=AHB_SIZE_32B beats=4 error=0
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(212) @ 5755000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Observed [AHB_WRITE]: HADDR=0x0000b000, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats
+# UVM_INFO ../src/env/ahb_scoreboard.sv(104) @ 5755000: uvm_test_top.env.scb [ahb_scoreboard] MATCH #13: [AHB_WRITE] HADDR=0x0000b000 AHB_BURST_INCR4 4 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 5755000: uvm_test_top.env.slave_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR4 size=AHB_SIZE_32B beats=4 error=0
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 5755000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_READ]: HADDR=0x0000b000, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 5755000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_READ]: HADDR=0x0000b000, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 5795000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/4] addr=0x0000b000 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY rdata=0x2a40ac8b
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 5795000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_READ addr=0x0000b000 resp=AHB_RESP_OKAY waits=1 rdata=0x2a40ac8b
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 5795000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000b000 rdata=0x2a40ac8b resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 5805000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/4] addr=0x0000b004 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY rdata=0xd47d0e26
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 5805000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_READ addr=0x0000b004 resp=AHB_RESP_OKAY waits=0 rdata=0xd47d0e26
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 5805000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000b004 rdata=0xd47d0e26 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 5815000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[2/4] addr=0x0000b008 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY rdata=0x8e20103a
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 5815000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_READ addr=0x0000b008 resp=AHB_RESP_OKAY waits=0 rdata=0x8e20103a
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 5815000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[2] addr=0x0000b008 rdata=0x8e20103a resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 5845000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[3/4] addr=0x0000b00c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY rdata=0x965286d0
+# UVM_INFO ../src/mst/ahb_master_driver.sv(376) @ 5845000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Transaction complete: AHB_READ 0x0000b000, 4 beats, burst=AHB_BURST_INCR4
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 5845000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_READ addr=0x0000b00c resp=AHB_RESP_OKAY waits=2 rdata=0x965286d0
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(212) @ 5845000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Observed [AHB_READ]: HADDR=0x0000b000, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 5845000: uvm_test_top.env.slave_cov [ahb_coverage] Sampled [AHB_READ]: burst=AHB_BURST_INCR4 size=AHB_SIZE_32B beats=4 error=0
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 5845000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[3] addr=0x0000b00c rdata=0x965286d0 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(231) @ 5845000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Observed [AHB_READ]: HADDR=0x0000b000, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 5845000: uvm_test_top.env.master_cov [ahb_coverage] Sampled [AHB_READ]: burst=AHB_BURST_INCR4 size=AHB_SIZE_32B beats=4 error=0
+# UVM_INFO ../src/env/ahb_scoreboard.sv(104) @ 5845000: uvm_test_top.env.scb [ahb_scoreboard] MATCH #14: [AHB_READ] HADDR=0x0000b000 AHB_BURST_INCR4 4 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 5845000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_WRITE]: HADDR=0x0000b040, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 5845000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_WRITE]: HADDR=0x0000b040, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 5875000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/4] addr=0x0000b040 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY wdata=0xbb4c04ff
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 5875000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000b040 resp=AHB_RESP_OKAY waits=0 wdata=0xbb4c04ff
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 5875000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000b040 wdata=0xbb4c04ff resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 5895000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/4] addr=0x0000b044 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xc28c2df9
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 5895000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000b044 resp=AHB_RESP_OKAY waits=1 wdata=0xc28c2df9
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 5895000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000b044 wdata=0xc28c2df9 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 5915000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[2/4] addr=0x0000b048 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x0b5a5cde
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 5915000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000b048 resp=AHB_RESP_OKAY waits=1 wdata=0x0b5a5cde
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 5915000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[2] addr=0x0000b048 wdata=0x0b5a5cde resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 5925000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[3/4] addr=0x0000b04c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x305c0d63
+# UVM_INFO ../src/mst/ahb_master_driver.sv(376) @ 5925000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Transaction complete: AHB_WRITE 0x0000b040, 4 beats, burst=AHB_BURST_INCR4
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 5925000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000b04c resp=AHB_RESP_OKAY waits=0 wdata=0x305c0d63
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(212) @ 5925000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Observed [AHB_WRITE]: HADDR=0x0000b040, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 5925000: uvm_test_top.env.slave_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR4 size=AHB_SIZE_32B beats=4 error=0
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 5925000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[3] addr=0x0000b04c wdata=0x305c0d63 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(231) @ 5925000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Observed [AHB_WRITE]: HADDR=0x0000b040, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 5925000: uvm_test_top.env.master_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR4 size=AHB_SIZE_32B beats=4 error=0
+# UVM_INFO ../src/env/ahb_scoreboard.sv(104) @ 5925000: uvm_test_top.env.scb [ahb_scoreboard] MATCH #15: [AHB_WRITE] HADDR=0x0000b040 AHB_BURST_INCR4 4 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 5925000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_READ]: HADDR=0x0000b040, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 5925000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_READ]: HADDR=0x0000b040, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 5965000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/4] addr=0x0000b040 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY rdata=0xbb4c04ff
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 5965000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_READ addr=0x0000b040 resp=AHB_RESP_OKAY waits=1 rdata=0xbb4c04ff
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 5965000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000b040 rdata=0xbb4c04ff resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 5995000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/4] addr=0x0000b044 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY rdata=0xc28c2df9
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 5995000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_READ addr=0x0000b044 resp=AHB_RESP_OKAY waits=2 rdata=0xc28c2df9
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 5995000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000b044 rdata=0xc28c2df9 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 6015000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[2/4] addr=0x0000b048 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY rdata=0x0b5a5cde
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 6015000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_READ addr=0x0000b048 resp=AHB_RESP_OKAY waits=1 rdata=0x0b5a5cde
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 6015000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[2] addr=0x0000b048 rdata=0x0b5a5cde resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 6045000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[3/4] addr=0x0000b04c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY rdata=0x305c0d63
+# UVM_INFO ../src/mst/ahb_master_driver.sv(376) @ 6045000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Transaction complete: AHB_READ 0x0000b040, 4 beats, burst=AHB_BURST_INCR4
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 6045000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_READ addr=0x0000b04c resp=AHB_RESP_OKAY waits=2 rdata=0x305c0d63
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(212) @ 6045000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Observed [AHB_READ]: HADDR=0x0000b040, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 6045000: uvm_test_top.env.slave_cov [ahb_coverage] Sampled [AHB_READ]: burst=AHB_BURST_INCR4 size=AHB_SIZE_32B beats=4 error=0
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 6045000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[3] addr=0x0000b04c rdata=0x305c0d63 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(231) @ 6045000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Observed [AHB_READ]: HADDR=0x0000b040, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 6045000: uvm_test_top.env.master_cov [ahb_coverage] Sampled [AHB_READ]: burst=AHB_BURST_INCR4 size=AHB_SIZE_32B beats=4 error=0
+# UVM_INFO ../src/env/ahb_scoreboard.sv(104) @ 6045000: uvm_test_top.env.scb [ahb_scoreboard] MATCH #16: [AHB_READ] HADDR=0x0000b040 AHB_BURST_INCR4 4 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 6045000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_WRITE]: HADDR=0x0000b080, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 6045000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_WRITE]: HADDR=0x0000b080, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 6095000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/4] addr=0x0000b080 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY wdata=0x83827b56
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 6095000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000b080 resp=AHB_RESP_OKAY waits=2 wdata=0x83827b56
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 6095000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000b080 wdata=0x83827b56 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 6105000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/4] addr=0x0000b084 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x76d78263
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 6105000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000b084 resp=AHB_RESP_OKAY waits=0 wdata=0x76d78263
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 6105000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000b084 wdata=0x76d78263 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 6115000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[2/4] addr=0x0000b088 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x1a60147e
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 6115000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000b088 resp=AHB_RESP_OKAY waits=0 wdata=0x1a60147e
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 6115000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[2] addr=0x0000b088 wdata=0x1a60147e resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 6125000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[3/4] addr=0x0000b08c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0xb97a2e77
+# UVM_INFO ../src/mst/ahb_master_driver.sv(376) @ 6125000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Transaction complete: AHB_WRITE 0x0000b080, 4 beats, burst=AHB_BURST_INCR4
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 6125000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000b08c resp=AHB_RESP_OKAY waits=0 wdata=0xb97a2e77
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(212) @ 6125000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Observed [AHB_WRITE]: HADDR=0x0000b080, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 6125000: uvm_test_top.env.slave_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR4 size=AHB_SIZE_32B beats=4 error=0
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 6125000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[3] addr=0x0000b08c wdata=0xb97a2e77 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(231) @ 6125000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Observed [AHB_WRITE]: HADDR=0x0000b080, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 6125000: uvm_test_top.env.master_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR4 size=AHB_SIZE_32B beats=4 error=0
+# UVM_INFO ../src/env/ahb_scoreboard.sv(104) @ 6125000: uvm_test_top.env.scb [ahb_scoreboard] MATCH #17: [AHB_WRITE] HADDR=0x0000b080 AHB_BURST_INCR4 4 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 6125000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_READ]: HADDR=0x0000b080, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 6125000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_READ]: HADDR=0x0000b080, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 6175000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/4] addr=0x0000b080 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY rdata=0x83827b56
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 6175000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_READ addr=0x0000b080 resp=AHB_RESP_OKAY waits=2 rdata=0x83827b56
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 6175000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000b080 rdata=0x83827b56 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 6195000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/4] addr=0x0000b084 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY rdata=0x76d78263
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 6195000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_READ addr=0x0000b084 resp=AHB_RESP_OKAY waits=1 rdata=0x76d78263
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 6195000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000b084 rdata=0x76d78263 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 6225000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[2/4] addr=0x0000b088 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY rdata=0x1a60147e
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 6225000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_READ addr=0x0000b088 resp=AHB_RESP_OKAY waits=2 rdata=0x1a60147e
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 6225000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[2] addr=0x0000b088 rdata=0x1a60147e resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 6245000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[3/4] addr=0x0000b08c trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY rdata=0xb97a2e77
+# UVM_INFO ../src/mst/ahb_master_driver.sv(376) @ 6245000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Transaction complete: AHB_READ 0x0000b080, 4 beats, burst=AHB_BURST_INCR4
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 6245000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_READ addr=0x0000b08c resp=AHB_RESP_OKAY waits=1 rdata=0xb97a2e77
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(212) @ 6245000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Observed [AHB_READ]: HADDR=0x0000b080, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 6245000: uvm_test_top.env.slave_cov [ahb_coverage] Sampled [AHB_READ]: burst=AHB_BURST_INCR4 size=AHB_SIZE_32B beats=4 error=0
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 6245000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[3] addr=0x0000b08c rdata=0xb97a2e77 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(231) @ 6245000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Observed [AHB_READ]: HADDR=0x0000b080, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 6245000: uvm_test_top.env.master_cov [ahb_coverage] Sampled [AHB_READ]: burst=AHB_BURST_INCR4 size=AHB_SIZE_32B beats=4 error=0
+# UVM_INFO ../src/env/ahb_scoreboard.sv(104) @ 6245000: uvm_test_top.env.scb [ahb_scoreboard] MATCH #18: [AHB_READ] HADDR=0x0000b080 AHB_BURST_INCR4 4 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 6245000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_WRITE]: HADDR=0x0000b0c0, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 6245000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_WRITE]: HADDR=0x0000b0c0, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 6285000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/4] addr=0x0000b0c0 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY wdata=0x385a65c7
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 6285000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000b0c0 resp=AHB_RESP_OKAY waits=1 wdata=0x385a65c7
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 6285000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000b0c0 wdata=0x385a65c7 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 6315000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/4] addr=0x0000b0c4 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x0b80c94e
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 6315000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000b0c4 resp=AHB_RESP_OKAY waits=2 wdata=0x0b80c94e
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 6315000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000b0c4 wdata=0x0b80c94e resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 6345000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[2/4] addr=0x0000b0c8 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x5c1f1308
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 6345000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000b0c8 resp=AHB_RESP_OKAY waits=2 wdata=0x5c1f1308
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 6345000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[2] addr=0x0000b0c8 wdata=0x5c1f1308 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 6355000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[3/4] addr=0x0000b0cc trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY wdata=0x70d7d744
+# UVM_INFO ../src/mst/ahb_master_driver.sv(376) @ 6355000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Transaction complete: AHB_WRITE 0x0000b0c0, 4 beats, burst=AHB_BURST_INCR4
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 6355000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_WRITE addr=0x0000b0cc resp=AHB_RESP_OKAY waits=0 wdata=0x70d7d744
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 6355000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[3] addr=0x0000b0cc wdata=0x70d7d744 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(231) @ 6355000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Observed [AHB_WRITE]: HADDR=0x0000b0c0, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 6355000: uvm_test_top.env.master_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR4 size=AHB_SIZE_32B beats=4 error=0
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(212) @ 6355000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Observed [AHB_WRITE]: HADDR=0x0000b0c0, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats
+# UVM_INFO ../src/env/ahb_scoreboard.sv(104) @ 6355000: uvm_test_top.env.scb [ahb_scoreboard] MATCH #19: [AHB_WRITE] HADDR=0x0000b0c0 AHB_BURST_INCR4 4 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 6355000: uvm_test_top.env.slave_cov [ahb_coverage] Sampled [AHB_WRITE]: burst=AHB_BURST_INCR4 size=AHB_SIZE_32B beats=4 error=0
+# UVM_INFO ../src/mst/ahb_master_driver.sv(85) @ 6355000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Queueing [AHB_READ]: HADDR=0x0000b0c0, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats
+# UVM_INFO ../src/mst/ahb_master_driver.sv(127) @ 6355000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Driving [AHB_READ]: HADDR=0x0000b0c0, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats               
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 6405000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[0/4] addr=0x0000b0c0 trans=AHB_TRANS_NONSEQ resp=AHB_RESP_OKAY rdata=0x385a65c7
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 6405000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_READ addr=0x0000b0c0 resp=AHB_RESP_OKAY waits=2 rdata=0x385a65c7
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 6405000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[0] addr=0x0000b0c0 rdata=0x385a65c7 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 6435000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[1/4] addr=0x0000b0c4 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY rdata=0x0b80c94e
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 6435000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_READ addr=0x0000b0c4 resp=AHB_RESP_OKAY waits=2 rdata=0x0b80c94e
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 6435000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[1] addr=0x0000b0c4 rdata=0x0b80c94e resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 6455000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[2/4] addr=0x0000b0c8 trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY rdata=0x5c1f1308
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 6455000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_READ addr=0x0000b0c8 resp=AHB_RESP_OKAY waits=1 rdata=0x5c1f1308
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 6455000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[2] addr=0x0000b0c8 rdata=0x5c1f1308 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_driver.sv(332) @ 6485000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Beat[3/4] addr=0x0000b0cc trans=AHB_TRANS_SEQ resp=AHB_RESP_OKAY rdata=0x70d7d744
+# UVM_INFO ../src/mst/ahb_master_driver.sv(376) @ 6485000: uvm_test_top.env.master_agent.drv [ahb_master_driver] Transaction complete: AHB_READ 0x0000b0c0, 4 beats, burst=AHB_BURST_INCR4
+# UVM_INFO ../src/slv/ahb_slave_driver.sv(184) @ 6485000: uvm_test_top.env.slave_agent.drv [ahb_slave_driver] Beat AHB_READ addr=0x0000b0cc resp=AHB_RESP_OKAY waits=2 rdata=0x70d7d744
+# UVM_INFO ../src/slv/ahb_slave_monitor.sv(212) @ 6485000: uvm_test_top.env.slave_agent.mon [ahb_slave_monitor] Observed [AHB_READ]: HADDR=0x0000b0c0, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 6485000: uvm_test_top.env.slave_cov [ahb_coverage] Sampled [AHB_READ]: burst=AHB_BURST_INCR4 size=AHB_SIZE_32B beats=4 error=0
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(128) @ 6485000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Beat[3] addr=0x0000b0cc rdata=0x70d7d744 resp=AHB_RESP_OKAY
+# UVM_INFO ../src/mst/ahb_master_monitor.sv(231) @ 6485000: uvm_test_top.env.master_agent.mon [ahb_master_monitor] Observed [AHB_READ]: HADDR=0x0000b0c0, HBURST=AHB_BURST_INCR4, HSIZE=AHB_SIZE_32B, 4 beats
+# UVM_INFO ../src/env/ahb_coverage.sv(174) @ 6485000: uvm_test_top.env.master_cov [ahb_coverage] Sampled [AHB_READ]: burst=AHB_BURST_INCR4 size=AHB_SIZE_32B beats=4 error=0
+# UVM_INFO ../src/env/ahb_scoreboard.sv(104) @ 6485000: uvm_test_top.env.scb [ahb_scoreboard] MATCH #20: [AHB_READ] HADDR=0x0000b0c0 AHB_BURST_INCR4 4 beats
+# UVM_INFO ../src/mst_seq/ahb_reset_seq.sv(152) @ 6485000: uvm_test_top.env.master_agent.sqr@@seq [ahb_reset_seq] Reset sequence done: sent=18 aborted=6 resets=6
+# UVM_INFO verilog_src/uvm-1.1d/src/base/uvm_objection.svh(1268) @ 6485500: reporter [TEST_DONE] 'run' phase is ready to proceed to the 'extract' phase
+# UVM_INFO ../src/env/ahb_coverage.sv(195) @ 6485500: uvm_test_top.env.master_cov [ahb_coverage] [master_cov] functional coverage: ahb_cg = 41.29%, ahb_trans_cg = 75.00%
+# UVM_INFO ../src/env/ahb_scoreboard.sv(208) @ 6485500: uvm_test_top.env.scb [ahb_scoreboard] Passthrough : compared=20 matched=20 mismatched=0
+# UVM_INFO ../src/env/ahb_scoreboard.sv(212) @ 6485500: uvm_test_top.env.scb [ahb_scoreboard] Ref-memory  : wr_bytes=832 rd_checked=64 rd_uninit=0 rd_mismatch=0
+# UVM_INFO ../src/env/ahb_coverage.sv(195) @ 6485500: uvm_test_top.env.slave_cov [ahb_coverage] [slave_cov] functional coverage: ahb_cg = 41.29%, ahb_trans_cg = 75.00%
+# UVM_INFO ../src/test/ahb_base_test.sv(74) @ 6485500: uvm_test_top [ahb_reset_test] 
+# === TEST PASSED ===
+# 
+# 
+# --- UVM Report Summary ---
+# 
+# ** Report counts by severity
+# UVM_INFO : 1032
+# UVM_WARNING :    0
+# UVM_ERROR :    0
+# UVM_FATAL :    0
+# ** Report counts by id
+# [Questa UVM]     3
+# [RNTST]     1
+# [TB_TOP]    15
+# [TEST_DONE]     1
+# [UVMTOP]     1
+# [ahb_coverage]    42
+# [ahb_master_agent]     1
+# [ahb_master_driver]   339
+# [ahb_master_monitor]   286
+# [ahb_reset_seq]    15
+# [ahb_reset_test]     1
+# [ahb_scoreboard]    22
+# [ahb_slave_agent]     1
+# [ahb_slave_driver]   260
+# [ahb_slave_monitor]    39
+# [ahb_vip_env]     5
+# ** Note: $finish    : /cadtools/mentor/Questa_10.6b/questasim/linux_x86_64/../verilog_src/uvm-1.1d/src/base/uvm_root.svh(430)
+#    Time: 6485500 ps  Iteration: 53  Instance: /tb_top
+# Saving coverage database on exit...
+# End time: 14:14:46 on Aug 06,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
