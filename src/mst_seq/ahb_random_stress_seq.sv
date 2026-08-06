@@ -23,6 +23,8 @@ class ahb_random_stress_seq extends ahb_base_seq;
     int unsigned num_busy_write;
     int unsigned num_busy_read;
     int unsigned num_multibeat_write;
+    int unsigned num_zero_wait_pairs;
+    int unsigned num_max_wait_pairs;
     int unsigned burst_count[8];
     int unsigned size_count[3];
 
@@ -79,6 +81,9 @@ class ahb_random_stress_seq extends ahb_base_seq;
 
         if (num_iter == 0)
             `uvm_fatal(get_type_name(), "NUM_ITER must be greater than zero")
+        if (num_iter < 2 && wait_max != 0)
+            `uvm_fatal(get_type_name(),
+                       "NUM_ITER must be at least two when WAIT_MAX is non-zero")
 
         `uvm_info(get_type_name(),
                   $sformatf("Starting random stress: iterations=%0d base=0x%08h wait_max=%0d",
@@ -88,8 +93,22 @@ class ahb_random_stress_seq extends ahb_base_seq;
             slot = base_addr + i * SLOT_SIZE;
 
             // Change slave timing only after the preceding pair has drained.
-            wait_lo = $urandom_range(wait_max, 0);
-            wait_hi = $urandom_range(wait_max, wait_lo);
+            // The first two pairs are deterministic coverage anchors; the
+            // remaining pairs retain constrained-random back-pressure.
+            if (i == 0) begin
+                wait_lo = 0;
+                wait_hi = 0;
+            end else if (i == 1) begin
+                wait_lo = wait_max;
+                wait_hi = wait_max;
+            end else begin
+                wait_lo = $urandom_range(wait_max, 0);
+                wait_hi = $urandom_range(wait_max, wait_lo);
+            end
+
+            if (wait_lo == 0 && wait_hi == 0) num_zero_wait_pairs++;
+            if (wait_lo == wait_max && wait_hi == wait_max)
+                num_max_wait_pairs++;
             if (slv_drv != null) begin
                 slv_drv.ready_delay_min = wait_lo;
                 slv_drv.ready_delay_max = wait_hi;
@@ -142,9 +161,10 @@ class ahb_random_stress_seq extends ahb_base_seq;
         end
 
         `uvm_info(get_type_name(),
-                  $sformatf("Random stress done: pairs=%0d pipelined=%0d busy_wr=%0d/%0d busy_rd=%0d beats=%0d mismatch=%0d",
+                  $sformatf("Random stress done: pairs=%0d pipelined=%0d busy_wr=%0d/%0d busy_rd=%0d waits_zero=%0d waits_max=%0d beats=%0d mismatch=%0d",
                             num_iter, num_pipelined, num_busy_write,
                             num_multibeat_write, num_busy_read,
+                            num_zero_wait_pairs, num_max_wait_pairs,
                             beats_checked, beats_mismatch),
                   (beats_mismatch == 0) ? UVM_LOW : UVM_NONE)
 
@@ -152,6 +172,10 @@ class ahb_random_stress_seq extends ahb_base_seq;
             (num_busy_write == 0 || num_busy_read == 0))
             `uvm_error(get_type_name(),
                        "Random stress generated no BUSY traffic in one direction")
+
+        if (num_zero_wait_pairs == 0 || num_max_wait_pairs == 0)
+            `uvm_error(get_type_name(),
+                       "Random stress missed a deterministic wait-state coverage anchor")
     endtask : body
 
 endclass : ahb_random_stress_seq
