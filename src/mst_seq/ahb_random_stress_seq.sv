@@ -20,13 +20,52 @@ class ahb_random_stress_seq extends ahb_base_seq;
     localparam int unsigned SLOT_SIZE = 128;
 
     int unsigned num_pipelined;
-    int unsigned num_busy;
+    int unsigned num_busy_write;
+    int unsigned num_busy_read;
+    int unsigned num_multibeat_write;
     int unsigned burst_count[8];
     int unsigned size_count[3];
 
     function new(string name = "ahb_random_stress_seq");
         super.new(name);
     endfunction : new
+
+    // Randomize BUSY independently on the read-back as well. An explicit
+    // non-zero constraint is required to override ahb_transaction's soft
+    // no-BUSY default; a dist containing zero alone does not override it.
+    virtual function ahb_transaction build_read_back(ahb_transaction wr);
+        ahb_transaction rd;
+        bit             inject_busy;
+        bit             inject_trailing_busy;
+
+        inject_busy          = $urandom_range(1, 0);
+        inject_trailing_busy = $urandom_range(1, 0);
+
+        rd = ahb_transaction::type_id::create("rd");
+        if (!rd.randomize() with {
+                write     == AHB_READ;
+                burst     == wr.burst;
+                size      == wr.size;
+                addr      == wr.addr;
+                num_beats == wr.num_beats;
+                foreach (busy_cycles[k])
+                    (inject_busy && k == 1) ->
+                        busy_cycles[k] inside {[1:3]};
+                (inject_trailing_busy && burst == AHB_BURST_INCR) ->
+                    trailing_busy_cycles inside {[1:3]};
+            })
+            `uvm_fatal(get_type_name(),
+                       $sformatf("Read randomization failed (%s @0x%08h)",
+                                 wr.burst.name(), wr.addr))
+
+        foreach (rd.busy_cycles[k])
+            if (rd.busy_cycles[k] != 0) begin
+                num_busy_read++;
+                return rd;
+            end
+        if (rd.trailing_busy_cycles != 0) num_busy_read++;
+        return rd;
+    endfunction : build_read_back
 
     virtual task body();
         ahb_transaction          wr;
@@ -35,6 +74,11 @@ class ahb_random_stress_seq extends ahb_base_seq;
         int unsigned             wait_hi;
         bit                      pipelined;
         bit                      has_busy;
+        bit                      inject_busy;
+        bit                      inject_trailing_busy;
+
+        if (num_iter == 0)
+            `uvm_fatal(get_type_name(), "NUM_ITER must be greater than zero")
 
         `uvm_info(get_type_name(),
                   $sformatf("Starting random stress: iterations=%0d base=0x%08h wait_max=%0d",
@@ -52,6 +96,8 @@ class ahb_random_stress_seq extends ahb_base_seq;
             end
 
             pipelined = $urandom_range(1, 0);
+            inject_busy          = $urandom_range(1, 0);
+            inject_trailing_busy = $urandom_range(1, 0);
 
             wr = ahb_transaction::type_id::create($sformatf("wr_%0d", i));
             if (!wr.randomize() with {
@@ -67,8 +113,10 @@ class ahb_random_stress_seq extends ahb_base_seq;
                                    AHB_BURST_INCR8, AHB_BURST_INCR16}) ->
                         (addr + num_beats * (1 << size) <= slot + SLOT_SIZE);
                     foreach (busy_cycles[k])
-                        busy_cycles[k] dist {0 := 80, [1:3] := 20};
-                    trailing_busy_cycles dist {0 := 85, [1:3] := 15};
+                        (inject_busy && k == 1) ->
+                            busy_cycles[k] inside {[1:3]};
+                    (inject_trailing_busy && burst == AHB_BURST_INCR) ->
+                        trailing_busy_cycles inside {[1:3]};
                 })
                 `uvm_fatal(get_type_name(),
                            $sformatf("Randomization failed at iteration %0d, slot 0x%08h",
@@ -81,7 +129,8 @@ class ahb_random_stress_seq extends ahb_base_seq;
             burst_count[int'(wr.burst)]++;
             size_count[int'(wr.size)]++;
             if (pipelined) num_pipelined++;
-            if (has_busy)  num_busy++;
+            if (wr.num_beats > 1) num_multibeat_write++;
+            if (has_busy)         num_busy_write++;
 
             `uvm_info(get_type_name(),
                       $sformatf("iter=%0d %s %s addr=0x%08h beats=%0d waits=%0d:%0d pipeline=%0b busy=%0b",
@@ -93,10 +142,16 @@ class ahb_random_stress_seq extends ahb_base_seq;
         end
 
         `uvm_info(get_type_name(),
-                  $sformatf("Random stress done: pairs=%0d pipelined=%0d busy=%0d beats=%0d mismatch=%0d",
-                            num_iter, num_pipelined, num_busy,
+                  $sformatf("Random stress done: pairs=%0d pipelined=%0d busy_wr=%0d/%0d busy_rd=%0d beats=%0d mismatch=%0d",
+                            num_iter, num_pipelined, num_busy_write,
+                            num_multibeat_write, num_busy_read,
                             beats_checked, beats_mismatch),
                   (beats_mismatch == 0) ? UVM_LOW : UVM_NONE)
+
+        if (num_multibeat_write != 0 &&
+            (num_busy_write == 0 || num_busy_read == 0))
+            `uvm_error(get_type_name(),
+                       "Random stress generated no BUSY traffic in one direction")
     endtask : body
 
 endclass : ahb_random_stress_seq
