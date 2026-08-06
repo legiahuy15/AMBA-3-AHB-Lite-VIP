@@ -38,6 +38,7 @@ package ahb_seq_pkg;
     `include "mst_seq/ahb_read_after_write_seq.sv"
     `include "mst_seq/ahb_back_to_back_seq.sv"
     `include "mst_seq/ahb_passive_seq.sv"
+    `include "mst_seq/ahb_random_stress_seq.sv"
 
     //-------------------------------------------------------------------------
     // Slave-sequence Library  (src/slv_seq/)
