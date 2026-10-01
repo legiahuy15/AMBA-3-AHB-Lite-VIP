@@ -2,15 +2,10 @@
 // File        : ahb_size_seq.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Transfer-size sweep. Walks HSIZE over every encoding legal on
-//               the data bus, each one at every alignment it allows, and issues
-//               them as SINGLE and as multi-beat bursts so HSIZE also has to
-//               hold constant for a whole burst. The swept set is fixed but its
-//               order, and each burst's position inside its slot, follow the
-//               seed. A separate check confirms the transaction constraints
-//               accept every HSIZE that fits the bus and reject every wider one.
-//               Requires the slave agent in auto-response mode (memory model).
-//               This file is `included inside ahb_seq_pkg.sv.
+// Description : Transfer-size sweep. All legal HSIZE values at every allowed
+//               alignment, as SINGLE and multi-beat bursts (shuffled order).
+//               Also checks that HSIZE wider than the bus fails randomization.
+//               Requires auto-response slave.
 //=============================================================================
 
 `ifndef AHB_SIZE_SEQ_INCLUDED_
@@ -27,31 +22,25 @@ class ahb_size_seq extends ahb_base_seq;
 
     bit [AHB_ADDR_WIDTH-1:0] base_addr = 32'h0000_6000;
 
-    // Both halves of the HSIZE encoding check, run once before the sweep
+    // Run check_size_encodings() before the sweep
     bit chk_size_encodings = 1'b1;
 
-    // One slot per sweep entry, holding the widest burst issued here (8 beats x
-    // 4 bytes) and leaving the burst room to move inside it. Slots are never
-    // reused, so transfers of different sizes cannot alias in the scoreboard
-    // reference memory, and a 64-byte stride keeps every burst clear of a 1KB
-    // boundary
+    // Address slot per burst (widest burst: 8 x 4B)
     localparam int unsigned SLOT_SIZE = 64;
 
     localparam int unsigned BUS_BYTES = AHB_DATA_WIDTH / 8;
 
-    // Sweep periods: 3 sizes and 4 burst types are coprime with the 4-lane
-    // offset walk, so 12 iterations cover every size/burst pair and every
-    // size/alignment pair
+    // 12 iterations cover all size/burst and size/alignment pairs
     localparam int unsigned NUM_SIZE  = 3;
     localparam int unsigned NUM_BURST = 4;
 
     //-------------------------------------------------------------------------
     // Statistics
     //-------------------------------------------------------------------------
-    int unsigned iter_per_size[NUM_SIZE];    // bursts issued at each HSIZE
-    int unsigned iter_per_lane[BUS_BYTES];   // bursts starting on each byte lane
-    int unsigned num_legal_accepted;         // HSIZE encodings that fit the bus
-    int unsigned num_illegal_rejected;       // wide HSIZE encodings refused
+    int unsigned iter_per_size[NUM_SIZE];    // bursts per HSIZE
+    int unsigned iter_per_lane[BUS_BYTES];   // bursts per start lane
+    int unsigned num_legal_accepted;         // legal HSIZE values accepted
+    int unsigned num_illegal_rejected;       // illegal HSIZE values rejected
 
     //-------------------------------------------------------------------------
     // Constructor
@@ -61,9 +50,7 @@ class ahb_size_seq extends ahb_base_seq;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Sweep tables - HSIZE encodings legal on a 32-bit bus, and the burst
-    // types they are issued with. The multi-beat entries are what exercise
-    // "HSIZE constant for the whole burst" (AHB_SIZ_006)
+    // Sweep tables - legal sizes and burst types (multi-beat: AHB_SIZ_006)
     //-------------------------------------------------------------------------
     function ahb_size_e get_size(int unsigned idx);
         case (idx % NUM_SIZE)
@@ -83,7 +70,7 @@ class ahb_size_seq extends ahb_base_seq;
     endfunction : get_burst
 
     //-------------------------------------------------------------------------
-    // Body - num_iter x (write burst, read-back, compare) over the sweep
+    // Body - num_iter x (write, read back, compare)
     //-------------------------------------------------------------------------
     virtual task body();
         ahb_transaction          wr;
@@ -101,9 +88,7 @@ class ahb_size_seq extends ahb_base_seq;
 
         if (chk_size_encodings) check_size_encodings();
 
-        // Which combinations run is fixed; the order they reach the bus is not.
-        // Shuffling gives every seed a different address stream and a different
-        // back-to-back pattern while the swept set stays complete
+        // Shuffled order, same coverage for every seed
         order = new[num_iter];
         foreach (order[j]) order[j] = j;
         order.shuffle();
@@ -112,13 +97,10 @@ class ahb_size_seq extends ahb_base_seq;
             idx    = order[j];
             slot   = base_addr + idx * SLOT_SIZE;
             sz     = get_size(idx);                 // period 3
-            bt     = get_burst(idx / NUM_SIZE);     // period 12 - all size/burst pairs
+            bt     = get_burst(idx / NUM_SIZE);     // period 12
             bytes  = 1 << sz;
 
-            // Every alignment the size allows: the raw offset walks all four
-            // byte lanes and is rounded down to the size boundary, so a byte
-            // transfer starts on lanes 0-3, a halfword on lanes 0 and 2, and a
-            // word only on lane 0 (AHB_SIZ_005)
+            // Start lane, aligned to the size (AHB_SIZ_005)
             offset = (idx % BUS_BYTES) & ~(bytes - 1);
 
             wr = ahb_transaction::type_id::create("wr");
@@ -127,17 +109,11 @@ class ahb_size_seq extends ahb_base_seq;
                     burst == bt;
                     size  == sz;
 
-                    // The sweep owns the start lane and the alignment; where
-                    // the burst sits inside its own slot is left to the seed.
-                    // The slot is SLOT_SIZE aligned, so pinning addr modulo the
-                    // bus width pins the start lane
+                    // Random position in the slot, fixed start lane
                     addr inside {[slot : slot + SLOT_SIZE - 1]};
                     addr % BUS_BYTES == offset;
 
-                    // Incrementing bursts must end inside the slot. A wrapping
-                    // burst needs no bound: its region is a power of two, no
-                    // wider than the slot, and naturally aligned, so it lies
-                    // wholly inside whichever slot holds its start address
+                    // INCR ends inside the slot (WRAP always does)
                     (burst inside {AHB_BURST_INCR,  AHB_BURST_INCR4,
                                    AHB_BURST_INCR8, AHB_BURST_INCR16}) ->
                         (addr + num_beats * (1 << size) <= slot + SLOT_SIZE);
@@ -161,13 +137,8 @@ class ahb_size_seq extends ahb_base_seq;
     endtask : body
 
     //-------------------------------------------------------------------------
-    // AHB_SIZ_004 - 2^HSIZE must never exceed the width of the data bus. The
-    // transaction constraint owns that rule (c_size_max), so the check walks
-    // all eight encodings and demands both halves of it: what fits the bus must
-    // still solve, what does not must leave the solver with no solution.
-    // The positive half is what makes the negative half mean something - on its
-    // own, "no solution" would also be the answer if some unrelated constraint
-    // had made the item unsolvable for every size
+    // check_size_encodings - all 8 HSIZE values: legal must randomize, wider
+    // than the bus must fail (c_size_max, AHB_SIZ_004)
     //-------------------------------------------------------------------------
     protected function void check_size_encodings();
         ahb_transaction tr;
@@ -203,8 +174,7 @@ class ahb_size_seq extends ahb_base_seq;
     endfunction : check_size_encodings
 
     //-------------------------------------------------------------------------
-    // End-of-sequence tally. A size or a lane that never came up means the
-    // sweep was cut short - the run proves less than the test claims
+    // report_sweep - summary; warn on unused size or lane
     //-------------------------------------------------------------------------
     protected function void report_sweep();
         ahb_size_e sz;

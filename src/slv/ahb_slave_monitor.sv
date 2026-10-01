@@ -2,9 +2,9 @@
 // File        : ahb_slave_monitor.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : AHB-Lite slave monitor. Reconstructs burst transactions from the
-//               pipelined bus (including HREADY wait states and HRESP) and
-//               broadcasts them on an analysis port. Passive: samples only.
+// Description : AHB-Lite slave monitor. Reconstructs bursts from the bus;
+//               publishes bursts on ap and per-address-phase HTRANS on
+//               trans_ap.
 //=============================================================================
 
 class ahb_slave_monitor extends uvm_monitor;
@@ -17,16 +17,13 @@ class ahb_slave_monitor extends uvm_monitor;
     // Completed transactions -> scoreboard / coverage
     uvm_analysis_port #(ahb_transaction) ap;
 
-    // One accepted address phase -> coverage. A reconstructed burst carries
-    // only its own beats, so IDLE never reaches ap; this port is the raw HTRANS
-    // the bus presented, IDLE included
+    // HTRANS per accepted address phase (incl. IDLE) -> coverage
     uvm_analysis_port #(ahb_trans_e) trans_ap;
 
-    // Completed transactions published on ap. Tests may use this observable
-    // statistic to verify that passive monitoring did not silently drop data.
+    // Transactions published on ap
     int unsigned num_observed;
 
-    // Burst reconstruction state (open = NONSEQ seen, not yet closed)
+    // Burst state (open = NONSEQ accepted, not yet closed)
     protected bit                       burst_open;
     protected bit [AHB_ADDR_WIDTH-1:0]  cur_addr;
     protected ahb_burst_e               cur_burst;
@@ -35,8 +32,8 @@ class ahb_slave_monitor extends uvm_monitor;
     protected bit                       cur_lock;
     protected ahb_prot_e                cur_prot;
 
-    // Per-beat accumulators. addr/trans/busy grow at address-phase accept;
-    // data/resp/ready one HREADY edge later (data phase)
+    // Per-beat queues: addr/trans/busy at address phase, data/resp/ready at
+    // data phase
     protected bit [AHB_ADDR_WIDTH-1:0]  addr_q[$];
     protected ahb_trans_e               trans_q[$];
     protected int unsigned              busy_q[$];
@@ -44,11 +41,11 @@ class ahb_slave_monitor extends uvm_monitor;
     protected ahb_resp_e                resp_q[$];
     protected bit                       ready_q[$];   // 1 = zero-wait data phase
 
-    // In-flight data phase of the last accepted active beat
+    // Data phase pending for the last accepted beat
     protected bit                       pending_valid;
-    protected int unsigned              pending_waits;   // HREADY=0 cycles seen
+    protected int unsigned              pending_waits;   // HREADY=0 cycles
 
-    // BUSY cycles seen since the last active beat (busy-before-beat / trailing)
+    // BUSY cycles since the last beat
     protected int unsigned              busy_cnt;
 
     //-------------------------------------------------------------------------
@@ -59,7 +56,7 @@ class ahb_slave_monitor extends uvm_monitor;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Build phase - get vif, create analysis port
+    // Build phase
     //-------------------------------------------------------------------------
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
@@ -70,7 +67,7 @@ class ahb_slave_monitor extends uvm_monitor;
     endfunction : build_phase
 
     //-------------------------------------------------------------------------
-    // Run phase - collect loop with reset recovery
+    // Run phase - collect loop, restart on reset
     //-------------------------------------------------------------------------
     virtual task run_phase(uvm_phase phase);
         forever begin
@@ -90,10 +87,9 @@ class ahb_slave_monitor extends uvm_monitor;
     endtask : run_phase
 
     //-------------------------------------------------------------------------
-    // Collect loop - one evaluation per HREADY=1 edge:
-    //   1) complete the in-flight data phase (sample HWDATA/HRDATA + HRESP)
-    //   2) decode the address phase accepted this cycle
-    // NONSEQ/IDLE accept closes the previous burst.
+    // collect_loop - on each HREADY=1 edge:
+    //   1) complete the pending data phase
+    //   2) accept the current address phase (NONSEQ/IDLE closes the burst)
     //-------------------------------------------------------------------------
     task collect_loop();
         forever begin
@@ -103,12 +99,9 @@ class ahb_slave_monitor extends uvm_monitor;
                 continue;
             end
 
-            // One transfer per accepted address phase, whatever its type. A
-            // transfer held across wait states is one transfer, so this counts
-            // it once - on the cycle it is accepted
             trans_ap.write(ahb_trans_e'(vif.monitor_cb.HTRANS));
 
-            // Complete the pending beat's data phase
+            // Data phase
             if (pending_valid) begin
                 data_q.push_back((cur_write == AHB_WRITE) ? vif.monitor_cb.HWDATA
                                                           : vif.monitor_cb.HRDATA);
@@ -117,7 +110,7 @@ class ahb_slave_monitor extends uvm_monitor;
                 pending_valid = 0;
             end
 
-            // Decode the accepted address phase
+            // Address phase
             case (ahb_trans_e'(vif.monitor_cb.HTRANS))
                 AHB_TRANS_NONSEQ: begin
                     publish_if_complete();          // close previous burst
@@ -143,14 +136,14 @@ class ahb_slave_monitor extends uvm_monitor;
                         busy_cnt++;
                 end
                 AHB_TRANS_IDLE: begin
-                    publish_if_complete();          // burst (if any) is done
+                    publish_if_complete();
                 end
             endcase
         end
     endtask : collect_loop
 
     //-------------------------------------------------------------------------
-    // Accept one active beat's address phase
+    // accept_beat - record a NONSEQ/SEQ address phase
     //-------------------------------------------------------------------------
     function void accept_beat(ahb_trans_e t);
         addr_q.push_back(vif.monitor_cb.HADDR);
@@ -162,7 +155,8 @@ class ahb_slave_monitor extends uvm_monitor;
     endfunction : accept_beat
 
     //-------------------------------------------------------------------------
-    // Close the open burst and publish it. Leftover busy_cnt is trailing BUSY.
+    // publish_if_complete - publish the open burst. Remaining busy_cnt is the
+    // trailing BUSY count
     //-------------------------------------------------------------------------
     function void publish_if_complete();
         ahb_transaction tr;
@@ -217,7 +211,7 @@ class ahb_slave_monitor extends uvm_monitor;
     endfunction : publish_if_complete
 
     //-------------------------------------------------------------------------
-    // Clear per-burst accumulators
+    // flush_burst - clear per-burst state
     //-------------------------------------------------------------------------
     function void flush_burst();
         burst_open    = 0;
@@ -233,7 +227,7 @@ class ahb_slave_monitor extends uvm_monitor;
     endfunction : flush_burst
 
     //-------------------------------------------------------------------------
-    // Full state flush (reset) - partial bursts discarded, not published
+    // flush_state - reset: discard partial burst
     //-------------------------------------------------------------------------
     function void flush_state();
         if (burst_open)

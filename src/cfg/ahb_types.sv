@@ -2,15 +2,15 @@
 // File        : ahb_types.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : AHB-Lite protocol parameters, enums, and typedefs (IHI0033A).
-//               Included inside ahb_pkg.sv - do NOT add package/endpackage here.
+// Description : AHB-Lite parameters and enums (IHI0033A). Included in
+//               ahb_pkg.sv.
 //==============================================================================
 
     // ---------------------------------------------------------------------------
     // Bus-width parameters
     // ---------------------------------------------------------------------------
-    parameter AHB_ADDR_WIDTH = 32;                   // Address bus width
-    parameter AHB_DATA_WIDTH = 32;                   // Data bus width
+    parameter AHB_ADDR_WIDTH = 32;
+    parameter AHB_DATA_WIDTH = 32;
 
     // ---------------------------------------------------------------------------
     // Burst type - HBURST[2:0]
@@ -39,8 +39,7 @@
     } ahb_prot_e;
 
     // ---------------------------------------------------------------------------
-    // Transfer size - HSIZE[2:0]
-    //    Bytes per transfer = 2^HSIZE; must not exceed DATA_WIDTH/8
+    // Transfer size - HSIZE[2:0], 2^HSIZE bytes (<= DATA_WIDTH/8)
     // ---------------------------------------------------------------------------
     typedef enum bit [2:0] {
         AHB_SIZE_8B    = 3'b000,   //   1 byte   (8 bits)
@@ -55,10 +54,6 @@
 
     // ---------------------------------------------------------------------------
     // Transfer type - HTRANS[1:0]
-    //    IDLE   - no transfer
-    //    BUSY   - idle cycle within a burst
-    //    NONSEQ - first beat of a burst (or single)
-    //    SEQ    - subsequent beats
     // ---------------------------------------------------------------------------
     typedef enum bit [1:0] {
         AHB_TRANS_IDLE   = 2'b00,
@@ -68,8 +63,7 @@
     } ahb_trans_e;
 
     // ---------------------------------------------------------------------------
-    // Direction control - HWRITE
-    //    Constant throughout a burst
+    // Direction - HWRITE
     // ---------------------------------------------------------------------------
     typedef enum bit {
         AHB_READ  = 1'b0,
@@ -77,9 +71,7 @@
     } ahb_dir_e;
 
     // ---------------------------------------------------------------------------
-    // Transfer response - HRESP (single-bit in AHB-Lite)
-    //    OKAY  - success
-    //    ERROR - transfer error
+    // Transfer response - HRESP
     // ---------------------------------------------------------------------------
     typedef enum bit {
         AHB_RESP_OKAY  = 1'b0,

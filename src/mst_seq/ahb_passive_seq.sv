@@ -1,9 +1,8 @@
 //=============================================================================
 // File        : ahb_passive_seq.sv
 // Project     : AMBA 3 AHB-Lite VIP
-// Description : Generates legal write traffic while the slave agent is
-//               passive. No read-back is used because a passive slave does not
-//               provide a memory model or drive response data.
+// Description : Write-only traffic for the passive slave test (no read-back:
+//               a passive slave has no memory model).
 //=============================================================================
 
 `ifndef AHB_PASSIVE_SEQ_INCLUDED_
@@ -16,8 +15,7 @@ class ahb_passive_seq extends ahb_base_seq;
     int unsigned num_iter = 12;
     bit [AHB_ADDR_WIDTH-1:0] base_addr = 32'h0000_A000;
 
-    // Number of transactions completed successfully. The test compares this
-    // with both num_iter and the passive monitor's publication count.
+    // Completed transactions (checked by the test)
     int unsigned num_sent;
 
     function new(string name = "ahb_passive_seq");
@@ -39,9 +37,7 @@ class ahb_passive_seq extends ahb_base_seq;
                   UVM_LOW)
 
         for (int unsigned i = 0; i < num_iter; i++) begin
-            // Repeat a deterministic six-entry matrix:
-            //   SINGLE/INCR4 x 8/16/32-bit.
-            // Randomization is retained for data and other legal knobs only.
+            // Directed SINGLE/INCR4 x 8/16/32-bit; other fields random
             directed_burst = ((i % 2) == 0) ? AHB_BURST_SINGLE
                                              : AHB_BURST_INCR4;
             case ((i / 2) % 3)

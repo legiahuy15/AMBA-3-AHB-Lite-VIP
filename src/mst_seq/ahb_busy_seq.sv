@@ -2,12 +2,10 @@
 // File        : ahb_busy_seq.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : BUSY insertion sequence. Puts a BUSY run before every beat of
-//               fixed-length and undefined-length bursts, and on some of them
-//               withdraws the BUSY for SEQ while the previous data phase is
-//               still waited. No burst ever ends out of a BUSY transfer.
-//               Requires the slave agent in auto-response mode (memory model).
-//               This file is `included inside ahb_seq_pkg.sv.
+// Description : BUSY insertion before every beat after the first, on
+//               fixed-length and INCR bursts. Some bursts change BUSY to SEQ
+//               during a wait state. No burst ends with BUSY.
+//               Requires auto-response slave.
 //=============================================================================
 
 `ifndef AHB_BUSY_SEQ_INCLUDED_
@@ -31,7 +29,7 @@ class ahb_busy_seq extends ahb_base_seq;
     //-------------------------------------------------------------------------
     int unsigned num_fixed;      // fixed-length bursts issued
     int unsigned num_undef;      // undefined-length bursts issued
-    int unsigned num_retract;    // bursts allowed to withdraw a waited BUSY
+    int unsigned num_retract;    // bursts with busy_retract_in_wait
 
     //-------------------------------------------------------------------------
     // Constructor
@@ -56,12 +54,10 @@ class ahb_busy_seq extends ahb_base_seq;
         for (int unsigned i = 0; i < num_iter; i++) begin
             slot = base_addr + i * SLOT_SIZE;
 
-            // 3 of every 4 bursts fixed length - the case
-            // BUSY_FIXED_LEN_NO_TERMINATE and AHB_WAI_005 apply to
+            // 3 of 4 bursts fixed length (AHB_WAI_005)
             fixed_len = ((i % 4) != 3);
 
-            // Longer period, so both withdrawn and held BUSY occur for each
-            // burst kind
+            // Period 4: both retract values for each burst kind
             retract = (((i / 2) % 2) == 1);
 
             if (fixed_len) num_fixed++; else num_undef++;
@@ -72,25 +68,23 @@ class ahb_busy_seq extends ahb_base_seq;
                     write == AHB_WRITE;
                     size inside {AHB_SIZE_8B, AHB_SIZE_16B, AHB_SIZE_32B};
 
-                    // SINGLE has no inter-beat gap, so it cannot carry BUSY
+                    // No SINGLE (BUSY not allowed)
                     fixed_len  -> (burst inside {AHB_BURST_INCR4,  AHB_BURST_INCR8,
                                                  AHB_BURST_INCR16, AHB_BURST_WRAP4,
                                                  AHB_BURST_WRAP8,  AHB_BURST_WRAP16});
                     !fixed_len -> (burst == AHB_BURST_INCR && num_beats inside {[2:16]});
 
-                    // BUSY run before every beat except the first
+                    // 1-3 BUSY cycles before every beat except the first
                     foreach (busy_cycles[k]) {
                         if (k > 0) busy_cycles[k] inside {[1:3]};
                         else       busy_cycles[k] == 0;
                     }
 
-                    // Every burst finishes on a SEQ beat; ending out of BUSY
-                    // belongs to the undefined-burst test
                     trailing_busy_cycles == 0;
 
                     busy_retract_in_wait == retract;
 
-                    // inside range bounds addr so the span sum cannot wrap
+                    // Burst stays inside its slot
                     addr inside {[slot : slot + SLOT_SIZE - 1]};
                     (burst inside {AHB_BURST_INCR,  AHB_BURST_INCR4,
                                    AHB_BURST_INCR8, AHB_BURST_INCR16}) ->

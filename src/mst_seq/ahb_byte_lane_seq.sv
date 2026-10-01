@@ -2,16 +2,10 @@
 // File        : ahb_byte_lane_seq.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Active byte-lane walk for narrow transfers. Every beat carries
-//               an address-derived payload on the lanes its address selects
-//               (little endian, IHI0033A 6.1.3) and the inverted payload on the
-//               lanes it must not use, so a lane-mapping error cannot read back
-//               as a match. Only the active lanes are ever compared - the
-//               checker never relies on data being replicated across the bus.
-//               The set of lanes walked is fixed; the order they reach the bus
-//               follows the seed.
-//               Requires the slave agent in auto-response mode (memory model).
-//               This file is `included inside ahb_seq_pkg.sv.
+// Description : Byte-lane walk for narrow transfers (little endian, IHI0033A
+//               6.1.3). Active lanes carry an address-derived pattern, inactive
+//               lanes its inverse. Only active lanes are compared. Lane order
+//               is randomized. Requires auto-response slave.
 //=============================================================================
 
 `ifndef AHB_BYTE_LANE_SEQ_INCLUDED_
@@ -24,18 +18,15 @@ class ahb_byte_lane_seq extends ahb_base_seq;
     //-------------------------------------------------------------------------
     // Knobs
     //-------------------------------------------------------------------------
-    // Sizes rotate per iteration, so a full lane walk needs at least NUM_SIZE
-    // iterations
+    // Size rotates per iteration: >= NUM_SIZE for a full walk
     int unsigned num_iter = 12;
 
     bit [AHB_ADDR_WIDTH-1:0] base_addr = 32'h0000_E000;
 
     localparam int unsigned BUS_BYTES = AHB_DATA_WIDTH / 8;
 
-    // Slot layout, word aligned: the SINGLE lane walk covers the first bus word
-    // and the 4-beat burst runs in the upper half. One size per slot and every
-    // address written and read at that same size, so narrow and wide accesses
-    // never alias in the scoreboard reference memory
+    // Slot layout: SINGLE walk in the first word, INCR4 from BURST_OFFS.
+    // One size per slot
     localparam int unsigned SLOT_SIZE  = 32;
     localparam int unsigned BURST_OFFS = 16;
 
@@ -44,7 +35,7 @@ class ahb_byte_lane_seq extends ahb_base_seq;
     //-------------------------------------------------------------------------
     // Statistics
     //-------------------------------------------------------------------------
-    int unsigned lane_hits[BUS_BYTES];   // beats whose active window starts here
+    int unsigned lane_hits[BUS_BYTES];   // beats per start lane
     int unsigned num_singles;
     int unsigned num_bursts;
 
@@ -56,7 +47,7 @@ class ahb_byte_lane_seq extends ahb_base_seq;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Narrow sizes first - the word entry is the full-width reference case
+    // get_size - size for slot idx
     //-------------------------------------------------------------------------
     function ahb_size_e get_size(int unsigned idx);
         case (idx % NUM_SIZE)
@@ -67,19 +58,16 @@ class ahb_byte_lane_seq extends ahb_base_seq;
     endfunction : get_size
 
     //-------------------------------------------------------------------------
-    // Payload byte for one byte address. Address-derived, so a byte that lands
-    // on the wrong lane - or at the wrong address - carries the wrong value
+    // byte_val - address-derived data byte
     //-------------------------------------------------------------------------
     function bit [7:0] byte_val(bit [AHB_ADDR_WIDTH-1:0] a);
         return a[7:0] ^ 8'hA5;
     endfunction : byte_val
 
     //-------------------------------------------------------------------------
-    // One bus word for a beat at address a covering 'bytes' bytes:
-    //   active lanes   (a % BUS_BYTES) ... +bytes-1 : the payload
-    //   inactive lanes                              : the inverted payload
-    // A byte and its inverse can never be equal, so a transfer driven onto the
-    // wrong lanes fails the read-back check instead of passing on a match
+    // lane_pattern - HWDATA for a beat at address a:
+    //   active lanes   : byte_val
+    //   inactive lanes : ~byte_val
     //-------------------------------------------------------------------------
     function bit [AHB_DATA_WIDTH-1:0] lane_pattern(bit [AHB_ADDR_WIDTH-1:0] a,
                                                    int unsigned             bytes);
@@ -96,9 +84,8 @@ class ahb_byte_lane_seq extends ahb_base_seq;
     endfunction : lane_pattern
 
     //-------------------------------------------------------------------------
-    // Body - one slot per iteration, visited in shuffled order: a SINGLE at
-    // every legal offset of the first word, then a 4-beat burst that moves the
-    // active window along the bus from a rotating start lane
+    // Body - per slot (shuffled order): SINGLE at every legal offset of the
+    // first word, then INCR4 from a rotating start lane
     //-------------------------------------------------------------------------
     virtual task body();
         int unsigned             order[];
@@ -113,10 +100,7 @@ class ahb_byte_lane_seq extends ahb_base_seq;
                   $sformatf("Starting byte-lane walk: %0d iterations from 0x%08h, %0d lanes on a %0d-bit bus",
                             num_iter, base_addr, BUS_BYTES, AHB_DATA_WIDTH), UVM_LOW)
 
-        // Which slot takes which size is shuffled, and so is the order the
-        // lanes inside a slot are visited. Every seed covers the same lanes at
-        // the same addresses, but presents them to the bus in a different
-        // order, so the back-to-back and wait-state overlaps differ per run
+        // Shuffle slot order; same lanes covered for every seed
         order = new[num_iter];
         foreach (order[j]) order[j] = j;
         order.shuffle();
@@ -127,8 +111,7 @@ class ahb_byte_lane_seq extends ahb_base_seq;
             sz    = get_size(idx);
             bytes = 1 << sz;
 
-            // Every legal offset inside one bus word: a byte transfer visits
-            // all four lanes, a halfword lanes 0 and 2, a word the full width
+            // Legal offsets in one bus word (shuffled)
             offs = new[BUS_BYTES / bytes];
             foreach (offs[k]) offs[k] = k * bytes;
             offs.shuffle();
@@ -138,11 +121,7 @@ class ahb_byte_lane_seq extends ahb_base_seq;
                 num_singles++;
             end
 
-            // INCR4 through the upper half of the slot. Consecutive beats step
-            // the active window along the bus; the start offset rotates with
-            // the slot so a burst also enters on a non-zero lane. Widest case
-            // is a word burst, 16 bytes from BURST_OFFS - exactly the rest of
-            // the slot, which is why this offset is not randomized
+            // INCR4 in the upper half; start lane rotates with the slot
             burst_offs = BURST_OFFS + ((idx % BUS_BYTES) & ~(bytes - 1));
             lane_transfer(AHB_BURST_INCR4, slot + burst_offs, sz);
             num_bursts++;
@@ -152,10 +131,7 @@ class ahb_byte_lane_seq extends ahb_base_seq;
     endtask : body
 
     //-------------------------------------------------------------------------
-    // One write/read-back pair with the payload placed by hand. wdata is left
-    // free by the randomize call and filled afterwards, because the pattern
-    // depends on each beat's own address. write_read_burst() compares the
-    // active byte lanes only
+    // lane_transfer - write/read-back pair, wdata set from lane_pattern
     //-------------------------------------------------------------------------
     protected task lane_transfer(ahb_burst_e              burst_type,
                                  bit [AHB_ADDR_WIDTH-1:0] tgt_addr,
@@ -193,8 +169,7 @@ class ahb_byte_lane_seq extends ahb_base_seq;
     endtask : lane_transfer
 
     //-------------------------------------------------------------------------
-    // End-of-sequence tally. The point of this sequence is that every lane
-    // carried an active transfer, so a lane left untouched is a failure
+    // report_walk - summary; error if a lane was never used
     //-------------------------------------------------------------------------
     protected function void report_walk();
         `uvm_info(get_type_name(),

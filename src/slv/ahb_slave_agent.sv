@@ -5,14 +5,14 @@
 // Description : AHB-Lite slave agent.
 //               UVM_ACTIVE  - driver + sequencer + monitor
 //               UVM_PASSIVE - monitor only
-//               The sequencer is idle when the driver runs in auto mode.
+//               Sequencer unused when auto_gen_resp = 1.
 //=============================================================================
 
 class ahb_slave_agent extends uvm_agent;
 
     `uvm_component_utils(ahb_slave_agent)
 
-    // Agent configuration (from config_db; default object when absent)
+    // Agent configuration (default if not in config_db)
     ahb_agent_config    cfg;
 
     // Virtual interface handle
@@ -36,7 +36,6 @@ class ahb_slave_agent extends uvm_agent;
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
 
-        // Config is optional - fall back to defaults (ACTIVE, auto responses)
         if (!uvm_config_db#(ahb_agent_config)::get(this, "", "cfg", cfg)) begin
             `uvm_info(get_type_name(),
                       "No ahb_agent_config in config_db - using defaults", UVM_MEDIUM)
@@ -74,7 +73,7 @@ class ahb_slave_agent extends uvm_agent;
         super.connect_phase(phase);
         if (is_active == UVM_ACTIVE) begin
             drv.seq_item_port.connect(sqr.seq_item_export);
-            drv.sqr = sqr;      // lets the driver publish the observed address
+            drv.sqr = sqr;
         end
     endfunction : connect_phase
 

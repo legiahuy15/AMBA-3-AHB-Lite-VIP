@@ -2,8 +2,8 @@
 // File        : ahb_if.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : AHB-Lite bus interface. Provides master-driver, slave-driver,
-//               and monitor clocking blocks with matching modports.
+// Description : AHB-Lite interface with master, slave and monitor clocking
+//               blocks and modports.
 //==============================================================================
 
 `timescale 1ns/1ps
@@ -39,7 +39,7 @@ interface ahb_if #(
     logic                  HRESP;
 
     //-------------------------------------------------------------------------
-    // Master driver clocking block: drives address/control/HWDATA, samples response
+    // Master driver
     //-------------------------------------------------------------------------
     clocking master_cb @(posedge clk);
         default input #1step output #1;
@@ -48,7 +48,7 @@ interface ahb_if #(
     endclocking
 
     //-------------------------------------------------------------------------
-    // Slave driver clocking block: drives HRDATA/HREADY/HRESP, samples address/control
+    // Slave driver
     //-------------------------------------------------------------------------
     clocking slave_cb @(posedge clk);
         default input #1step output #1;
@@ -57,7 +57,7 @@ interface ahb_if #(
     endclocking
 
     //-------------------------------------------------------------------------
-    // Monitor clocking block: samples all signals (passive)
+    // Monitor (inputs only)
     //-------------------------------------------------------------------------
     clocking monitor_cb @(posedge clk);
         default input #1step;

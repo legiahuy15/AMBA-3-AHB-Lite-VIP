@@ -2,14 +2,10 @@
 // File        : ahb_back_to_back_seq.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Continuous traffic with no IDLE between transfers. Whole
-//               batches of write/read-back bursts are queued without waiting,
-//               so the driver always holds a successor and overlaps its beat-0
-//               address phase into the previous data phase (IHI0033A 3.1).
-//               The master's outstanding limit is swept across the batches,
-//               from unlimited down to a fully serialized single transfer.
-//               Requires the slave agent in auto-response mode (memory model).
-//               This file is `included inside ahb_seq_pkg.sv.
+// Description : Back-to-back traffic. Batches of write/read-back bursts are
+//               queued without waiting so beat 0 of each transfer overlaps the
+//               previous data phase (IHI0033A 3.1). max_outstanding is swept
+//               per batch. Requires auto-response slave.
 //=============================================================================
 
 `ifndef AHB_BACK_TO_BACK_SEQ_INCLUDED_
@@ -22,41 +18,33 @@ class ahb_back_to_back_seq extends ahb_base_seq;
     //-------------------------------------------------------------------------
     // Knobs
     //-------------------------------------------------------------------------
-    int unsigned num_iter = 32;                 // write/read pairs to run
+    int unsigned num_iter = 32;                 // write/read pairs
 
     bit [AHB_ADDR_WIDTH-1:0] base_addr = 32'h0001_0000;
 
-    // Pairs queued before the batch is drained and checked. Two transfers per
-    // pair, so a batch offers up to 2 x batch_pairs transfers to the driver
+    // Pairs queued per batch before drain and check
     int unsigned batch_pairs = 4;
 
-    // Master driver whose outstanding limit is swept, set by the test. The
-    // driver latches max_outstanding in build_phase, so the field must be poked
-    // directly. Null: traffic runs at the configured limit
+    // Driver whose max_outstanding is swept (set by the test). Null: no sweep
     ahb_master_driver mst_drv;
 
     localparam int unsigned NUM_WINDOWS = 4;
 
-    // One slot per pair, 64-byte aligned and twice the longest burst issued
-    // here (8 beats x 4 bytes), so a WRAP region falls wholly inside it and
-    // slots never alias in the scoreboard reference memory
+    // Address slot per pair: 64B aligned, 2x the longest burst (8 x 4B)
     localparam int unsigned SLOT_SIZE = 64;
 
     //-------------------------------------------------------------------------
     // Statistics
     //-------------------------------------------------------------------------
-    int unsigned num_queued;                        // transfers handed over
-    int unsigned deepest_outstanding;               // over the whole run
-    int unsigned deepest_per_window[NUM_WINDOWS];   // per swept limit
+    int unsigned num_queued;                        // transfers queued
+    int unsigned deepest_outstanding;               // whole run
+    int unsigned deepest_per_window[NUM_WINDOWS];   // per limit
     int unsigned limit_violations;                  // accepted beyond the limit
 
-    //-------------------------------------------------------------------------
-    // Transfers accepted but not yet complete, oldest first. The driver runs
-    // its queue FIFO, so the front always retires first
-    //-------------------------------------------------------------------------
+    // Accepted, not yet complete (FIFO order)
     protected ahb_transaction pend[$];
 
-    // Set in body(): the limit is ours to sweep and therefore ours to check
+    // Limit sweep active (mst_drv != null)
     protected bit sweep_on;
 
     //-------------------------------------------------------------------------
@@ -67,12 +55,11 @@ class ahb_back_to_back_seq extends ahb_base_seq;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // The outstanding limits, swept in order (AHB_ENV_004):
-    //   0 - unlimited, the whole batch sits in the driver queue
-    //   4 - deep enough that a successor is always waiting
-    //   2 - exactly one successor, the minimum for an overlap
-    //   1 - fully serialized: the accept loop stalls until the bus is free, so
-    //       no successor exists and every transfer opens after an IDLE
+    // max_outstanding sweep (AHB_ENV_004):
+    //   0 - unlimited
+    //   4 - deep pipeline
+    //   2 - one successor (minimum for overlap)
+    //   1 - serialized, no overlap
     //-------------------------------------------------------------------------
     function int unsigned get_limit(int unsigned idx);
         case (idx % NUM_WINDOWS)
@@ -84,8 +71,7 @@ class ahb_back_to_back_seq extends ahb_base_seq;
     endfunction : get_limit
 
     //-------------------------------------------------------------------------
-    // Hand the limit to the driver. Called between batches only, with the
-    // pipeline drained, so no accepted transfer outlives its limit
+    // apply_limit - set driver limit; called between batches (pipeline empty)
     //-------------------------------------------------------------------------
     function void apply_limit(int unsigned lim);
         if (mst_drv == null) return;
@@ -93,7 +79,7 @@ class ahb_back_to_back_seq extends ahb_base_seq;
     endfunction : apply_limit
 
     //-------------------------------------------------------------------------
-    // Limit as it reads in a log line
+    // limit_str - limit for log messages
     //-------------------------------------------------------------------------
     function string limit_str(int unsigned lim);
         if (lim == 0) return "unlimited";
@@ -101,17 +87,15 @@ class ahb_back_to_back_seq extends ahb_base_seq;
     endfunction : limit_str
 
     //-------------------------------------------------------------------------
-    // queue_tracked - hand one transfer over without waiting for the bus, and
-    // record how deep the pipeline got. queue_item() returns once the driver
-    // has accepted the item, so the depth measured here is exactly what the
-    // accept loop is holding: with a limit in force it must never exceed it
+    // queue_tracked - queue one transfer and check pipeline depth against the
+    // limit (queue_item() returns when the driver accepts the item)
     //-------------------------------------------------------------------------
     task queue_tracked(ahb_transaction tr, int unsigned lim, int unsigned win);
         queue_item(tr);
         pend.push_back(tr);
         num_queued++;
 
-        // Retire everything the driver has finished
+        // Retire completed transfers
         while (pend.size() > 0 && pend[0].done)
             void'(pend.pop_front());
 
@@ -120,7 +104,6 @@ class ahb_back_to_back_seq extends ahb_base_seq;
         if (pend.size() > deepest_per_window[win])
             deepest_per_window[win] = pend.size();
 
-        // Only meaningful for a limit this sequence put in force itself
         if (sweep_on && lim != 0 && pend.size() > lim) begin
             limit_violations++;
             `uvm_error(get_type_name(),
@@ -130,8 +113,7 @@ class ahb_back_to_back_seq extends ahb_base_seq;
     endtask : queue_tracked
 
     //-------------------------------------------------------------------------
-    // Body - batches of write/read-back pairs queued without a gap, under a
-    // swept outstanding limit
+    // Body
     //-------------------------------------------------------------------------
     virtual task body();
         ahb_transaction          wr_q[$];
@@ -175,9 +157,7 @@ class ahb_back_to_back_seq extends ahb_base_seq;
             rd_q.delete();
 
             //-----------------------------------------------------------------
-            // Queue the whole batch without waiting: every transfer is already
-            // in the driver queue when its predecessor reaches the last data
-            // phase, which is what opens the overlap slot
+            // Queue the whole batch without waiting
             //-----------------------------------------------------------------
             for (int unsigned k = 0; k < this_batch; k++) begin
                 slot = base_addr + pair_idx * SLOT_SIZE;
@@ -191,12 +171,11 @@ class ahb_back_to_back_seq extends ahb_base_seq;
                         size inside {AHB_SIZE_8B, AHB_SIZE_16B, AHB_SIZE_32B};
                         (burst == AHB_BURST_INCR) -> (num_beats inside {[2:8]});
 
-                        // No BUSY - a master stall would open exactly the
-                        // bubble this sequence is out to avoid
+                        // No BUSY
                         foreach (busy_cycles[i]) busy_cycles[i] == 0;
                         trailing_busy_cycles == 0;
 
-                        // inside range bounds addr so the span sum cannot wrap
+                        // Burst stays inside its slot
                         addr inside {[slot : slot + SLOT_SIZE - 1]};
                         (burst inside {AHB_BURST_INCR, AHB_BURST_INCR4,
                                        AHB_BURST_INCR8}) ->
@@ -205,8 +184,6 @@ class ahb_back_to_back_seq extends ahb_base_seq;
                     `uvm_fatal(get_type_name(),
                                $sformatf("Write randomization failed @slot 0x%08h", slot))
 
-                // Same control, same address - AHB is in order, so the read
-                // returns what the write ahead of it committed
                 rd = build_read_back(wr);
 
                 wr_q.push_back(wr);
@@ -219,8 +196,7 @@ class ahb_back_to_back_seq extends ahb_base_seq;
             end
 
             //-----------------------------------------------------------------
-            // Drain and check. The batch is compared only once every transfer
-            // in it has left the bus
+            // Drain and check
             //-----------------------------------------------------------------
             foreach (rd_q[k]) begin
                 wr = wr_q[k];
@@ -242,9 +218,7 @@ class ahb_back_to_back_seq extends ahb_base_seq;
         end
 
         //---------------------------------------------------------------------
-        // A limit of 2 or more, or none at all, must leave a successor waiting
-        // while a transfer is on the bus - otherwise the driver never had the
-        // chance to overlap and the run proves nothing about AHB_BAS_004
+        // Limits other than 1 must reach depth >= 2 (AHB_BAS_004)
         //---------------------------------------------------------------------
         for (int unsigned w = 0; w < NUM_WINDOWS; w++) begin
             lim = get_limit(w);

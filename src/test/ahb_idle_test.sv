@@ -2,17 +2,10 @@
 // File        : ahb_idle_test.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : IDLE transfer test. Runs ahb_idle_seq, which leaves the bus
-//               IDLE in runs of several cycles around every burst and, in its
-//               last phase, has the master present IDLE in the pipelined slot
-//               while the slave is still waiting. A bus watcher classifies
-//               every cycle and checks that the slave answered each accepted
-//               IDLE and BUSY with a zero-wait OKAY, that nothing but IDLE or
-//               NONSEQ ever followed an accepted IDLE, and that the address
-//               moved under an IDLE held with HREADY low.
-//               Covers AHB_TRN_001, AHB_TRN_006, AHB_WAI_007 and AHB_WAI_010
-//               in doc/ahb_lite_vplan.xlsx.
-//               This file is `included inside ahb_test_pkg.sv.
+// Description : IDLE transfer test. Runs ahb_idle_seq and checks on the bus:
+//               zero-wait OKAY for IDLE/BUSY, only IDLE/NONSEQ after IDLE,
+//               HADDR change under a waited IDLE.
+//               vplan: AHB_TRN_001, AHB_TRN_006, AHB_WAI_007, AHB_WAI_010.
 //=============================================================================
 
 `ifndef AHB_IDLE_TEST_INCLUDED_
@@ -22,27 +15,27 @@ class ahb_idle_test extends ahb_base_test;
 
     `uvm_component_utils(ahb_idle_test)
 
-    // Write/read pairs to issue, overridable: +NUM_ITER=<n>
+    // Write/read pairs (+NUM_ITER=<n>)
     int unsigned num_iter = 24;
 
-    // Longest IDLE run requested between transfers, overridable: +MAX_GAP=<n>
+    // Max IDLE run between transfers (+MAX_GAP=<n>)
     int unsigned max_gap = 4;
 
     //-------------------------------------------------------------------------
-    // Bus observation, filled by watch_bus()
+    // Bus statistics (watch_bus)
     //-------------------------------------------------------------------------
-    protected int unsigned num_idle_accepted;   // IDLE cycles accepted (HREADY=1)
-    protected int unsigned num_idle_waited;     // IDLE presented with HREADY=0
-    protected int unsigned num_busy_accepted;   // BUSY cycles accepted
-    protected int unsigned num_bursts;          // NONSEQ address phases accepted
+    protected int unsigned num_idle_accepted;   // IDLE with HREADY=1
+    protected int unsigned num_idle_waited;     // IDLE with HREADY=0
+    protected int unsigned num_busy_accepted;   // BUSY with HREADY=1
+    protected int unsigned num_bursts;          // NONSEQ accepted
     protected int unsigned longest_idle_run;    // consecutive accepted IDLEs
 
-    // The address moved while HTRANS was IDLE and HREADY low (AHB_WAI_007)
+    // HADDR changed under IDLE with HREADY=0 (AHB_WAI_007)
     protected int unsigned num_idle_wait_addr_change;
 
-    // Violations, each already reported as an error where it was seen
-    protected int unsigned num_resp_viol;       // IDLE/BUSY not answered OKAY
-    protected int unsigned num_order_viol;      // SEQ or BUSY after an IDLE
+    // Violations
+    protected int unsigned num_resp_viol;       // IDLE/BUSY not zero-wait OKAY
+    protected int unsigned num_order_viol;      // SEQ/BUSY after IDLE
 
     //-------------------------------------------------------------------------
     // Constructor
@@ -52,12 +45,9 @@ class ahb_idle_test extends ahb_base_test;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Build phase - auto-response mode: the read-back check needs the memory
-    // model, and it is what proves the slave ignored the IDLEs it was given.
-    // The overlap is deferred into the wait state, so the pipelined slot opens
-    // as IDLE instead of taking the next transfer straight away - the only way
-    // an IDLE is ever presented with HREADY low. Wait states start at zero;
-    // the sequence rewrites ready_delay_min/max per phase
+    // Build phase - auto-response slave (memory model for read-back), deferred
+    // overlap so IDLE can be presented with HREADY=0. Wait states set per
+    // phase by the sequence
     //-------------------------------------------------------------------------
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
@@ -74,14 +64,13 @@ class ahb_idle_test extends ahb_base_test;
     endfunction : build_phase
 
     //-------------------------------------------------------------------------
-    // watch_bus - classify every bus cycle and check the IDLE rules against the
-    // cycle that follows. Runs until killed by the run phase
+    // watch_bus - classify each cycle, check IDLE rules on the next cycle
     //-------------------------------------------------------------------------
     task watch_bus();
         virtual ahb_if           vif;
         ahb_trans_e              prev_t;
         bit                      prev_ready;
-        bit                      prev_valid;    // a previous cycle was sampled
+        bit                      prev_valid;    // prev_* holds a sampled cycle
         bit [AHB_ADDR_WIDTH-1:0] prev_addr;
         ahb_trans_e              cur_t;
         bit                      cur_ready;
@@ -106,12 +95,10 @@ class ahb_idle_test extends ahb_base_test;
             cur_resp  = ahb_resp_e'(vif.monitor_cb.HRESP);
 
             //-----------------------------------------------------------------
-            // Rules that read the cycle after the one they are about
+            // Checks on the previous cycle
             //-----------------------------------------------------------------
             if (prev_valid) begin
-                // An accepted IDLE or BUSY moves no data: the slave must
-                // complete it in the next cycle with OKAY, no wait states
-                // (AHB_TRN_001, AHB_WAI_010)
+                // Accepted IDLE/BUSY -> zero-wait OKAY (AHB_TRN_001, AHB_WAI_010)
                 if (prev_ready && prev_t inside {AHB_TRANS_IDLE, AHB_TRANS_BUSY}
                     && (!cur_ready || cur_resp != AHB_RESP_OKAY)) begin
                     num_resp_viol++;
@@ -120,7 +107,7 @@ class ahb_idle_test extends ahb_base_test;
                                          prev_t.name(), cur_ready, cur_resp.name()))
                 end
 
-                // A burst cannot resume across an IDLE (AHB_TRN_006)
+                // Accepted IDLE -> IDLE or NONSEQ only (AHB_TRN_006)
                 if (prev_ready && prev_t == AHB_TRANS_IDLE &&
                     !(cur_t inside {AHB_TRANS_IDLE, AHB_TRANS_NONSEQ})) begin
                     num_order_viol++;
@@ -129,9 +116,7 @@ class ahb_idle_test extends ahb_base_test;
                                          cur_t.name()))
                 end
 
-                // Address/control need not hold under an IDLE, so the master
-                // may move HADDR while the previous data phase is still waited
-                // (AHB_WAI_007). Legal, and recorded here as having happened
+                // HADDR change under a waited IDLE - legal, counted (AHB_WAI_007)
                 if (!prev_ready && prev_t == AHB_TRANS_IDLE &&
                     vif.monitor_cb.HADDR !== prev_addr)
                     num_idle_wait_addr_change++;
@@ -158,7 +143,7 @@ class ahb_idle_test extends ahb_base_test;
                     run = 0;
                     if (cur_ready) num_bursts++;
                 end
-                default: run = 0;   // SEQ stays inside an open burst
+                default: run = 0;   // SEQ
             endcase
 
             prev_t     = cur_t;
@@ -169,7 +154,7 @@ class ahb_idle_test extends ahb_base_test;
     endtask : watch_bus
 
     //-------------------------------------------------------------------------
-    // Run phase - the watcher never returns, so join_any ends on the sequence
+    // Run phase - watch_bus never returns; join_any ends on the sequence
     //-------------------------------------------------------------------------
     task run_phase(uvm_phase phase);
         ahb_idle_seq seq;
@@ -181,11 +166,10 @@ class ahb_idle_test extends ahb_base_test;
         seq.num_iter = num_iter;
         seq.max_gap  = max_gap;
 
-        // Bus clock, used by the sequence to count out its IDLE runs
+        // Clock for IDLE gap timing
         seq.vif = env_cfg.master_vif;
 
-        // Null when the slave agent is passive: the sequence then runs at the
-        // configured back-pressure instead of setting a window per phase
+        // Null if the slave agent is passive (fixed back-pressure)
         seq.slv_drv = env.slave_agent.drv;
 
         fork
@@ -200,9 +184,7 @@ class ahb_idle_test extends ahb_base_test;
     endtask : run_phase
 
     //-------------------------------------------------------------------------
-    // check_bus - the stimulus must actually have produced the transfers the
-    // rules above are written against. A clean run that never idled, never
-    // stalled on BUSY, or never held an IDLE through a wait proves nothing
+    // check_bus - required scenarios were exercised
     //-------------------------------------------------------------------------
     function void check_bus();
         `uvm_info(get_type_name(),

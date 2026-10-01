@@ -2,12 +2,9 @@
 // File        : ahb_byte_lane_test.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Byte-lane test. Runs ahb_byte_lane_seq, which walks narrow
-//               transfers across every active byte lane of the data bus and
-//               checks each one against the reference memory, with the inverted
-//               payload on the lanes the transfer must not use.
-//               Covers AHB_DAT_003 and AHB_DAT_004 in doc/ahb_lite_vplan.xlsx.
-//               This file is `included inside ahb_test_pkg.sv.
+// Description : Byte-lane test. Runs ahb_byte_lane_seq: narrow transfers on
+//               every byte lane, inverted data on unused lanes.
+//               vplan: AHB_DAT_003, AHB_DAT_004.
 //=============================================================================
 
 `ifndef AHB_BYTE_LANE_TEST_INCLUDED_
@@ -17,8 +14,7 @@ class ahb_byte_lane_test extends ahb_base_test;
 
     `uvm_component_utils(ahb_byte_lane_test)
 
-    // Slots to walk, overridable: +NUM_ITER=<n>. Sizes rotate per slot, so at
-    // least 3 are needed to reach every lane
+    // Slots (+NUM_ITER=<n>). >= 3 to reach every lane (size rotates per slot)
     int unsigned num_iter = 12;
 
     //-------------------------------------------------------------------------
@@ -29,8 +25,7 @@ class ahb_byte_lane_test extends ahb_base_test;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Build phase - memory-model slave with a few wait states, so a narrow
-    // beat also has to hold HWDATA on its lanes across an extended data phase
+    // Build phase - auto-response slave, 0-2 wait states
     //-------------------------------------------------------------------------
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);

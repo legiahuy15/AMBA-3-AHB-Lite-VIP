@@ -2,13 +2,9 @@
 // File        : ahb_error_seq.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Master traffic for the ERROR response test. Walks every burst
-//               type with abort_on_error alternating between cancel and
-//               continue, while the slave sequence injects ERROR responses.
-//               Writes and reads use disjoint address regions so the
-//               scoreboard reference memory never checks read data that the
-//               slave sequence made up.
-//               This file is `included inside ahb_seq_pkg.sv.
+// Description : Master traffic for the ERROR response test. All burst types,
+//               abort_on_error alternating (cancel/continue). Reads and writes
+//               use separate regions.
 //=============================================================================
 
 `ifndef AHB_ERROR_SEQ_INCLUDED_
@@ -23,14 +19,12 @@ class ahb_error_seq extends ahb_base_seq;
     //-------------------------------------------------------------------------
     int unsigned num_iter = 16;
 
-    // Disjoint: in sequence mode the slave answers reads from the response
-    // item, not its memory model, so reads target a never-written region where
-    // the scoreboard reference memory skips the beat
+    // Separate regions: read data comes from the slave sequence, so reads
+    // target unwritten addresses (not checked by the scoreboard)
     bit [AHB_ADDR_WIDTH-1:0] wr_base = 32'h0000_7000;
     bit [AHB_ADDR_WIDTH-1:0] rd_base = 32'h0000_8000;
 
-    // Region the slave sequence answers as a default slave would: every beat
-    // returns ERROR, so the reference memory skips the whole burst
+    // Unmapped region: every beat returns ERROR
     bit [AHB_ADDR_WIDTH-1:0] unmapped_base = 32'h0000_9000;
 
     localparam int unsigned SLOT_SIZE = 64;   // 16 beats x 4 bytes
@@ -39,9 +33,9 @@ class ahb_error_seq extends ahb_base_seq;
     // Statistics
     //-------------------------------------------------------------------------
     int unsigned num_bursts;
-    int unsigned num_with_error;     // bursts that saw at least one ERROR beat
-    int unsigned num_cancelled;      // of those, the ones told to cancel
-    int unsigned num_unmapped;       // bursts aimed at the unmapped region
+    int unsigned num_with_error;     // bursts with >= 1 ERROR beat
+    int unsigned num_cancelled;      // ... with abort_on_error
+    int unsigned num_unmapped;       // bursts to the unmapped region
 
     //-------------------------------------------------------------------------
     // Constructor
@@ -51,7 +45,7 @@ class ahb_error_seq extends ahb_base_seq;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Body - alternate direction and ERROR policy across every burst type
+    // Body
     //-------------------------------------------------------------------------
     virtual task body();
         ahb_transaction          tr;
@@ -70,18 +64,16 @@ class ahb_error_seq extends ahb_base_seq;
 
         for (int unsigned i = 0; i < num_iter; i++) begin
             dir    = ((i % 2) == 0) ? AHB_WRITE : AHB_READ;
-            cancel = (((i / 2) % 2) == 0);      // alternate on a longer period
+            cancel = (((i / 2) % 2) == 0);
 
-            // Only a cancelling burst may move its address; alternate so the
-            // address-held case is covered too
+            // Address change on ERROR: cancel only, alternating
             move_addr = 1'b0;
             if (cancel) begin
                 move_addr   = addr_toggle;
                 addr_toggle = !addr_toggle;
             end
 
-            // Period 3 keeps unmapped bursts out of step with the direction
-            // and policy patterns, so both combinations reach the region
+            // Period 3: unmapped bursts hit all direction/policy combinations
             unmapped = ((i % 3) == 2);
             if (unmapped) begin
                 slot = unmapped_base + (i / 3) * SLOT_SIZE;
@@ -94,7 +86,6 @@ class ahb_error_seq extends ahb_base_seq;
             if (!tr.randomize() with {
                     write == dir;
                     size inside {AHB_SIZE_8B, AHB_SIZE_16B, AHB_SIZE_32B};
-                    // Cap INCR so an undefined-length burst fits the slot
                     (burst == AHB_BURST_INCR) -> (num_beats inside {[1:16]});
                     addr inside {[slot : slot + SLOT_SIZE - 1]};
                     addr + num_beats * (1 << size) <= slot + SLOT_SIZE;
@@ -105,12 +96,11 @@ class ahb_error_seq extends ahb_base_seq;
                            $sformatf("Randomization failed @slot 0x%08h", slot))
 
             send_and_wait(tr, ok);
-            if (!ok) continue;                  // reset flush
+            if (!ok) continue;                  // aborted by reset
 
             num_bursts++;
 
-            // resp[] holds only completed beats, so the first ERROR marks
-            // where a cancelling burst stopped
+            // First ERROR beat
             err_beat = -1;
             foreach (tr.resp[k]) begin
                 if (tr.resp[k] == AHB_RESP_ERROR) begin
@@ -131,8 +121,7 @@ class ahb_error_seq extends ahb_base_seq;
                           UVM_MEDIUM)
             end
 
-            // Cancel stops on the ERROR beat; continue (and any error-free
-            // burst) drives every beat
+            // Cancel: stop at the ERROR beat. Otherwise: all beats
             exp_beats = (err_beat >= 0 && tr.abort_on_error)
                         ? (err_beat + 1) : tr.get_num_beats();
 

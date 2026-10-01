@@ -2,11 +2,8 @@
 // File        : ahb_single_seq.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Randomized SINGLE transfers over every legal size, address
-//               alignment and direction. Each iteration writes one beat and
-//               reads it back at the same address.
-//               Requires the slave agent in auto-response mode (memory model).
-//               This file is `included inside ahb_seq_pkg.sv.
+// Description : Random SINGLE write/read-back, all legal sizes and alignments.
+//               Requires auto-response slave.
 //=============================================================================
 
 `ifndef AHB_SINGLE_SEQ_INCLUDED_
@@ -23,9 +20,7 @@ class ahb_single_seq extends ahb_base_seq;
 
     bit [AHB_ADDR_WIDTH-1:0] base_addr = 32'h0000_2000;
 
-    // One word-sized slot per iteration, at a random aligned offset so narrow
-    // transfers hit every byte lane. Slots are never reused, so transfers of
-    // different sizes cannot alias in the scoreboard reference memory
+    // One word per iteration, random aligned offset
     localparam int unsigned SLOT_SIZE = 4;
 
     //-------------------------------------------------------------------------
@@ -50,7 +45,6 @@ class ahb_single_seq extends ahb_base_seq;
             slot = base_addr + i * SLOT_SIZE;
 
             wr = ahb_transaction::type_id::create("wr");
-            // c_addr_align pairs a legal offset with the chosen size
             if (!wr.randomize() with {
                     write == AHB_WRITE;
                     burst == AHB_BURST_SINGLE;

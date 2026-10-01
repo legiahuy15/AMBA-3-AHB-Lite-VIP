@@ -2,12 +2,11 @@
 // File        : ahb_slave_driver.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : AHB-Lite slave driver. Answers bus transfers in two modes
-//               (ahb_agent_config.auto_gen_resp):
-//                 1 (auto)     - OKAY from an internal memory model
-//                 0 (sequence) - ready delay / HRESP / HRDATA from
+// Description : AHB-Lite slave driver (ahb_agent_config.auto_gen_resp):
+//                 1 (auto)     - internal memory model, OKAY
+//                 0 (sequence) - wait states / HRESP / HRDATA from
 //                                ahb_slave_response items
-//               Reactive component: raises no run-phase objection.
+//               Raises no objection.
 //=============================================================================
 
 class ahb_slave_driver extends uvm_driver #(ahb_slave_response);
@@ -17,16 +16,15 @@ class ahb_slave_driver extends uvm_driver #(ahb_slave_response);
     // Virtual interface handle
     virtual ahb_if vif;
 
-    // Sequencer handle, wired by the agent. Sequence mode only - publishes the
-    // address phase being answered
+    // Sequencer (set by the agent); receives the current address phase
     ahb_slave_sequencer sqr;
 
-    // Response mode + auto-mode wait-state range (from ahb_agent_config)
+    // See ahb_agent_config
     bit          auto_gen_resp   = 1;
     int unsigned ready_delay_min = 0;
     int unsigned ready_delay_max = 0;
 
-    // Auto-mode memory model: HADDR -> data (write stores, read returns)
+    // Auto-mode memory model (HADDR -> data)
     protected bit [AHB_DATA_WIDTH-1:0] mem [bit [AHB_ADDR_WIDTH-1:0]];
 
     //-------------------------------------------------------------------------
@@ -37,7 +35,7 @@ class ahb_slave_driver extends uvm_driver #(ahb_slave_response);
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Build phase - get vif; pull response mode/timing from cfg (optional)
+    // Build phase - vif and agent config (optional)
     //-------------------------------------------------------------------------
     function void build_phase(uvm_phase phase);
         ahb_agent_config cfg;
@@ -52,7 +50,7 @@ class ahb_slave_driver extends uvm_driver #(ahb_slave_response);
     endfunction : build_phase
 
     //-------------------------------------------------------------------------
-    // Run phase - reset-recovery loop mirroring the master driver
+    // Run phase - restart on reset
     //-------------------------------------------------------------------------
     virtual task run_phase(uvm_phase phase);
         forever begin
@@ -74,24 +72,20 @@ class ahb_slave_driver extends uvm_driver #(ahb_slave_response);
     endtask : run_phase
 
     //-------------------------------------------------------------------------
-    // Serve loop - one iteration per address phase. IDLE/BUSY get a zero-wait
-    // OKAY; NONSEQ/SEQ get a full data-phase response. Each branch consumes
-    // exactly the cycles of the transfer it handled
+    // serve_bus - one iteration per address phase. IDLE/BUSY: zero-wait OKAY;
+    // NONSEQ/SEQ: data-phase response
     //-------------------------------------------------------------------------
     task serve_bus();
-        @(vif.slave_cb);                     // align to the clocking block
+        @(vif.slave_cb);
         forever begin
             ahb_trans_e htrans;
             htrans = ahb_trans_e'(vif.slave_cb.HTRANS);
 
             if (htrans == AHB_TRANS_IDLE || htrans == AHB_TRANS_BUSY) begin
-                // No data transfer: hold ready, OKAY
                 vif.slave_cb.HREADY <= 1'b1;
                 vif.slave_cb.HRESP  <= AHB_RESP_OKAY;
                 @(vif.slave_cb);
             end else begin
-                // Active beat: capture the address phase, resolve the response,
-                // then drive its data phase
                 bit [AHB_ADDR_WIDTH-1:0] addr;
                 ahb_dir_e                write;
                 int unsigned             delay;
@@ -108,9 +102,8 @@ class ahb_slave_driver extends uvm_driver #(ahb_slave_response);
     endtask : serve_bus
 
     //-------------------------------------------------------------------------
-    // Resolve the response for one beat. Auto mode builds it locally; sequence
-    // mode pulls an ahb_slave_response and calls item_done() in the same time
-    // step, so no item is held across a clock edge (reset-safe)
+    // get_response - response for one beat. Sequence mode: get_next_item()
+    // and item_done() in the same time step (reset-safe)
     //-------------------------------------------------------------------------
     task get_response(input  bit [AHB_ADDR_WIDTH-1:0] addr,
                       input  ahb_dir_e                write,
@@ -119,12 +112,11 @@ class ahb_slave_driver extends uvm_driver #(ahb_slave_response);
                       output bit [AHB_DATA_WIDTH-1:0] rdata);
         if (auto_gen_resp) begin
             delay = $urandom_range(ready_delay_max, ready_delay_min);
-            resp  = AHB_RESP_OKAY;                       // spec default
-            rdata = mem.exists(addr) ? mem[addr] : '0;   // read loopback
+            resp  = AHB_RESP_OKAY;
+            rdata = mem.exists(addr) ? mem[addr] : '0;
         end else begin
             ahb_slave_response rsp;
-            // Publish the address phase before asking - the sequence reads it
-            // from the sequencer once start_item() returns
+            // Address phase for the response sequence
             if (sqr != null) begin
                 sqr.req_addr  = addr;
                 sqr.req_write = write;
@@ -138,12 +130,10 @@ class ahb_slave_driver extends uvm_driver #(ahb_slave_response);
     endtask : get_response
 
     //-------------------------------------------------------------------------
-    // Drive one beat's data phase:
-    //   1) 'delay' wait states  (HREADY=0, HRESP=OKAY)
-    //   2) response:
-    //        OKAY  - HREADY=1, HRESP=OKAY (+ HRDATA on read); capture write data
-    //        ERROR - two-cycle: (HREADY=0,ERROR) then (HREADY=1,ERROR)
-    // The final @(slave_cb) lands on the completion edge
+    // drive_beat - data phase:
+    //   1) 'delay' wait states (HREADY=0, HRESP=OKAY)
+    //   2) OKAY  - HREADY=1 (+ HRDATA on read); store write data
+    //      ERROR - (HREADY=0, ERROR) then (HREADY=1, ERROR)
     //-------------------------------------------------------------------------
     task drive_beat(input bit [AHB_ADDR_WIDTH-1:0] addr,
                     input ahb_dir_e                write,
@@ -164,14 +154,13 @@ class ahb_slave_driver extends uvm_driver #(ahb_slave_response);
             vif.slave_cb.HREADY <= 1'b1;
             vif.slave_cb.HRESP  <= AHB_RESP_ERROR;
             @(vif.slave_cb);
-            // Errored transfer does not commit to memory
+            // No memory update on ERROR
         end else begin
             vif.slave_cb.HREADY <= 1'b1;
             vif.slave_cb.HRESP  <= AHB_RESP_OKAY;
             if (write == AHB_READ)
                 vif.slave_cb.HRDATA <= rdata;
             @(vif.slave_cb);
-            // Completion edge: sample and store write data for loopback
             if (write == AHB_WRITE)
                 mem[addr] = vif.slave_cb.HWDATA;
         end
@@ -185,7 +174,7 @@ class ahb_slave_driver extends uvm_driver #(ahb_slave_response);
     endtask : drive_beat
 
     //-------------------------------------------------------------------------
-    // Reset - drive default idle response (ready, OKAY). Memory persists.
+    // reset_signals - HREADY=1, OKAY. Memory is kept
     //-------------------------------------------------------------------------
     task reset_signals();
         @(vif.slave_cb);

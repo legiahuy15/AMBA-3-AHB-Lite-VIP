@@ -2,13 +2,10 @@
 // File        : ahb_reset_test.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Reset recovery test. Runs ahb_reset_seq, which yanks HRESETn
-//               part way through long bursts and then proves traffic runs
-//               clean again. The drivers and monitors must flush, the aborted
-//               items must be released, and the scoreboard must end with
-//               nothing unmatched.
-//               Covers AHB_RST_002 to AHB_RST_007 in doc/ahb_lite_vplan.xlsx.
-//               This file is `included inside ahb_test_pkg.sv.
+// Description : Mid-simulation reset test (ahb_reset_seq). Reset asserted
+//               during bursts, then traffic must recover with no unmatched
+//               scoreboard entries.
+//               vplan: AHB_RST_002..007.
 //=============================================================================
 
 `ifndef AHB_RESET_TEST_INCLUDED_
@@ -18,7 +15,7 @@ class ahb_reset_test extends ahb_base_test;
 
     `uvm_component_utils(ahb_reset_test)
 
-    // Bursts driven while resets fire, overridable: +NUM_ITER=<n>
+    // Bursts (+NUM_ITER=<n>)
     int unsigned num_iter = 18;
 
     //-------------------------------------------------------------------------
@@ -29,8 +26,7 @@ class ahb_reset_test extends ahb_base_test;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Build phase - wait states keep transfers on the bus long enough for a
-    // reset to land inside a data phase
+    // Build phase - auto-response slave, 0-2 wait states
     //-------------------------------------------------------------------------
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
@@ -43,8 +39,7 @@ class ahb_reset_test extends ahb_base_test;
     endfunction : build_phase
 
     //-------------------------------------------------------------------------
-    // Run phase - the drain must outlast a reset pulse (8 clocks), so the
-    // phase never ends with one in flight
+    // Run phase - drain time > reset pulse (8 clocks)
     //-------------------------------------------------------------------------
     task run_phase(uvm_phase phase);
         ahb_reset_seq seq;

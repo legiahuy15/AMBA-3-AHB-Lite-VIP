@@ -2,9 +2,7 @@
 // File        : ahb_seq_pkg.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Sequence library package for the AHB-Lite VIP. Imports
-//               ahb_pkg (transaction, types, sequencers) and includes all
-//               master-side and slave-side sequences.
+// Description : Sequence library package (master and slave sequences).
 //=============================================================================
 
 `ifndef AHB_SEQ_PKG_INCLUDED_
@@ -41,9 +39,7 @@ package ahb_seq_pkg;
     `include "mst_seq/ahb_random_stress_seq.sv"
 
     //-------------------------------------------------------------------------
-    // Slave-sequence Library  (src/slv_seq/)
-    //   Used only when the slave agent runs in sequence mode
-    //   (ahb_agent_config.auto_gen_resp = 0)
+    // Slave-sequence Library  (src/slv_seq/) - requires auto_gen_resp = 0
     //-------------------------------------------------------------------------
     `include "slv_seq/ahb_slave_error_seq.sv"
 

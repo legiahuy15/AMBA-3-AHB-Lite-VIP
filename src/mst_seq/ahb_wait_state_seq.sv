@@ -2,15 +2,9 @@
 // File        : ahb_wait_state_seq.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Slave back-pressure sweep. Steps the slave's wait-state window
-//               from zero waits up to the 16 recommended by IHI0033A 5.1.2 and
-//               drives read and write traffic through every window, half of it
-//               pipelined so an address phase is presented while the previous
-//               data phase is still waited. Pairs with the master's
-//               en_idle_to_nonseq_in_wait to also produce the IDLE-to-NONSEQ
-//               transition inside a wait state.
-//               Requires the slave agent in auto-response mode (memory model).
-//               This file is `included inside ahb_seq_pkg.sv.
+// Description : Wait-state sweep from 0 to 16 (IHI0033A 5.1.2) with
+//               write/read-back pairs; every other pair pipelined.
+//               Requires auto-response slave.
 //=============================================================================
 
 `ifndef AHB_WAIT_STATE_SEQ_INCLUDED_
@@ -27,26 +21,23 @@ class ahb_wait_state_seq extends ahb_base_seq;
 
     bit [AHB_ADDR_WIDTH-1:0] base_addr = 32'h0000_D000;
 
-    // Ceiling applied to every window, to shorten a long run
+    // Upper limit for every window
     int unsigned wait_max = 16;
 
-    // Slave driver whose wait-state window is swept, set by the test. The
-    // driver latches ready_delay_min/max in build_phase, so the fields must be
-    // poked directly. Null: traffic runs at the configured window
+    // Slave driver for the sweep (set by the test). Null: no sweep
     ahb_slave_driver slv_drv;
 
     localparam int unsigned NUM_WINDOWS = 8;
 
-    // One slot per iteration, sized for a 16-beat word burst and 64-byte
-    // aligned so a WRAP region also falls inside it
+    // Address slot per burst (16 x 4B), 64B aligned
     localparam int unsigned SLOT_SIZE = 64;
 
     //-------------------------------------------------------------------------
     // Statistics
     //-------------------------------------------------------------------------
-    int unsigned iter_per_window[NUM_WINDOWS];   // bursts issued in each window
-    int unsigned num_pipelined;                  // write/read pairs queued together
-    int unsigned deepest_window;                 // largest max wait actually applied
+    int unsigned iter_per_window[NUM_WINDOWS];   // bursts per window
+    int unsigned num_pipelined;                  // pipelined pairs
+    int unsigned deepest_window;                 // largest max wait applied
 
     //-------------------------------------------------------------------------
     // Constructor
@@ -56,13 +47,12 @@ class ahb_wait_state_seq extends ahb_base_seq;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // The windows, swept in order. Each is a [lo:hi] range the slave driver
-    // draws every beat's wait count from, independently:
-    //   0        - zero wait (pipelined baseline)
-    //   1, 2, 3  - short fixed waits
-    //   1:7, 8:15- mixed, beats of one burst waited by differing amounts
-    //   16       - recommended maximum, IHI0033A 5.1.2 (AHB_WAI_009)
-    //   0:16     - whole range inside a single burst
+    // get_window - wait-state range [lo:hi] per beat:
+    //   0        - zero wait
+    //   1, 2, 3  - fixed
+    //   1:7, 8:15- random per beat
+    //   16       - maximum, IHI0033A 5.1.2 (AHB_WAI_009)
+    //   0:16     - full range
     //-------------------------------------------------------------------------
     function void get_window(input  int unsigned idx,
                              output int unsigned lo,
@@ -78,14 +68,13 @@ class ahb_wait_state_seq extends ahb_base_seq;
             default: begin lo = 0;  hi = 16; end
         endcase
 
-        // wait_max clamps the window; lo follows so the range stays valid
+        // Clamp to wait_max
         if (hi > wait_max) hi = wait_max;
         if (lo > hi)       lo = hi;
     endfunction : get_window
 
     //-------------------------------------------------------------------------
-    // Hand the window to the slave. Called between transactions only, so no
-    // beat sees its wait count change underneath it
+    // apply_window - set slave wait states; called between transfers
     //-------------------------------------------------------------------------
     function void apply_window(int unsigned lo, int unsigned hi);
         if (slv_drv == null) return;
@@ -95,7 +84,7 @@ class ahb_wait_state_seq extends ahb_base_seq;
     endfunction : apply_window
 
     //-------------------------------------------------------------------------
-    // Body - num_iter x (write burst, read-back, compare) under a swept window
+    // Body - num_iter x (write, read back, compare)
     //-------------------------------------------------------------------------
     virtual task body();
         ahb_transaction          wr;
@@ -119,17 +108,11 @@ class ahb_wait_state_seq extends ahb_base_seq;
             apply_window(lo, hi);
             iter_per_window[i % NUM_WINDOWS]++;
 
-            // A deep window costs up to hi cycles per beat, twice over (write
-            // then read-back), so keep those bursts short. Threshold above the
-            // 1:7 window, where long burst types still meet a non-trivial wait
+            // Short bursts only for deep windows (runtime)
             deep = (hi > 7);
 
-            // Every other pair is queued together, presenting the read's NONSEQ
-            // address phase while the write's last data phase is still waited:
-            // exercises HTRANS/address-control stability across a wait
-            // (AHB_WAI_002, AHB_WAI_003) and, with en_idle_to_nonseq_in_wait,
-            // the IDLE-to-NONSEQ upgrade mid-wait (AHB_WAI_004). Odd iterations
-            // are the windows that insert at least one wait state
+            // Odd iterations pipelined: read address phase during the write's
+            // wait states (AHB_WAI_002..004)
             pipelined = ((i % 2) == 1);
             if (pipelined) num_pipelined++;
 
@@ -145,12 +128,11 @@ class ahb_wait_state_seq extends ahb_base_seq;
                                             AHB_BURST_WRAP4,  AHB_BURST_WRAP8});
                     (burst == AHB_BURST_INCR) -> (num_beats inside {[2:8]});
 
-                    // No BUSY - a master stall would blur the slave's
-                    // back-pressure
+                    // No BUSY
                     foreach (busy_cycles[k]) busy_cycles[k] == 0;
                     trailing_busy_cycles == 0;
 
-                    // inside range bounds addr so the span sum cannot wrap
+                    // Burst stays inside its slot
                     addr inside {[slot : slot + SLOT_SIZE - 1]};
                     (burst inside {AHB_BURST_INCR,  AHB_BURST_INCR4,
                                    AHB_BURST_INCR8, AHB_BURST_INCR16}) ->

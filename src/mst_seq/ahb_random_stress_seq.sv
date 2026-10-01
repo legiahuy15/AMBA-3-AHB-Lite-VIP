@@ -32,9 +32,8 @@ class ahb_random_stress_seq extends ahb_base_seq;
         super.new(name);
     endfunction : new
 
-    // Randomize BUSY independently on the read-back as well. An explicit
-    // non-zero constraint is required to override ahb_transaction's soft
-    // no-BUSY default; a dist containing zero alone does not override it.
+    // build_read_back - read-back with independently randomized BUSY.
+    // Explicit non-zero constraint overrides the soft no-BUSY default
     virtual function ahb_transaction build_read_back(ahb_transaction wr);
         ahb_transaction rd;
         bit             inject_busy;
@@ -92,9 +91,8 @@ class ahb_random_stress_seq extends ahb_base_seq;
         for (int unsigned i = 0; i < num_iter; i++) begin
             slot = base_addr + i * SLOT_SIZE;
 
-            // Change slave timing only after the preceding pair has drained.
-            // The first two pairs are deterministic coverage anchors; the
-            // remaining pairs retain constrained-random back-pressure.
+            // Slave wait states per pair: pair 0 zero wait, pair 1 wait_max,
+            // then random
             if (i == 0) begin
                 wait_lo = 0;
                 wait_hi = 0;

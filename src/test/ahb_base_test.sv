@@ -2,11 +2,9 @@
 // File        : ahb_base_test.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Base UVM test for the AHB-Lite VIP. Builds the environment in
-//               passthrough mode (master drives, slave responds on the same
-//               bus) and provides build, end_of_elaboration and report phases.
-//               Derived tests supply their own run_phase.
-//               This file is `included inside ahb_test_pkg.sv.
+// Description : Base test. Builds the env in passthrough mode (master and
+//               slave agents on one bus) and reports PASS/FAIL. Derived tests
+//               provide run_phase.
 //=============================================================================
 
 `ifndef AHB_BASE_TEST_INCLUDED_
@@ -30,8 +28,7 @@ class ahb_base_test extends uvm_test;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Build phase - create env_cfg, fetch the vif from tb_top, build the env.
-    // Derived tests customise env_cfg after calling super.build_phase()
+    // Build phase - derived tests modify env_cfg after super.build_phase()
     //-------------------------------------------------------------------------
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
@@ -43,7 +40,7 @@ class ahb_base_test extends uvm_test;
             `uvm_fatal(get_type_name(),
                        "Virtual interface 'vif' not found - must be set by tb_top")
 
-        // slave_vif remains null -> passthrough mode (both agents on same bus)
+        // slave_vif null -> passthrough mode
 
         uvm_config_db#(ahb_vip_env_config)::set(this, "env", "cfg", env_cfg);
 

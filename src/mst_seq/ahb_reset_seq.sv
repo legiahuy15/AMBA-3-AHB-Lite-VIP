@@ -2,11 +2,9 @@
 // File        : ahb_reset_seq.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Reset recovery sequence. Runs long bursts and yanks HRESETn
-//               part way through them by triggering the global UVM event
-//               "ahb_reset_req" that tb_top listens on, then proves traffic
-//               runs clean again once the resets stop.
-//               This file is `included inside ahb_seq_pkg.sv.
+// Description : Reset recovery sequence. Asserts HRESETn during INCR16 bursts
+//               via the global UVM event "ahb_reset_req" (tb_top), then runs
+//               write/read pairs that must complete.
 //=============================================================================
 
 `ifndef AHB_RESET_SEQ_INCLUDED_
@@ -19,8 +17,8 @@ class ahb_reset_seq extends ahb_base_seq;
     //-------------------------------------------------------------------------
     // Knobs
     //-------------------------------------------------------------------------
-    int unsigned num_iter    = 18;   // bursts driven while resets are firing
-    int unsigned num_recover = 4;    // clean write/read pairs afterwards
+    int unsigned num_iter    = 18;   // bursts in the reset phase
+    int unsigned num_recover = 4;    // write/read pairs in the recovery phase
     int unsigned reset_every = 3;    // reset on every Nth burst
 
     bit [AHB_ADDR_WIDTH-1:0] base_addr    = 32'h0000_A000;   // reset phase
@@ -28,8 +26,7 @@ class ahb_reset_seq extends ahb_base_seq;
 
     localparam int unsigned SLOT_SIZE = 64;
 
-    // A 16-beat burst lasts at least 160 ns, so a reset in this window lands
-    // mid-burst rather than between transfers
+    // Reset delay from burst start (INCR16 >= 160 ns)
     localparam int unsigned RESET_DELAY_MIN_NS = 50;
     localparam int unsigned RESET_DELAY_MAX_NS = 150;
 
@@ -64,8 +61,7 @@ class ahb_reset_seq extends ahb_base_seq;
                             num_iter, reset_every), UVM_LOW)
 
         //---------------------------------------------------------------------
-        // Reset phase - long bursts with HRESETn pulled part way through.
-        // Aborts are expected, so they are logged rather than warned
+        // Reset phase - aborts expected
         //---------------------------------------------------------------------
         expect_reset_abort = 1'b1;
 
@@ -75,8 +71,7 @@ class ahb_reset_seq extends ahb_base_seq;
             if ((i % reset_every) == (reset_every - 1)) begin
                 delay_ns = $urandom_range(RESET_DELAY_MAX_NS, RESET_DELAY_MIN_NS);
                 num_resets++;
-                // Forked, so the burst is already on the bus when HRESETn
-                // drops. The delay is not clock aligned: asynchronous assert
+                // Asynchronous reset, delay_ns after burst start
                 fork
                     begin
                         #(delay_ns * 1ns);
@@ -103,14 +98,12 @@ class ahb_reset_seq extends ahb_base_seq;
             if (!ok) num_aborted++;
         end
 
-        // Let any in-flight reset finish before the recovery phase
+        // Wait for pending resets
         wait fork;
         #500ns;
 
         //---------------------------------------------------------------------
-        // Recovery phase - no more resets: everything must complete and the
-        // read-back must match the scoreboard reference memory. An abort here
-        // is a recovery failure, so warnings are back on
+        // Recovery phase - no resets; any abort is an error
         //---------------------------------------------------------------------
         expect_reset_abort = 1'b0;
 
@@ -151,7 +144,7 @@ class ahb_reset_seq extends ahb_base_seq;
                   $sformatf("Reset sequence done: sent=%0d aborted=%0d resets=%0d",
                             num_sent, num_aborted, num_resets), UVM_LOW)
 
-        // A reset that never caught a transfer leaves the recovery path untested
+        // At least one reset must abort a transfer
         if (num_resets > 0 && num_aborted == 0)
             `uvm_error(get_type_name(),
                        "No transaction was aborted - reset never landed on an active transfer")

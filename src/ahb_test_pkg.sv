@@ -2,9 +2,7 @@
 // File        : ahb_test_pkg.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Test package for AHB-Lite VIP.
-//               Imports ahb_pkg (VIP core) and ahb_seq_pkg (sequence library),
-//               and includes all test classes.
+// Description : Test package.
 //=============================================================================
 
 `ifndef AHB_TEST_PKG_INCLUDED_

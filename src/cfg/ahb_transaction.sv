@@ -2,8 +2,8 @@
 // File        : ahb_transaction.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : AHB-Lite sequence item. Holds all fields for one read/write
-//               transaction, protocol constraints (IHI0033A), and debug helpers.
+// Description : AHB-Lite sequence item: one burst, protocol constraints
+//               (IHI0033A), copy/compare/print helpers.
 //==============================================================================
 
 class ahb_transaction extends uvm_sequence_item;
@@ -27,36 +27,32 @@ class ahb_transaction extends uvm_sequence_item;
     rand bit                      ready[];
     rand ahb_resp_e               resp[];
 
-    // Canonical burst length (number of beats), derived from burst type
+    // Number of beats (from burst type; 1-256 for INCR)
     rand int unsigned             num_beats;
 
-    // BUSY cycles driven before beat i. busy_cycles[0] == 0, so BUSY only
-    // appears between beats
+    // BUSY cycles before beat i (busy_cycles[0] == 0)
     rand int unsigned             busy_cycles[];
 
     // INCR only: BUSY cycles after the last beat, then IDLE/NONSEQ
     rand int unsigned             trailing_busy_cycles;
 
-    // ERROR policy: 1 = cancel remaining beats, 0 = continue (both spec-legal)
+    // ERROR policy: 1 = cancel remaining beats, 0 = continue
     rand bit                      abort_on_error;
 
-    // Withdraw a presented BUSY during a wait state, replacing it with the
-    // transfer that ends the BUSY run (IHI0033A 3.6.1)
+    // Replace a BUSY during a wait state with the next transfer type
+    // (IHI0033A 3.6.1)
     rand bit                      busy_retract_in_wait;
 
-    // Move the address while cancelling a burst on ERROR - address/control may
-    // change with HREADY low (IHI0033A 3.6.2)
+    // Change HADDR when cancelling a burst on ERROR (IHI0033A 3.6.2)
     rand bit                      addr_change_on_error;
 
-    // Set by the driver at end of transfer; rdata[]/resp[] valid only then.
-    // Level flag, not an event, so an early completion cannot be missed
+    // Set by the driver on completion; rdata[]/resp[] valid after this
     bit                           done;
 
-    // Set with done when a reset flushed the txn; rdata[]/resp[] are invalid
+    // Set with done if flushed by reset; rdata[]/resp[] invalid
     bit                           aborted;
 
-    // Beats actually completed on the bus. Below num_beats when an ERROR
-    // cancelled the rest of the burst
+    // Beats completed on the bus (< num_beats if cancelled on ERROR)
     int unsigned                  beats_done;
 
     //-------------------------------------------------------------------------
@@ -78,15 +74,14 @@ class ahb_transaction extends uvm_sequence_item;
         `uvm_field_int(                    abort_on_error, UVM_ALL_ON)
         `uvm_field_int(                    busy_retract_in_wait, UVM_ALL_ON)
         `uvm_field_int(                    addr_change_on_error, UVM_ALL_ON)
-        // trans[]/resp[]: no macro for enum dynamic arrays - handled by
-        // do_copy/do_compare/do_print
+        // trans[]/resp[]: handled in do_copy/do_compare/do_print
     `uvm_object_utils_end
 
     //-------------------------------------------------------------------------
     // Constraints
     //-------------------------------------------------------------------------
 
-    // Canonical beat count, derived from burst type
+    // Beat count from burst type
     constraint c_num_beats {
         if (burst == AHB_BURST_SINGLE)                              num_beats == 1;
         else if (burst inside {AHB_BURST_WRAP4,  AHB_BURST_INCR4})  num_beats == 4;
@@ -95,7 +90,7 @@ class ahb_transaction extends uvm_sequence_item;
         else                                                        num_beats inside {[1:256]}; // INCR
     }
 
-    // Every beat-level array is sized to the canonical beat count
+    // Beat arrays sized to num_beats
     constraint c_array_sizes {
         wdata.size() == num_beats;
         rdata.size() == num_beats;
@@ -105,8 +100,7 @@ class ahb_transaction extends uvm_sequence_item;
         busy_cycles.size() == num_beats;
     }
 
-    // Burst size must not exceed data bus width
-    // 2^size <= DATA_WIDTH / 8
+    // 2^HSIZE <= DATA_WIDTH / 8
     constraint c_size_max {
         (1 << size) <= (AHB_DATA_WIDTH / 8);
     }
@@ -123,12 +117,12 @@ class ahb_transaction extends uvm_sequence_item;
             ((addr >> 10) == ((addr + (num_beats - 1) * (1 << size)) >> 10));
     }
 
-    // Single master - HMASTLOCK not needed (no arbitration)
+    // Single master: HMASTLOCK fixed to 0
     constraint c_lock_fixed {
         lock == 1'b0;
     }
 
-    // HPROT not supported - fixed to default
+    // HPROT not supported: fixed to default
     constraint c_prot_fixed {
         prot == AHB_PROT_DEFAULT;
     }
@@ -154,8 +148,7 @@ class ahb_transaction extends uvm_sequence_item;
         }
     }
 
-    // Beats are active transfers only (BUSY modeled via busy_cycles[]);
-    // beat 0 is NONSEQ
+    // Beats are NONSEQ/SEQ only (BUSY via busy_cycles[]); beat 0 is NONSEQ
     constraint c_trans_active {
         foreach (trans[i])
             trans[i] inside {AHB_TRANS_NONSEQ, AHB_TRANS_SEQ};
@@ -163,7 +156,7 @@ class ahb_transaction extends uvm_sequence_item;
             trans[0] == AHB_TRANS_NONSEQ;
     }
 
-    // No BUSY before beat 0; BUSY runs capped at 3 cycles, default none
+    // No BUSY before beat 0; max 3 cycles; default 0
     constraint c_busy_cycles {
         if (num_beats > 0) busy_cycles[0] == 0;
         foreach (busy_cycles[i]) {
@@ -172,29 +165,29 @@ class ahb_transaction extends uvm_sequence_item;
         }
     }
 
-    // Only INCR may end the burst out of BUSY; default none
+    // Trailing BUSY: INCR only; max 3 cycles; default 0
     constraint c_trailing_busy {
         trailing_busy_cycles <= 3;
         soft trailing_busy_cycles == 0;
         (burst != AHB_BURST_INCR) -> (trailing_busy_cycles == 0);
     }
 
-    // Cancel-on-ERROR optional per spec; default cancel
+    // Default: cancel on ERROR
     constraint c_abort_on_error {
         soft abort_on_error == 1'b1;
     }
 
-    // BUSY retraction optional; default off
+    // Default: no BUSY retraction
     constraint c_busy_retract {
         soft busy_retract_in_wait == 1'b0;
     }
 
-    // Address move on ERROR cancel optional; default off
+    // Default: no address change on ERROR
     constraint c_addr_change_on_error {
         soft addr_change_on_error == 1'b0;
     }
 
-    // Default distribution: favour common burst types
+    // Burst type distribution
     constraint c_burst_dist {
         burst dist {
             AHB_BURST_SINGLE := 40,
@@ -208,7 +201,7 @@ class ahb_transaction extends uvm_sequence_item;
         };
     }
 
-    // Default direction distribution
+    // Direction distribution
     constraint c_dir_dist {
         write dist {0 := 50, 1 := 50};
     }
@@ -228,7 +221,7 @@ class ahb_transaction extends uvm_sequence_item;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Helper: get number of beats for the current burst type
+    // get_num_beats - number of beats for the burst type
     //-------------------------------------------------------------------------
     function int get_num_beats();
         case (burst)
@@ -236,22 +229,20 @@ class ahb_transaction extends uvm_sequence_item;
             AHB_BURST_WRAP4,  AHB_BURST_INCR4:  return 4;
             AHB_BURST_WRAP8,  AHB_BURST_INCR8:  return 8;
             AHB_BURST_WRAP16, AHB_BURST_INCR16: return 16;
-            // INCR: canonical num_beats, else beat-array size for directed
-            // items that skip it
+            // INCR: num_beats, or wdata size if num_beats is unset
             AHB_BURST_INCR:                     return (num_beats != 0) ? num_beats : wdata.size();
             default:                            return 1;
         endcase
     endfunction : get_num_beats
 
     //-------------------------------------------------------------------------
-    // do_copy - deep copy including enum arrays
+    // do_copy - adds trans[]/resp[]
     //-------------------------------------------------------------------------
     function void do_copy(uvm_object rhs);
         ahb_transaction rhs_t;
-        super.do_copy(rhs);     // copies all `uvm_field_*` registered fields
+        super.do_copy(rhs);
         if (!$cast(rhs_t, rhs))
             `uvm_fatal(get_type_name(), "do_copy: cast failed")
-        // Manual copy of trans[] & resp[]
         this.trans = new[rhs_t.trans.size()];
         this.resp  = new[rhs_t.resp.size()];
         foreach (rhs_t.trans[i])
@@ -261,15 +252,15 @@ class ahb_transaction extends uvm_sequence_item;
     endfunction : do_copy
 
     //-------------------------------------------------------------------------
-    // do_compare - compare including enum arrays
+    // do_compare - adds trans[]/resp[]
     //-------------------------------------------------------------------------
     function bit do_compare(uvm_object rhs, uvm_comparer comparer);
         ahb_transaction rhs_t;
         bit result;
-        result = super.do_compare(rhs, comparer);   // compare all registered fields
+        result = super.do_compare(rhs, comparer);
         if (!$cast(rhs_t, rhs))
             `uvm_fatal(get_type_name(), "do_compare: cast failed")
-        // Compare trans[] sizes & elements
+        // trans[]
         if (this.trans.size() != rhs_t.trans.size()) begin
             `uvm_info(get_type_name(),
                       $sformatf("trans size mismatch: %0d vs %0d",
@@ -284,7 +275,7 @@ class ahb_transaction extends uvm_sequence_item;
                 result = 0;
             end
         end
-        // Compare resp[] sizes & elements
+        // resp[]
         if (this.resp.size() != rhs_t.resp.size()) begin
             `uvm_info(get_type_name(),
                       $sformatf("resp size mismatch: %0d vs %0d",
@@ -303,17 +294,15 @@ class ahb_transaction extends uvm_sequence_item;
     endfunction : do_compare
 
     //-------------------------------------------------------------------------
-    // do_print - print UVM output
+    // do_print - adds trans[]/resp[]
     //-------------------------------------------------------------------------
     function void do_print(uvm_printer printer);
-        super.do_print(printer);    // prints all registered fields
-        // Manually print trans[]
+        super.do_print(printer);
         printer.print_generic("trans.size()", "int", $bits(trans.size()),
                               $sformatf("%0d", trans.size()));
         foreach (trans[i])
             printer.print_generic($sformatf("trans[%0d]", i), "ahb_trans_e", 2,
                                   trans[i].name());
-        // Manually print resp[]
         printer.print_generic("resp.size()", "int", $bits(resp.size()),
                               $sformatf("%0d", resp.size()));
         foreach (resp[i])
@@ -322,7 +311,7 @@ class ahb_transaction extends uvm_sequence_item;
     endfunction : do_print
 
     //-------------------------------------------------------------------------
-    // convert2string - human-readable transaction summary for debug
+    // convert2string - debug summary
     //-------------------------------------------------------------------------
     function string convert2string();
         string s;

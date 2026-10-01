@@ -2,12 +2,8 @@
 // File        : ahb_wrap_burst_seq.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Wrapping bursts (WRAP4, WRAP8, WRAP16) over every legal size,
-//               with start addresses both on and inside the wrap boundary.
-//               Each iteration writes one burst and reads it back beat for
-//               beat at the same address.
-//               Requires the slave agent in auto-response mode (memory model).
-//               This file is `included inside ahb_seq_pkg.sv.
+// Description : WRAP4/8/16 write/read-back bursts, all legal sizes, aligned and
+//               unaligned start addresses. Requires auto-response slave.
 //=============================================================================
 
 `ifndef AHB_WRAP_BURST_SEQ_INCLUDED_
@@ -24,10 +20,8 @@ class ahb_wrap_burst_seq extends ahb_base_seq;
 
     bit [AHB_ADDR_WIDTH-1:0] base_addr = 32'h0000_4000;
 
-    // Slot holds the largest wrap region issued here (16 beats x 4 bytes). A
-    // wrap region is a power of two and naturally aligned, so any region
-    // containing an address in this slot lies wholly inside it - the start
-    // address randomizes freely without aliasing the next slot
+    // Largest wrap region (16 x 4B); any start address in the slot keeps the
+    // burst inside it
     localparam int unsigned SLOT_SIZE = 64;
 
     //-------------------------------------------------------------------------
@@ -38,7 +32,7 @@ class ahb_wrap_burst_seq extends ahb_base_seq;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Body - num_iter x (WRAP write burst, WRAP read burst, compare)
+    // Body - num_iter x (write, read back, compare)
     //-------------------------------------------------------------------------
     virtual task body();
         ahb_transaction          wr;
@@ -52,8 +46,6 @@ class ahb_wrap_burst_seq extends ahb_base_seq;
             slot = base_addr + i * SLOT_SIZE;
 
             wr = ahb_transaction::type_id::create("wr");
-            // Free offset inside the slot: start addresses land both on the
-            // wrap boundary and part way through the region
             if (!wr.randomize() with {
                     write == AHB_WRITE;
                     burst inside {AHB_BURST_WRAP4, AHB_BURST_WRAP8, AHB_BURST_WRAP16};

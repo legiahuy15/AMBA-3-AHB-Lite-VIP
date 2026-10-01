@@ -1,16 +1,8 @@
 # ============================================================================
-# wave.do - AMBA 3 AHB-Lite waveform setup for QuestaSim GUI
-#   Custom radices show the enum names declared in src/cfg/ahb_types.sv on the
-#   plain interface vectors: transfer type, burst type, size, direction and
-#   response.
-#
-#   Colors:
-#     - AHB signals use Questa's DEFAULT wave color (green traces, RED for
-#       unknown/X regions before reset) - no -color overrides, otherwise the
-#       X region loses its red highlight.
-#     - User-defined radix values carry their own -color (green) so those rows
-#       match the other signals instead of the white/gray default.
-#     - clk / rst_n stay yellow.
+# wave.do - AHB-Lite waveform setup for QuestaSim GUI
+#   Radices show enum names from src/cfg/ahb_types.sv.
+#   AHB signals use the default color (X shown in red); radix values are
+#   green; clk/rst_n yellow.
 # ============================================================================
 
 radix define ahb_trans {
@@ -33,7 +25,7 @@ radix define ahb_burst {
     -default hex
 }
 
-# HSIZE encodes the transfer width in bits (2^HSIZE bytes)
+# HSIZE as transfer width in bits
 radix define ahb_size {
     3'b000 "8b"    -color #00ff00,
     3'b001 "16b"   -color #00ff00,

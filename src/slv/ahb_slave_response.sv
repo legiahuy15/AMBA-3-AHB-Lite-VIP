@@ -2,9 +2,8 @@
 // File        : ahb_slave_response.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : AHB-Lite slave response item. Describes how the slave driver
-//               answers one data phase: wait states, HRESP, and read data.
-//               Used only in sequence mode (ahb_agent_config.auto_gen_resp = 0).
+// Description : Slave response item for one data phase: wait states, HRESP,
+//               HRDATA. Sequence mode only (auto_gen_resp = 0).
 //==============================================================================
 
 class ahb_slave_response extends uvm_sequence_item;
@@ -13,15 +12,13 @@ class ahb_slave_response extends uvm_sequence_item;
     // Response fields (one data phase / beat)
     //-------------------------------------------------------------------------
 
-    // Wait states: number of cycles HREADY is held low before the beat
-    // completes. 0 = zero-wait (HREADY high immediately)
+    // Wait states before completion
     rand int unsigned             ready_delay;
 
-    // Transfer response for this beat. The driver expands ERROR into the
-    // two-cycle response (HREADY=0,HRESP=1 then HREADY=1,HRESP=1)
+    // Response (ERROR driven as two cycles)
     rand ahb_resp_e               resp;
 
-    // Read data returned on HRDATA (used when the observed transfer is a read)
+    // HRDATA (reads only)
     rand bit [AHB_DATA_WIDTH-1:0] rdata;
 
     //-------------------------------------------------------------------------
@@ -40,7 +37,7 @@ class ahb_slave_response extends uvm_sequence_item;
     // Default: zero-wait
     constraint c_ready_delay_default {
         soft ready_delay == 0;
-        ready_delay <= 16;              // bound directed randomization
+        ready_delay <= 16;
     }
 
     // Default: successful transfer
@@ -53,11 +50,11 @@ class ahb_slave_response extends uvm_sequence_item;
     //-------------------------------------------------------------------------
     function new(string name = "ahb_slave_response");
         super.new(name);
-        resp = AHB_RESP_OKAY;           // sane default for non-randomized items
+        resp = AHB_RESP_OKAY;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // convert2string - human-readable summary for debug
+    // convert2string - debug summary
     //-------------------------------------------------------------------------
     function string convert2string();
         return $sformatf("SLAVE_RESP: ready_delay=%0d resp=%s rdata=0x%08h",

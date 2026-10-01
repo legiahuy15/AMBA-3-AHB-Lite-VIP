@@ -2,13 +2,10 @@
 // File        : ahb_error_response_test.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : ERROR response test. The slave agent runs in sequence mode and
-//               ahb_slave_error_seq answers a share of the beats with ERROR,
-//               while ahb_error_seq drives every burst type under both the
-//               cancel and the continue policy.
-//               Covers AHB_RSP_003 to AHB_RSP_008, AHB_BST_014, AHB_BST_015
-//               and AHB_ENV_003 in doc/ahb_lite_vplan.xlsx.
-//               This file is `included inside ahb_test_pkg.sv.
+// Description : ERROR response test. Slave in sequence mode
+//               (ahb_slave_error_seq); master runs ahb_error_seq on all burst
+//               types with cancel and continue policies.
+//               vplan: AHB_RSP_003..008, AHB_BST_014, AHB_BST_015, AHB_ENV_003.
 //=============================================================================
 
 `ifndef AHB_ERROR_RESPONSE_TEST_INCLUDED_
@@ -18,10 +15,10 @@ class ahb_error_response_test extends ahb_base_test;
 
     `uvm_component_utils(ahb_error_response_test)
 
-    // Bursts to issue, overridable: +NUM_ITER=<n>
+    // Bursts (+NUM_ITER=<n>)
     int unsigned num_iter = 16;
 
-    // Share of beats answered with ERROR, overridable: +ERROR_RATE=<n>
+    // ERROR rate in percent (+ERROR_RATE=<n>)
     int unsigned error_rate_pct = 25;
 
     //-------------------------------------------------------------------------
@@ -32,8 +29,7 @@ class ahb_error_response_test extends ahb_base_test;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Build phase - responses come from the sequencer, so the memory model and
-    // ready_delay_min/max are unused
+    // Build phase - slave sequence mode
     //-------------------------------------------------------------------------
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
@@ -45,8 +41,8 @@ class ahb_error_response_test extends ahb_base_test;
     endfunction : build_phase
 
     //-------------------------------------------------------------------------
-    // Run phase - the slave sequence runs forever: forked off and killed at
-    // phase end. Only the master traffic holds the objection
+    // Run phase - slave sequence runs forever (join_none); objection held by
+    // the master sequence only
     //-------------------------------------------------------------------------
     task run_phase(uvm_phase phase);
         ahb_error_seq       mst_seq;
@@ -58,7 +54,7 @@ class ahb_error_response_test extends ahb_base_test;
         mst_seq          = ahb_error_seq::type_id::create("mst_seq");
         mst_seq.num_iter = num_iter;
 
-        // Unmapped region is owned by the master sequence; mirror it here
+        // Same unmapped region as the master sequence
         slv_seq                = ahb_slave_error_seq::type_id::create("slv_seq");
         slv_seq.error_rate_pct = error_rate_pct;
         slv_seq.unmapped_base  = mst_seq.unmapped_base;

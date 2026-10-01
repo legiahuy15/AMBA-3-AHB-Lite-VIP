@@ -2,10 +2,8 @@
 # File        : Makefile
 # Project     : AMBA 3 AHB-Lite VIP
 # Author      : Huy Le
-# Description : QuestaSim simulation Makefile.
-#               Supports parallel regressions, random seeding, code/functional
-#               coverage collection, and merging results into HTML reports.
-#               Recipes use POSIX shell (Linux, or Git Bash / MSYS on Windows).
+# Description : QuestaSim flow: compile, run, parallel regression, coverage
+#               merge and HTML report. Requires a POSIX shell.
 # ==============================================================================
 
 SHELL        := /bin/bash
@@ -19,12 +17,7 @@ LOG_DIR      = $(REPORT_DIR)/logs
 COV_DIR      = $(REPORT_DIR)/coverage
 COV_HTML_DIR = $(REPORT_DIR)/cov_html
 
-# Compilation Source Files (in correct compile order)
-#   ahb_if.sv      : interface, must precede the packages
-#   ahb_pkg.sv     : VIP core (types, transaction, agents, env)
-#   ahb_seq_pkg.sv : sequence library (imports ahb_pkg)
-#   ahb_test_pkg.sv: tests (imports ahb_pkg + ahb_seq_pkg)
-#   ahb_sva.sv     : protocol checker module, instantiated inside tb_top
+# Sources in compile order
 SV_SOURCES = \
     $(SRC_DIR)/ahb_if.sv \
     $(SRC_DIR)/ahb_pkg.sv \
@@ -34,22 +27,21 @@ SV_SOURCES = \
     $(SRC_DIR)/tb_top.sv
 
 # ==============================================================================
-# 2. Configurable Variables (Can be overridden via command line)
+# 2. Configurable Variables (command-line overridable)
 # ==============================================================================
 TESTNAME      ?= ahb_read_after_write_test
-# Set to 'random' or a specific integer (e.g., 42)
+# 'random' or an integer
 SEED          ?= random
 UVM_VERBOSITY ?= UVM_LOW
 # Number of iterations per test in regression
 NUM_RUNS      ?= 5
-# 1: Enable coverage collection, 0: Disable for speed
+# 1: collect coverage, 0: disable
 USE_COVERAGE  ?= 1
 
-# Additional user-defined simulator arguments
-# (e.g. make run PLUSARGS="+DUMP_VCD +TIMEOUT_NS=2000000")
+# Extra plusargs (e.g. PLUSARGS="+TIMEOUT_NS=2000000")
 PLUSARGS      += +DUMP_VCD
 
-# List of tests to run during a regression
+# Regression test list
 TEST_LIST     ?= ahb_sanity_test ahb_single_transfer_test ahb_incr_burst_test \
                  ahb_wrap_burst_test ahb_undefined_burst_test \
                  ahb_error_response_test ahb_reset_test ahb_busy_test \
@@ -66,15 +58,14 @@ VOPT_FLAGS = +acc -work work -l $(LOG_DIR)/optimize.log
 VSIM_BASE_FLAGS = -c -work work
 VSIM_FLAGS = $(VSIM_BASE_FLAGS) -l $(LOG_DIR)/run.log
 
-# Coverage collection settings
+# Coverage
 ifeq ($(USE_COVERAGE),1)
     VLOG_FLAGS += -cover sbcet
     VOPT_FLAGS += -cover sbcet
     VSIM_BASE_FLAGS += -coverage
 endif
 
-# Dynamic Seed Generation (shuf when available, else $RANDOM composition)
-#   ':=' is required so the seed is drawn once and -sv_seed matches the .ucdb name
+# Random seed (shuf, else $RANDOM). ':=' so -sv_seed matches the .ucdb name
 ifeq ($(SEED),random)
     GEN_SEED := $(shell shuf -i 1-99999999 -n 1 2>/dev/null || echo $$(( ($$RANDOM * 32768 + $$RANDOM) % 99999999 + 1 )))
 else
@@ -116,12 +107,12 @@ compile:
 	@vmap work work
 	vlog $(VLOG_FLAGS) $(SV_SOURCES)
 
-# Optimize phase (Standard industry Questa flow using vopt)
+# Optimize phase (vopt)
 optimize: compile
 	@echo "[OPTIMIZE] Generating optimized model 'opt_tb_top'..."
 	vopt $(VOPT_FLAGS) tb_top -o opt_tb_top
 
-# Run a single simulation batch
+# Single run (batch)
 run: optimize
 	@mkdir -p $(LOG_DIR) $(COV_DIR)
 	@echo "[RUN] Executing: $(TESTNAME) | SEED=$(GEN_SEED)"
@@ -132,7 +123,7 @@ run: optimize
 		-do "coverage save -onexit $(COV_DIR)/$(TESTNAME)_seed_$(GEN_SEED).ucdb; run -all; quit -f" \
 		opt_tb_top
 
-# Launch Questa GUI with full AHB-Lite waveform view
+# Single run (GUI, wave.do)
 gui: optimize
 	@mkdir -p $(LOG_DIR)
 	@echo "[GUI] Launching QuestaSim GUI for: $(TESTNAME)"
@@ -144,12 +135,11 @@ gui: optimize
 		opt_tb_top &
 
 # ==============================================================================
-# 5. Regression Harness (Supports parallel execution, e.g., 'make -j8 regress')
+# 5. Regression (parallel with 'make -jN regress')
 # ==============================================================================
-# Generate a list of execution targets: e.g., ahb_read_after_write_test_run_1
+# Targets <test>_run_<n>
 REGRESS_TARGETS = $(foreach test,$(TEST_LIST),$(foreach idx,$(shell seq 1 $(NUM_RUNS)),$(test)_run_$(idx)))
 
-# Regression runner entrypoint
 regress: optimize
 	@echo "[REGRESS] Starting parallel regression for tests: $(TEST_LIST)"
 	@echo "          Running $(NUM_RUNS) iterations per test..."
@@ -157,7 +147,7 @@ regress: optimize
 	@$(MAKE) $(REGRESS_TARGETS)
 	@echo "[REGRESS] Parallel regression complete! Run 'make cov_report' to generate coverage."
 
-# Individual run target handler
+# One regression run; FAILED if UVM_ERROR or UVM_FATAL count is non-zero
 $(REGRESS_TARGETS):
 	@test_name=$(word 1,$(subst _run_, ,$@)); \
 	run_idx=$(word 2,$(subst _run_, ,$@)); \
@@ -181,7 +171,7 @@ $(REGRESS_TARGETS):
 # ==============================================================================
 # 6. Coverage Post-Processing
 # ==============================================================================
-# Merge all generated UCDB databases
+# Merge UCDBs
 merge_cov:
 	@echo "[COV] Merging all coverage databases in $(COV_DIR) into $(COV_DIR)/merged.ucdb..."
 	@mkdir -p $(COV_DIR)
@@ -193,7 +183,7 @@ merge_cov:
 		exit 1; \
 	fi
 
-# Generate the HTML Report
+# HTML report
 cov_report: merge_cov
 	@echo "[COV] Generating HTML coverage report in $(COV_HTML_DIR)..."
 	@mkdir -p $(COV_HTML_DIR)

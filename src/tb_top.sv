@@ -2,10 +2,8 @@
 // File        : tb_top.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Top-level testbench module for the AHB-Lite VIP.
-//               Generates clock and reset, instantiates the interface,
-//               propagates the virtual interface to UVM config_db,
-//               and starts the UVM phase execution via run_test().
+// Description : Testbench top: clock, reset, interface, SVA checker,
+//               config_db setup, run_test(), watchdog.
 //=============================================================================
 
 `timescale 1ns/1ps
@@ -23,7 +21,7 @@ module tb_top;
     import ahb_test_pkg::*;
 
     //-------------------------------------------------------------------------
-    // Parameters (Match standard values used across agents & tests)
+    // Parameters
     //-------------------------------------------------------------------------
     parameter ADDR_WIDTH = 32;
     parameter DATA_WIDTH = 32;
@@ -40,7 +38,7 @@ module tb_top;
         forever #5 clk = ~clk;
     end
 
-    // Reset assertion (HRESETn is active low, held for 10 clock cycles)
+    // Power-on reset, 10 cycles
     initial begin
         rst_n = 1'b0;
         repeat (10) @(posedge clk);
@@ -49,8 +47,7 @@ module tb_top;
     end
 
     //-------------------------------------------------------------------------
-    // Mid-simulation reset - extra pulse requested by a test through the global
-    // UVM event "ahb_reset_req", independent of the power-on reset
+    // Mid-simulation reset (8 cycles) on global UVM event "ahb_reset_req"
     //-------------------------------------------------------------------------
     initial begin
         automatic uvm_event reset_ev = uvm_event_pool::get_global("ahb_reset_req");
@@ -76,9 +73,7 @@ module tb_top;
     );
 
     //-------------------------------------------------------------------------
-    // Time-0 signal initialisation - the drivers take the bus on their first
-    // clocking edge, so the signals would otherwise be X at the first sampling
-    // edge. Values match the drivers' reset_signals()
+    // Time-0 values (same as the drivers' reset_signals())
     //-------------------------------------------------------------------------
     initial begin
         intf.HADDR     = '0;
@@ -95,7 +90,7 @@ module tb_top;
     end
 
     //-------------------------------------------------------------------------
-    // SVA - AHB-Lite protocol assertion checker
+    // SVA protocol checker
     //-------------------------------------------------------------------------
     ahb_sva #(
         .ADDR_WIDTH (ADDR_WIDTH),
@@ -130,10 +125,9 @@ module tb_top;
     end
 
     //-------------------------------------------------------------------------
-    // Simulation Control & Waveform Dumping
+    // VCD dump (+DUMP_VCD)
     //-------------------------------------------------------------------------
     initial begin
-        // Enable waveform dumping if requested by +DUMP_VCD plusarg
         if ($test$plusargs("DUMP_VCD")) begin
             $dumpfile("ahb_lite_vip.vcd");
             $dumpvars(0, tb_top);
@@ -142,10 +136,10 @@ module tb_top;
     end
 
     //-------------------------------------------------------------------------
-    // Safety simulation watchdog - timeout in ns, overridable with +TIMEOUT_NS
+    // Watchdog (+TIMEOUT_NS=<ns>, default 10 ms)
     //-------------------------------------------------------------------------
     initial begin
-        automatic longint unsigned timeout_ns = 10_000_000;  // 10 ms default backup
+        automatic longint unsigned timeout_ns = 10_000_000;
         void'($value$plusargs("TIMEOUT_NS=%d", timeout_ns));
         #(timeout_ns);
         `uvm_fatal("TB_TOP",

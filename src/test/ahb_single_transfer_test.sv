@@ -2,10 +2,9 @@
 // File        : ahb_single_transfer_test.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Randomized SINGLE transfer test. Runs ahb_single_seq over all
-//               legal sizes, alignments and directions.
-//               Covers AHB_BST_001 and AHB_TRN_007 in doc/ahb_lite_vplan.xlsx.
-//               This file is `included inside ahb_test_pkg.sv.
+// Description : Random SINGLE transfer test (ahb_single_seq), all legal sizes,
+//               alignments and directions.
+//               vplan: AHB_BST_001, AHB_TRN_007.
 //=============================================================================
 
 `ifndef AHB_SINGLE_TRANSFER_TEST_INCLUDED_
@@ -15,7 +14,7 @@ class ahb_single_transfer_test extends ahb_base_test;
 
     `uvm_component_utils(ahb_single_transfer_test)
 
-    // Transfers to issue, overridable: +NUM_ITER=<n>
+    // Transfers (+NUM_ITER=<n>)
     int unsigned num_iter = 20;
 
     //-------------------------------------------------------------------------
@@ -26,7 +25,7 @@ class ahb_single_transfer_test extends ahb_base_test;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Build phase - memory-model slave with a few wait states
+    // Build phase - auto-response slave, 0-2 wait states
     //-------------------------------------------------------------------------
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);

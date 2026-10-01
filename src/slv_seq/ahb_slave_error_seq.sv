@@ -2,13 +2,9 @@
 // File        : ahb_slave_error_seq.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Slave response sequence for error injection. Feeds one
-//               ahb_slave_response per active beat: every access inside the
-//               unmapped region gets ERROR the way a default slave would, and
-//               a configurable share of the remaining beats gets ERROR too.
-//               Runs forever - the test ends it by dropping its objection.
-//               Requires auto_gen_resp = 0 on the slave agent.
-//               This file is `included inside ahb_seq_pkg.sv.
+// Description : Slave error injection. One response per active beat: ERROR in
+//               the unmapped region, ERROR at error_rate_pct elsewhere.
+//               Runs forever. Requires auto_gen_resp = 0.
 //=============================================================================
 
 `ifndef AHB_SLAVE_ERROR_SEQ_INCLUDED_
@@ -22,12 +18,10 @@ class ahb_slave_error_seq extends uvm_sequence #(ahb_slave_response);
     //-------------------------------------------------------------------------
     // Knobs
     //-------------------------------------------------------------------------
-    int unsigned error_rate_pct  = 25;   // share of mapped beats given ERROR
-    int unsigned ready_delay_max = 2;    // wait states inserted before a response
+    int unsigned error_rate_pct  = 25;   // ERROR rate (%) outside unmapped region
+    int unsigned ready_delay_max = 2;    // max wait states per beat
 
-    // Region with no slave behind it: every active beat is answered ERROR,
-    // like a default slave. IDLE/BUSY never reach here - the driver answers
-    // them zero-wait OKAY
+    // Unmapped region: always ERROR
     bit [AHB_ADDR_WIDTH-1:0] unmapped_base = 32'h0000_9000;
     bit [AHB_ADDR_WIDTH-1:0] unmapped_size = 32'h0000_1000;
 
@@ -46,10 +40,8 @@ class ahb_slave_error_seq extends uvm_sequence #(ahb_slave_response);
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Body - one response per active beat, for as long as the test runs.
-    // Fields are assigned, not randomized: an inline dist does not conflict
-    // with the item's satisfiable soft c_ready_delay_default / c_resp_default,
-    // so randomize() would return zero-wait OKAY forever
+    // Body - fields assigned directly (randomize() would keep the soft
+    // zero-wait OKAY defaults)
     //-------------------------------------------------------------------------
     virtual task body();
         ahb_slave_response       rsp;
@@ -64,8 +56,7 @@ class ahb_slave_error_seq extends uvm_sequence #(ahb_slave_response);
         forever begin
             rsp = ahb_slave_response::type_id::create("rsp");
 
-            // Blocks until the driver asks, i.e. after it published the
-            // address phase it is answering
+            // Returns after the driver publishes the address phase
             start_item(rsp);
 
             addr     = p_sequencer.req_addr;

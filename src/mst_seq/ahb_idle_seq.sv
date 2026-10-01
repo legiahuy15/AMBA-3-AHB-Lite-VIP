@@ -2,24 +2,13 @@
 // File        : ahb_idle_seq.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : IDLE transfer sequence. Deliberately leaves the bus IDLE, in
-//               runs of one to max_gap cycles, before a burst, between a write
-//               and its read-back, and after the burst has closed. Runs in
-//               three phases so every shape of IDLE the spec allows appears:
-//                 1) gap     - zero-wait traffic separated by IDLE runs, the
-//                              plain accepted IDLE transfer (AHB_TRN_001,
-//                              AHB_TRN_006)
-//                 2) busy    - the same with BUSY runs inside the bursts, so
-//                              IDLE and BUSY are both answered zero-wait OKAY
-//                              (AHB_WAI_010)
-//                 3) in-wait - pipelined pairs against a slave that always
-//                              waits, so the pipelined slot is presented as
-//                              IDLE with HREADY low and the address moves
-//                              underneath it (AHB_WAI_007)
-//               The read-back compare proves the slave ignored every IDLE it
-//               was given: no IDLE may disturb the memory model.
-//               Requires the slave agent in auto-response mode (memory model).
-//               This file is `included inside ahb_seq_pkg.sv.
+// Description : IDLE transfer sequence. Inserts IDLE runs (1..max_gap cycles)
+//               around write/read-back pairs, in three phases:
+//                 1) gap     - zero wait states (AHB_TRN_001, AHB_TRN_006)
+//                 2) busy    - bursts with BUSY (AHB_WAI_010)
+//                 3) in-wait - IDLE with HREADY=0, then NONSEQ to a new
+//                              address (AHB_WAI_007)
+//               Requires auto-response slave.
 //=============================================================================
 
 `ifndef AHB_IDLE_SEQ_INCLUDED_
@@ -32,40 +21,34 @@ class ahb_idle_seq extends ahb_base_seq;
     //-------------------------------------------------------------------------
     // Knobs
     //-------------------------------------------------------------------------
-    int unsigned num_iter = 24;                 // write/read pairs, all phases
+    int unsigned num_iter = 24;                 // write/read pairs (total)
 
     bit [AHB_ADDR_WIDTH-1:0] base_addr = 32'h0000_F000;
 
-    // Longest IDLE run requested between two transfers. The driver closes every
-    // burst with an IDLE of its own, so the run observed on the bus is longer
+    // Max requested IDLE cycles between transfers (driver adds its own IDLE)
     int unsigned max_gap = 4;
 
     //-------------------------------------------------------------------------
     // Handles supplied by the test
     //-------------------------------------------------------------------------
 
-    // Bus clock, used to count out the IDLE runs. Null: the gaps collapse to
-    // the single IDLE the driver inserts on its own
+    // Clock for IDLE gap timing. Null: no extra IDLE cycles
     virtual ahb_if vif;
 
-    // Slave driver whose wait-state window is set per phase. The driver latches
-    // ready_delay_min/max in build_phase, so the fields must be poked directly.
-    // Null: traffic runs at the configured window
+    // Slave driver for per-phase wait states. Null: configured wait states
     ahb_slave_driver slv_drv;
 
     localparam int unsigned NUM_PHASES = 3;
 
-    // One slot per pair, 64-byte aligned and twice the longest burst issued
-    // here (8 beats x 4 bytes), so a WRAP region falls wholly inside it and
-    // slots never alias in the scoreboard reference memory
+    // Address slot per pair: 64B aligned, 2x the longest burst (8 x 4B)
     localparam int unsigned SLOT_SIZE = 64;
 
     //-------------------------------------------------------------------------
     // Statistics
     //-------------------------------------------------------------------------
-    int unsigned iter_per_phase[NUM_PHASES];    // pairs issued in each phase
+    int unsigned iter_per_phase[NUM_PHASES];    // pairs per phase
     int unsigned num_gaps;                      // IDLE runs requested
-    int unsigned num_gap_cycles;                // ... totalling this many cycles
+    int unsigned num_gap_cycles;                // total IDLE cycles requested
     int unsigned longest_gap;                   // longest run requested
 
     //-------------------------------------------------------------------------
@@ -76,8 +59,7 @@ class ahb_idle_seq extends ahb_base_seq;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Hand a wait-state window to the slave. Called between transfers only, so
-    // no beat sees its wait count change underneath it
+    // apply_window - set slave wait states; called between transfers
     //-------------------------------------------------------------------------
     function void apply_window(int unsigned lo, int unsigned hi);
         if (slv_drv == null) return;
@@ -86,9 +68,7 @@ class ahb_idle_seq extends ahb_base_seq;
     endfunction : apply_window
 
     //-------------------------------------------------------------------------
-    // idle_gap - hold the sequence off the sequencer for n bus cycles. The
-    // driver queue is empty while this runs, so its pipelined slot stays IDLE
-    // and the bus idles for the whole window
+    // idle_gap - wait n bus cycles with the driver queue empty (bus IDLE)
     //-------------------------------------------------------------------------
     task idle_gap(int unsigned n);
         if (n == 0) return;
@@ -97,12 +77,12 @@ class ahb_idle_seq extends ahb_base_seq;
         num_gap_cycles += n;
         if (n > longest_gap) longest_gap = n;
 
-        if (vif == null) return;        // no clock handle - nothing to count
+        if (vif == null) return;
         repeat (n) @(vif.monitor_cb);
     endtask : idle_gap
 
     //-------------------------------------------------------------------------
-    // random_gap - 1 to max_gap cycles, never zero: an IDLE run is the point
+    // random_gap - 1..max_gap cycles
     //-------------------------------------------------------------------------
     function int unsigned random_gap();
         if (max_gap == 0) return 1;
@@ -110,12 +90,12 @@ class ahb_idle_seq extends ahb_base_seq;
     endfunction : random_gap
 
     //-------------------------------------------------------------------------
-    // Body - the three phases, each over its own address range
+    // Body - three phases, separate address ranges
     //-------------------------------------------------------------------------
     virtual task body();
         int unsigned n_gap, n_busy, n_wait;
 
-        if (num_iter < NUM_PHASES) num_iter = NUM_PHASES;   // one pair per phase
+        if (num_iter < NUM_PHASES) num_iter = NUM_PHASES;   // >= 1 pair per phase
 
         if (vif == null)
             `uvm_warning(get_type_name(),
@@ -151,17 +131,15 @@ class ahb_idle_seq extends ahb_base_seq;
     endtask : body
 
     //-------------------------------------------------------------------------
-    // Phase 1 - zero-wait traffic with an IDLE run before the write, between
-    // the write and its read-back, and after the read-back. Every IDLE here is
-    // accepted on the cycle it is presented, which is the transfer AHB_TRN_001
-    // and AHB_TRN_006 are about
+    // Phase 1 - zero wait states; IDLE runs before, between and after each
+    // write/read pair (AHB_TRN_001, AHB_TRN_006)
     //-------------------------------------------------------------------------
     task run_gap_phase(int unsigned n, bit [AHB_ADDR_WIDTH-1:0] base);
         ahb_transaction          wr, rd;
         bit [AHB_ADDR_WIDTH-1:0] slot;
         bit                      ok;
 
-        apply_window(0, 0);     // zero wait: HTRANS is the only variable
+        apply_window(0, 0);
 
         for (int unsigned i = 0; i < n; i++) begin
             slot = base + i * SLOT_SIZE;
@@ -176,11 +154,11 @@ class ahb_idle_seq extends ahb_base_seq;
                     size inside {AHB_SIZE_8B, AHB_SIZE_16B, AHB_SIZE_32B};
                     (burst == AHB_BURST_INCR) -> (num_beats inside {[2:8]});
 
-                    // No BUSY - phase 2 owns that
+                    // No BUSY
                     foreach (busy_cycles[k]) busy_cycles[k] == 0;
                     trailing_busy_cycles == 0;
 
-                    // inside range bounds addr so the span sum cannot wrap
+                    // Burst stays inside its slot
                     addr inside {[slot : slot + SLOT_SIZE - 1]};
                     (burst inside {AHB_BURST_INCR, AHB_BURST_INCR4,
                                    AHB_BURST_INCR8}) ->
@@ -191,9 +169,6 @@ class ahb_idle_seq extends ahb_base_seq;
 
             rd = build_read_back(wr);
 
-            // Three IDLE runs per pair: before, between and after. The one
-            // between the write and the read is the interesting one - the read
-            // must still return what the write committed across it
             idle_gap(random_gap());
             send_and_wait(wr, ok);
             if (!ok) continue;
@@ -214,16 +189,14 @@ class ahb_idle_seq extends ahb_base_seq;
     endtask : run_gap_phase
 
     //-------------------------------------------------------------------------
-    // Phase 2 - the same IDLE runs, but the bursts now stall on BUSY as well.
-    // IDLE and BUSY must both come back zero-wait OKAY (AHB_WAI_010), and no
-    // BUSY may appear after an accepted IDLE (AHB_TRN_006)
+    // Phase 2 - IDLE runs plus BUSY inside bursts (AHB_WAI_010, AHB_TRN_006)
     //-------------------------------------------------------------------------
     task run_busy_phase(int unsigned n, bit [AHB_ADDR_WIDTH-1:0] base);
         ahb_transaction          wr, rd;
         bit [AHB_ADDR_WIDTH-1:0] slot;
         bit                      ok;
 
-        apply_window(0, 2);     // BUSY answered zero-wait even when beats wait
+        apply_window(0, 2);
 
         for (int unsigned i = 0; i < n; i++) begin
             slot = base + i * SLOT_SIZE;
@@ -232,23 +205,22 @@ class ahb_idle_seq extends ahb_base_seq;
             wr = ahb_transaction::type_id::create("wr");
             if (!wr.randomize() with {
                     write == AHB_WRITE;
-                    // Multi-beat only: SINGLE has no inter-beat gap to stall in
+                    // Multi-beat only (no BUSY on SINGLE)
                     burst inside {AHB_BURST_INCR,  AHB_BURST_INCR4,
                                   AHB_BURST_INCR8, AHB_BURST_WRAP4,
                                   AHB_BURST_WRAP8};
                     size inside {AHB_SIZE_8B, AHB_SIZE_16B, AHB_SIZE_32B};
                     (burst == AHB_BURST_INCR) -> (num_beats inside {[2:8]});
 
-                    // A BUSY run before every beat except the first
+                    // 1-2 BUSY cycles before every beat except the first
                     foreach (busy_cycles[k]) {
                         if (k > 0) busy_cycles[k] inside {[1:2]};
                         else       busy_cycles[k] == 0;
                     }
 
-                    // Ending out of BUSY belongs to the undefined-burst test
                     trailing_busy_cycles == 0;
 
-                    // inside range bounds addr so the span sum cannot wrap
+                    // Burst stays inside its slot
                     addr inside {[slot : slot + SLOT_SIZE - 1]};
                     (burst inside {AHB_BURST_INCR, AHB_BURST_INCR4,
                                    AHB_BURST_INCR8}) ->
@@ -277,20 +249,16 @@ class ahb_idle_seq extends ahb_base_seq;
     endtask : run_busy_phase
 
     //-------------------------------------------------------------------------
-    // Phase 3 - IDLE inside a wait state. The pair is queued together, so the
-    // driver holds the read while the write is still on the bus. With
-    // en_idle_to_nonseq_in_wait the pipelined slot opens as IDLE rather than
-    // taking the read straight away, and the slave always waits, so that IDLE
-    // is presented with HREADY low. Upgrading it to the read's NONSEQ then
-    // moves HADDR off the write's last beat while the wait is still running -
-    // the address change of AHB_WAI_007. Multi-beat bursts only: on a SINGLE
-    // the read-back address equals the write address and HADDR would not move
+    // Phase 3 - IDLE during a wait state. Pipelined write/read pair with
+    // en_idle_to_nonseq_in_wait and 1-3 wait states: IDLE with HREADY=0, then
+    // NONSEQ with a new HADDR (AHB_WAI_007). Multi-beat only, so the read
+    // address differs from the last write beat
     //-------------------------------------------------------------------------
     task run_in_wait_phase(int unsigned n, bit [AHB_ADDR_WIDTH-1:0] base);
         ahb_transaction          wr;
         bit [AHB_ADDR_WIDTH-1:0] slot;
 
-        apply_window(1, 3);     // every beat waited, so the slot always idles
+        apply_window(1, 3);     // every beat has wait states
 
         for (int unsigned i = 0; i < n; i++) begin
             slot = base + i * SLOT_SIZE;
@@ -305,11 +273,11 @@ class ahb_idle_seq extends ahb_base_seq;
                     size inside {AHB_SIZE_8B, AHB_SIZE_16B, AHB_SIZE_32B};
                     (burst == AHB_BURST_INCR) -> (num_beats inside {[2:8]});
 
-                    // No BUSY - a master stall would blur the slot under test
+                    // No BUSY
                     foreach (busy_cycles[k]) busy_cycles[k] == 0;
                     trailing_busy_cycles == 0;
 
-                    // inside range bounds addr so the span sum cannot wrap
+                    // Burst stays inside its slot
                     addr inside {[slot : slot + SLOT_SIZE - 1]};
                     (burst inside {AHB_BURST_INCR, AHB_BURST_INCR4,
                                    AHB_BURST_INCR8}) ->
@@ -325,7 +293,6 @@ class ahb_idle_seq extends ahb_base_seq;
 
             write_read_burst(wr, 1'b1);
 
-            // Back to a quiet bus before the next pair is queued
             idle_gap(random_gap());
         end
     endtask : run_in_wait_phase

@@ -11,7 +11,7 @@ class ahb_master_agent extends uvm_agent;
 
     `uvm_component_utils(ahb_master_agent)
 
-    // Agent configuration (from config_db; default object when absent)
+    // Agent configuration (default if not in config_db)
     ahb_agent_config     cfg;
 
     // Virtual interface (from config_db)
@@ -35,7 +35,6 @@ class ahb_master_agent extends uvm_agent;
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
 
-        // Config is optional - fall back to defaults (ACTIVE, coverage on)
         if (!uvm_config_db#(ahb_agent_config)::get(this, "", "cfg", cfg)) begin
             `uvm_info(get_type_name(),
                       "No ahb_agent_config in config_db - using defaults", UVM_MEDIUM)

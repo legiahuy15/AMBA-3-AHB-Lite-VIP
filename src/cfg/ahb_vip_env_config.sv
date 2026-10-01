@@ -2,9 +2,8 @@
 // File        : ahb_vip_env_config.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Configuration object for the AHB-Lite VIP environment. Holds
-//               agent configs, virtual interfaces, and feature enables
-//               (scoreboard, coverage).
+// Description : Environment configuration: agent configs, virtual interfaces,
+//               scoreboard/coverage enables.
 //=============================================================================
 
 class ahb_vip_env_config extends uvm_object;
@@ -12,17 +11,15 @@ class ahb_vip_env_config extends uvm_object;
     `uvm_object_utils(ahb_vip_env_config)
 
     //-------------------------------------------------------------------------
-    // Agent configuration objects - defaulted in the constructor, overridable
-    // by a test before the env build_phase
+    // Agent configs (created in the constructor)
     //-------------------------------------------------------------------------
     ahb_agent_config master_agent_cfg;
     ahb_agent_config slave_agent_cfg;
 
     //-------------------------------------------------------------------------
     // Virtual interfaces
-    //   master_vif : master side of the DUT (required)
-    //   slave_vif  : slave side of the DUT (optional). Null -> master_vif
-    //                serves both agents (passthrough, one shared bus)
+    //   master_vif : master side (required)
+    //   slave_vif  : slave side (optional). Null: master_vif for both agents
     //-------------------------------------------------------------------------
     virtual ahb_if master_vif;
     virtual ahb_if slave_vif;
@@ -30,11 +27,11 @@ class ahb_vip_env_config extends uvm_object;
     //-------------------------------------------------------------------------
     // Environment feature enables
     //-------------------------------------------------------------------------
-    bit has_scoreboard = 1;     // Create scoreboard (master-slave comparison)
-    bit has_coverage   = 1;     // Create functional coverage collectors
+    bit has_scoreboard = 1;
+    bit has_coverage   = 1;
 
     //-------------------------------------------------------------------------
-    // Constructor - creates default agent configs
+    // Constructor
     //-------------------------------------------------------------------------
     function new(string name = "ahb_vip_env_config");
         super.new(name);

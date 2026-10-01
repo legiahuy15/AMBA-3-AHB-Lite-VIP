@@ -2,10 +2,8 @@
 // File        : ahb_base_seq.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Base master sequence. Provides the send-and-wait helper that
-//               all AHB-Lite master sequences use, plus a write/read-back
-//               burst check shared by the burst sequences.
-//               This file is `included inside ahb_seq_pkg.sv.
+// Description : Base master sequence. Send/wait helpers and write/read-back
+//               burst check.
 //=============================================================================
 
 `ifndef AHB_BASE_SEQ_INCLUDED_
@@ -16,14 +14,13 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
     `uvm_object_utils(ahb_base_seq)
 
     //-------------------------------------------------------------------------
-    // Beat-level statistics, accumulated by write_read_burst()
+    // Beat statistics (compare_burst)
     //-------------------------------------------------------------------------
     int unsigned beats_checked;
     int unsigned beats_mismatch;
 
     //-------------------------------------------------------------------------
-    // Set by a sequence that provokes resets on purpose: a flushed transaction
-    // is then logged as info instead of a warning
+    // Expected reset aborts: log as info, not warning
     //-------------------------------------------------------------------------
     bit expect_reset_abort = 1'b0;
 
@@ -35,13 +32,11 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // send_and_wait - send one item and block until the transfer finishes.
-    // The driver is pipelined: finish_item() returns early, rdata[]/resp[] are
-    // valid only after tr.done. ok = 0 when a reset flushed the item
+    // send_and_wait - send one item, wait for tr.done (finish_item() returns
+    // before completion). ok = 0 if aborted by reset
     //-------------------------------------------------------------------------
     virtual task send_and_wait(ahb_transaction tr, output bit ok);
         queue_item(tr);
-        // Level-sensitive: passes immediately if already completed
         wait (tr.done);
         ok = !tr.aborted;
         if (!ok) begin
@@ -57,20 +52,17 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
     endtask : send_and_wait
 
     //-------------------------------------------------------------------------
-    // queue_item - hand one item to the driver without blocking, so a caller
-    // can stack transactions and let the driver run them back to back
+    // queue_item - send one item without waiting for completion
     //-------------------------------------------------------------------------
     virtual task queue_item(ahb_transaction tr);
         start_item(tr);
-        // Arm before the item reaches the driver
         tr.done    = 1'b0;
         tr.aborted = 1'b0;
         finish_item(tr);
     endtask : queue_item
 
     //-------------------------------------------------------------------------
-    // beat_address - address of beat i (INCR increment / WRAP). Mirrors the
-    // scoreboard
+    // beat_address - address of beat i (INCR / WRAP)
     //-------------------------------------------------------------------------
     function bit [AHB_ADDR_WIDTH-1:0] beat_address(ahb_transaction tr, int i);
         int unsigned bytes = 1 << tr.size;
@@ -89,8 +81,7 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
     endfunction : beat_address
 
     //-------------------------------------------------------------------------
-    // build_read_back - a READ transfer carrying the same control as wr, so the
-    // burst can be read back beat for beat
+    // build_read_back - READ with the same address and control as wr
     //-------------------------------------------------------------------------
     virtual function ahb_transaction build_read_back(ahb_transaction wr);
         ahb_transaction rd;
@@ -110,9 +101,8 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
     endfunction : build_read_back
 
     //-------------------------------------------------------------------------
-    // compare_burst - check a completed read-back against the write that
-    // produced it. Only the active byte lanes are compared; a narrow transfer
-    // leaves the rest undefined. Both transfers must be done and not aborted
+    // compare_burst - compare read-back with write on active byte lanes.
+    // Both transfers must be done and not aborted
     //-------------------------------------------------------------------------
     virtual function void compare_burst(ahb_transaction wr, ahb_transaction rd);
         bit [AHB_ADDR_WIDTH-1:0] a;
@@ -128,7 +118,7 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
             beat_bad = 0;
             beats_checked++;
 
-            // No ERROR is requested here, so any non-OKAY is a failure
+            // Non-OKAY is a failure
             if (wr.resp[k] != AHB_RESP_OKAY || rd.resp[k] != AHB_RESP_OKAY) begin
                 beats_mismatch++;
                 `uvm_error(get_type_name(),
@@ -160,17 +150,13 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
     endfunction : compare_burst
 
     //-------------------------------------------------------------------------
-    // write_read_burst - send a randomized write burst, read it back with
-    // identical control and compare every beat.
-    // pipelined = 1 queues both transfers before waiting (AHB is in order, so
-    // the read still returns what the write committed)
+    // write_read_burst - write wr, read it back, compare.
+    // pipelined = 1: queue both before waiting
     //-------------------------------------------------------------------------
     virtual task write_read_burst(ahb_transaction wr, bit pipelined = 0);
         ahb_transaction rd;
         bit             ok;
 
-        // Built up front - pipelined mode queues it while the write is still
-        // on the bus
         rd = build_read_back(wr);
 
         if (pipelined) begin
@@ -191,7 +177,7 @@ class ahb_base_seq extends uvm_sequence #(ahb_transaction);
             end
         end else begin
             send_and_wait(wr, ok);
-            if (!ok) return;                // reset flush - skip the pair
+            if (!ok) return;                // aborted by reset
             send_and_wait(rd, ok);
             if (!ok) return;
         end

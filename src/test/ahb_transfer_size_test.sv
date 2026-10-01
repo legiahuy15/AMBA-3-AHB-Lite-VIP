@@ -2,13 +2,10 @@
 // File        : ahb_transfer_size_test.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Transfer-size test. Runs ahb_size_seq, which sweeps HSIZE over
-//               every encoding legal on the data bus, at every alignment each
-//               one allows, as SINGLE and as multi-beat bursts, and checks that
-//               the encodings fitting the bus are accepted by constraint while
-//               the wider ones are rejected.
-//               Covers AHB_SIZ_001 to AHB_SIZ_006 in doc/ahb_lite_vplan.xlsx.
-//               This file is `included inside ahb_test_pkg.sv.
+// Description : Transfer-size test (ahb_size_seq). Sweeps legal HSIZE values
+//               and alignments in SINGLE and multi-beat bursts; checks that
+//               sizes wider than the bus fail randomization.
+//               vplan: AHB_SIZ_001..006.
 //=============================================================================
 
 `ifndef AHB_TRANSFER_SIZE_TEST_INCLUDED_
@@ -18,13 +15,10 @@ class ahb_transfer_size_test extends ahb_base_test;
 
     `uvm_component_utils(ahb_transfer_size_test)
 
-    // Bursts to issue, overridable: +NUM_ITER=<n>. 12 covers the full sweep;
-    // the default runs it twice
+    // Bursts (+NUM_ITER=<n>). 12 per full sweep
     int unsigned num_iter = 24;
 
-    // HSIZE encoding check, overridable: +CHK_SIZE_ENCODINGS=0. The failed
-    // randomize() calls it makes on the wide encodings are the expected result,
-    // not an error
+    // Illegal HSIZE randomization check (+CHK_SIZE_ENCODINGS=0 to disable)
     int unsigned chk_size_encodings = 1;
 
     //-------------------------------------------------------------------------
@@ -35,8 +29,7 @@ class ahb_transfer_size_test extends ahb_base_test;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Build phase - memory-model slave with a few wait states, so a narrow
-    // beat also has to hold its data phase across back-pressure
+    // Build phase - auto-response slave, 0-2 wait states
     //-------------------------------------------------------------------------
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);

@@ -2,8 +2,7 @@
 // File        : ahb_pkg.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Top-level package for the AHB-Lite VIP. Imports UVM and
-//               includes all VIP components.
+// Description : VIP package: types, transaction, configs, agents, env.
 //=============================================================================
 
 `ifndef AHB_PKG_INCLUDED_

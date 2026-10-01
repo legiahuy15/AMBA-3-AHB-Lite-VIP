@@ -2,11 +2,9 @@
 // File        : ahb_undefined_burst_seq.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Undefined-length INCR bursts from 1 to 256 beats, with BUSY
-//               inserted mid-burst and, on half the iterations, trailing BUSY
-//               so the burst ends out of a BUSY transfer.
-//               Requires the slave agent in auto-response mode (memory model).
-//               This file is `included inside ahb_seq_pkg.sv.
+// Description : Undefined-length INCR bursts (1-256 beats) with mid-burst BUSY
+//               and, on every other burst, trailing BUSY.
+//               Requires auto-response slave.
 //=============================================================================
 
 `ifndef AHB_UNDEFINED_BURST_SEQ_INCLUDED_
@@ -23,12 +21,10 @@ class ahb_undefined_burst_seq extends ahb_base_seq;
 
     bit [AHB_ADDR_WIDTH-1:0] base_addr = 32'h0000_5000;
 
-    // A 256-beat word burst spans a full 1KB, so the slot is 1KB and 1KB
-    // aligned: the burst always fits and never crosses a page boundary
+    // 1KB slot (256 x 4B), 1KB aligned
     localparam int unsigned SLOT_SIZE = 1024;
 
-    // BUSY inserted before every Nth beat. Sparse - a BUSY run on every beat
-    // of a 256-beat burst would dominate the runtime
+    // BUSY before every Nth beat
     localparam int unsigned BUSY_EVERY = 8;
 
     //-------------------------------------------------------------------------
@@ -39,7 +35,7 @@ class ahb_undefined_burst_seq extends ahb_base_seq;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Body - num_iter x (INCR write burst, INCR read burst, compare)
+    // Body - num_iter x (write, read back, compare)
     //-------------------------------------------------------------------------
     virtual task body();
         ahb_transaction          wr;
@@ -57,25 +53,21 @@ class ahb_undefined_burst_seq extends ahb_base_seq;
         for (int unsigned i = 0; i < num_iter; i++) begin
             slot = base_addr + i * SLOT_SIZE;
 
-            // Pin both ends of the legal length range so every run covers them
+            // First two bursts: 1 and 256 beats
             case (i)
                 0:       pin_beats = 1;
                 1:       pin_beats = 256;
                 default: pin_beats = 0;     // free length
             endcase
 
-            // Every other burst ends out of a BUSY transfer - legal for
-            // undefined-length bursts only
+            // Trailing BUSY on odd bursts
             want_trailing = ((i % 2) == 1);
 
-            // Different period than the trailing BUSY, so all four combinations
-            // occur. Retraction withdraws a waited BUSY for SEQ (mid-burst) or
-            // IDLE/NONSEQ (end of burst); without it the BUSY is only held
+            // Period 4: all trailing/retract combinations
             want_retract = (((i / 2) % 2) == 1);
 
-            // A retracted trailing BUSY hands its slot to the queued transfer
-            // (NONSEQ) or closes with IDLE. Alternate pipelining across those
-            // bursts to produce both endings
+            // Trailing BUSY + retract: alternate pipelined (BUSY->NONSEQ)
+            // and not pipelined (BUSY->IDLE)
             want_pipeline = 1'b0;
             if (want_trailing && want_retract) begin
                 want_pipeline = pipe_toggle;
@@ -88,17 +80,13 @@ class ahb_undefined_burst_seq extends ahb_base_seq;
                     burst == AHB_BURST_INCR;
                     size inside {AHB_SIZE_8B, AHB_SIZE_16B, AHB_SIZE_32B};
 
-                    // Pinned at the extremes, else a moderate range
                     (pin_beats != 0) -> (num_beats == pin_beats);
                     (pin_beats == 0) -> (num_beats inside {[2:64]});
 
-                    // Burst fits inside its own 1KB slot. The inside range
-                    // bounds addr; without it the solver can satisfy the span
-                    // constraint by letting addr + span wrap past 32 bits
+                    // Burst stays inside its slot
                     addr inside {[slot : slot + SLOT_SIZE - 1]};
                     addr + num_beats * (1 << size) <= slot + SLOT_SIZE;
 
-                    // BUSY between beats, and trailing BUSY on demand
                     foreach (busy_cycles[k]) {
                         if (k > 0 && (k % BUSY_EVERY) == 0) busy_cycles[k] inside {[1:2]};
                         else                                busy_cycles[k] == 0;

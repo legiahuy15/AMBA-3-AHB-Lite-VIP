@@ -2,10 +2,8 @@
 // File        : ahb_vip_env.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : AHB-Lite VIP environment. Instantiates and connects the master
-//               agent, slave agent, scoreboard, and per-agent coverage. Monitor
-//               analysis ports feed the scoreboard and coverage collectors.
-//               Scoreboard and coverage are optional (ahb_vip_env_config).
+// Description : VIP environment: master and slave agents, scoreboard and
+//               per-agent coverage (optional, ahb_vip_env_config).
 //=============================================================================
 
 class ahb_vip_env extends uvm_env;
@@ -34,8 +32,7 @@ class ahb_vip_env extends uvm_env;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Build phase - propagate agent configs and virtual interfaces via
-    // config_db, then create the agents and the optional checkers
+    // Build phase - pass configs and vifs to agents, create components
     //-------------------------------------------------------------------------
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
@@ -49,14 +46,12 @@ class ahb_vip_env extends uvm_env;
         uvm_config_db#(ahb_agent_config)::set(this, "master_agent", "cfg", cfg.master_agent_cfg);
         uvm_config_db#(ahb_agent_config)::set(this, "slave_agent", "cfg", cfg.slave_agent_cfg);
 
-        // Master vif is required
         if (cfg.master_vif == null)
             `uvm_fatal(get_type_name(), "master_vif is null - set it in ahb_vip_env_config before build")
 
         uvm_config_db#(virtual ahb_if)::set(this, "master_agent", "vif", cfg.master_vif);
 
-        // Slave side: slave_vif if provided, otherwise reuse master_vif
-        // (passthrough mode - both agents observe the same bus)
+        // slave_vif, or master_vif in passthrough mode
         if (cfg.slave_vif != null) begin
             uvm_config_db#(virtual ahb_if)::set(this, "slave_agent", "vif", cfg.slave_vif);
         end else begin
@@ -80,7 +75,7 @@ class ahb_vip_env extends uvm_env;
     endfunction : build_phase
 
     //-------------------------------------------------------------------------
-    // Connect phase - monitor analysis ports to scoreboard and coverage
+    // Connect phase - monitors to scoreboard and coverage
     //-------------------------------------------------------------------------
     function void connect_phase(uvm_phase phase);
         super.connect_phase(phase);
@@ -95,7 +90,7 @@ class ahb_vip_env extends uvm_env;
         if (cfg.has_coverage) begin
             master_agent.mon.ap.connect(master_cov.analysis_export);
             slave_agent.mon.ap.connect(slave_cov.analysis_export);
-            // Raw HTRANS stream - the only source of IDLE coverage
+            // HTRANS stream (IDLE coverage)
             master_agent.mon.trans_ap.connect(master_cov.trans_export);
             slave_agent.mon.trans_ap.connect(slave_cov.trans_export);
             `uvm_info(get_type_name(),

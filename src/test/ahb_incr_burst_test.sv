@@ -2,12 +2,9 @@
 // File        : ahb_incr_burst_test.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Incrementing burst test. Runs ahb_incr_burst_seq with INCR4,
-//               INCR8 and INCR16 over all legal sizes, placing bursts up
-//               against the 1KB boundary.
-//               Covers AHB_BST_003 to AHB_BST_005, AHB_BST_009, AHB_BST_011
-//               and AHB_BST_012 in doc/ahb_lite_vplan.xlsx.
-//               This file is `included inside ahb_test_pkg.sv.
+// Description : INCR4/8/16 burst test (ahb_incr_burst_seq), all legal sizes,
+//               bursts placed near the 1KB boundary.
+//               vplan: AHB_BST_003..005, AHB_BST_009, AHB_BST_011, AHB_BST_012.
 //=============================================================================
 
 `ifndef AHB_INCR_BURST_TEST_INCLUDED_
@@ -17,7 +14,7 @@ class ahb_incr_burst_test extends ahb_base_test;
 
     `uvm_component_utils(ahb_incr_burst_test)
 
-    // Bursts to issue, overridable: +NUM_ITER=<n>
+    // Bursts (+NUM_ITER=<n>)
     int unsigned num_iter = 16;
 
     //-------------------------------------------------------------------------
@@ -28,8 +25,7 @@ class ahb_incr_burst_test extends ahb_base_test;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Build phase - memory-model slave with a few wait states, so beats see
-    // both back-pressure and zero-wait completions
+    // Build phase - auto-response slave, 0-2 wait states
     //-------------------------------------------------------------------------
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);

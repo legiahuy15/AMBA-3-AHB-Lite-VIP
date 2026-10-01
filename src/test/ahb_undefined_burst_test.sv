@@ -2,12 +2,9 @@
 // File        : ahb_undefined_burst_test.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Undefined-length burst test. Runs ahb_undefined_burst_seq with
-//               INCR bursts from 1 to 256 beats, BUSY inserted mid-burst and
-//               bursts terminated out of a BUSY transfer.
-//               Covers AHB_BST_002, AHB_TRN_009 and AHB_WAI_006 in
-//               doc/ahb_lite_vplan.xlsx.
-//               This file is `included inside ahb_test_pkg.sv.
+// Description : Undefined-length INCR burst test (ahb_undefined_burst_seq):
+//               1-256 beats, mid-burst BUSY, termination after BUSY.
+//               vplan: AHB_BST_002, AHB_TRN_009, AHB_WAI_006.
 //=============================================================================
 
 `ifndef AHB_UNDEFINED_BURST_TEST_INCLUDED_
@@ -17,7 +14,7 @@ class ahb_undefined_burst_test extends ahb_base_test;
 
     `uvm_component_utils(ahb_undefined_burst_test)
 
-    // Bursts to issue, overridable: +NUM_ITER=<n>
+    // Bursts (+NUM_ITER=<n>)
     int unsigned num_iter = 8;
 
     //-------------------------------------------------------------------------
@@ -28,8 +25,7 @@ class ahb_undefined_burst_test extends ahb_base_test;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Build phase - wait states put BUSY on the bus with HREADY low, the case
-    // BUSY_WAIT_TRANSITION checks
+    // Build phase - wait states for BUSY under HREADY=0 (BUSY_WAIT_TRANSITION)
     //-------------------------------------------------------------------------
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
@@ -42,7 +38,7 @@ class ahb_undefined_burst_test extends ahb_base_test;
     endfunction : build_phase
 
     //-------------------------------------------------------------------------
-    // Run phase - a 256-beat burst takes a while, so allow a longer drain
+    // Run phase - longer drain time for 256-beat bursts
     //-------------------------------------------------------------------------
     task run_phase(uvm_phase phase);
         ahb_undefined_burst_seq seq;

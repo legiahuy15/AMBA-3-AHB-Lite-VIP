@@ -1,8 +1,8 @@
 //=============================================================================
 // File        : ahb_passive_test.sv
 // Project     : AMBA 3 AHB-Lite VIP
-// Description : Verifies slave-agent passive mode. The master drives traffic;
-//               the passive slave creates only its monitor and observes it.
+// Description : Slave agent in passive mode (monitor only). Checks that the
+//               monitor observes every master transaction.
 //=============================================================================
 
 `ifndef AHB_PASSIVE_TEST_INCLUDED_

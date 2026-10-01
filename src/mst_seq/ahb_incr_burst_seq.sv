@@ -2,11 +2,8 @@
 // File        : ahb_incr_burst_seq.sv
 // Project     : AMBA 3 AHB-Lite VIP
 // Author      : Huy Le
-// Description : Fixed-length incrementing bursts (INCR4, INCR8, INCR16) over
-//               every legal size. Each iteration writes one burst and reads it
-//               back beat for beat at the same address.
-//               Requires the slave agent in auto-response mode (memory model).
-//               This file is `included inside ahb_seq_pkg.sv.
+// Description : INCR4/8/16 write/read-back bursts, all legal sizes.
+//               Requires auto-response slave.
 //=============================================================================
 
 `ifndef AHB_INCR_BURST_SEQ_INCLUDED_
@@ -21,12 +18,10 @@ class ahb_incr_burst_seq extends ahb_base_seq;
     //-------------------------------------------------------------------------
     int unsigned num_iter = 16;
 
-    // 1KB aligned: every 16th slot boundary is also a 1KB page boundary
+    // 1KB aligned (every 16th slot starts a 1KB page)
     bit [AHB_ADDR_WIDTH-1:0] base_addr = 32'h0000_3000;
 
-    // Slot holds the largest burst issued here (16 beats x 4 bytes), placed at
-    // a random aligned offset but always fitting inside. Slots never alias in
-    // the scoreboard reference memory and no burst crosses a 1KB boundary
+    // Address slot per burst: largest burst (16 x 4B)
     localparam int unsigned SLOT_SIZE = 64;
 
     //-------------------------------------------------------------------------
@@ -37,7 +32,7 @@ class ahb_incr_burst_seq extends ahb_base_seq;
     endfunction : new
 
     //-------------------------------------------------------------------------
-    // Body - num_iter x (INCR write burst, INCR read burst, compare)
+    // Body - num_iter x (write, read back, compare)
     //-------------------------------------------------------------------------
     virtual task body();
         ahb_transaction          wr;
@@ -51,9 +46,8 @@ class ahb_incr_burst_seq extends ahb_base_seq;
         for (int unsigned i = 0; i < num_iter; i++) begin
             slot = base_addr + i * SLOT_SIZE;
 
-            // Pin every fourth burst against the top of its slot. Slots that
-            // close a 1KB page have (i % 4 == 3), so each page ends on the last
-            // byte before the boundary - the INCR_1KB_BOUNDARY worst case
+            // Every 4th burst ends at the top of its slot, which includes the
+            // last bytes before each 1KB boundary (INCR_1KB_BOUNDARY)
             pin_top = ((i % 4) == 3);
 
             wr = ahb_transaction::type_id::create("wr");
@@ -61,9 +55,7 @@ class ahb_incr_burst_seq extends ahb_base_seq;
                     write == AHB_WRITE;
                     burst inside {AHB_BURST_INCR4, AHB_BURST_INCR8, AHB_BURST_INCR16};
                     size inside {AHB_SIZE_8B, AHB_SIZE_16B, AHB_SIZE_32B};
-                    // The inside range bounds addr; without it the solver can
-                    // satisfy the span constraint by letting addr + span wrap
-                    // past 32 bits, landing outside this slot
+                    // Burst stays inside its slot
                     addr inside {[slot : slot + SLOT_SIZE - 1]};
                     addr + num_beats * (1 << size) <= slot + SLOT_SIZE;
                     pin_top -> (addr + num_beats * (1 << size) == slot + SLOT_SIZE);
